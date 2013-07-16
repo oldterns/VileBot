@@ -1,0 +1,14 @@
+logLevel=TRACE
+
+redisHost=localhost
+redisPort=6300
+
+ircBotAmount=1
+
+ircUser1=ExampleBot
+ircNick1=ExampleBot
+ircRealName1=A Bot
+ircServerAddress1=irc.example.com
+ircPort1=6697
+ircSslMode1=ON_NOHOST
+ircChannel1=#examplebot

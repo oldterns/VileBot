@@ -1,0 +1,5 @@
+/keratin-irc/
+*.swp
+.settings/
+.project
+.classpath
