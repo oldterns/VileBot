@@ -101,10 +101,10 @@ exec_redis() {
     KEY_FILTER='^[^a-zA-Z0-9]' exec_redis quotes SADD 'noun-quotes-$key' '$value'
 
     msg "Lists"
-    exec_redis lists SADD 'userlist-$key' '$value'
+    KEY_FILTER='seekrit' exec_redis lists SADD 'userlist-$key' '$value'
 
     msg "Ranks/Karma"
-    KEY_FILTER="^[^a-zA-Z0-9]|[+ |:~'\\|_-,]" exec_redis ranks ZADD 'noun-karma' '$value' '$key'
+    KEY_FILTER="^[^a-zA-Z1-9]|[+ |:~'\\|_-,]" exec_redis ranks ZADD 'noun-karma' '$value' '$key'
 
     msg "Last Seen"
     # Value is converted to miliseconds since epoch
