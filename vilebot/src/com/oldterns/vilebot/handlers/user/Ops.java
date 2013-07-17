@@ -8,29 +8,21 @@ package com.oldterns.vilebot.handlers.user;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.oldterns.vilebot.db.GroupDB;
-import com.oldterns.vilebot.util.BaseNick;
 
 import net.engio.mbassy.listener.Handler;
-
 import ca.szc.keratin.bot.Channel;
 import ca.szc.keratin.bot.KeratinBot;
 import ca.szc.keratin.bot.annotation.AssignedBot;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceiveChannelMode;
 import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+
+import com.oldterns.vilebot.db.GroupDB;
+import com.oldterns.vilebot.util.BaseNick;
 
 @HandlerContainer
 public class Ops
 {
-    private static final Pattern nickPattern = Pattern.compile( "\\S+" );
-
-    private static final Pattern addRemOpPattern = Pattern.compile( "!(un|)op (" + nickPattern + ")" );
-
     @AssignedBot
     private KeratinBot bot;
 
@@ -71,35 +63,6 @@ public class Ops
             }
 
             bot.opNicks( channel.getName(), newOpNicks );
-        }
-    }
-
-    // TODO move to admin
-    @Handler
-    private void addRemOp( ReceivePrivmsg event )
-    {
-        String text = event.getText();
-        Matcher matcher = addRemOpPattern.matcher( text );
-
-        if ( matcher.matches() )
-        {
-            String mode = BaseNick.toBaseNick( matcher.group( 1 ) );
-            String nick = BaseNick.toBaseNick( matcher.group( 2 ) );
-
-            if ( "un".equals( mode ) )
-            {
-                if ( GroupDB.remOp( nick ) )
-                    event.reply( "Removed " + nick + " from operator group" );
-                else
-                    event.reply( nick + " was not in the operator group" );
-            }
-            else
-            {
-                if ( GroupDB.addOp( nick ) )
-                    event.reply( "Added " + nick + " to operator group" );
-                else
-                    event.reply( nick + " was already in the operator group" );
-            }
         }
     }
 }

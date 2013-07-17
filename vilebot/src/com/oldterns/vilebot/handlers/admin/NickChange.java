@@ -6,6 +6,13 @@
  */
 package com.oldterns.vilebot.handlers.admin;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.oldterns.vilebot.db.GroupDB;
+import com.oldterns.vilebot.util.BaseNick;
+import com.oldterns.vilebot.util.Sessions;
+
 import net.engio.mbassy.listener.Handler;
 
 import ca.szc.keratin.bot.KeratinBot;
@@ -16,27 +23,29 @@ import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 @HandlerContainer
 public class NickChange
 {
+    private static final Pattern nickChangePattern = Pattern.compile( "!admin nick ([a-zA-Z][a-zA-Z0-9-_|]+)" );
+
     @AssignedBot
     private KeratinBot bot;
-
 
     @Handler
     private void changeNick( ReceivePrivmsg event )
     {
         String text = event.getText();
+        Matcher matcher = nickChangePattern.matcher( text );
+        String sender = event.getSender();
 
-        if ( text.startsWith( "!nick " ) )
+        if ( matcher.matches() )
         {
-            bot.setNick( text.substring( text.indexOf( ' ' ) ) );
+            String username = Sessions.getSession( sender );
+            if ( GroupDB.isAdmin( username ) )
+            {
+                String newNick = matcher.group( 1 );
+                bot.setNick( newNick );
+                BaseNick.addBotNick( newNick );
 
-            // try
-            // {
-            // bus.publish( new SendNick( bus, text.substring( 7 ) ) );
-            // }
-            // catch ( InvalidMessagePrefixException | InvalidMessageCommandException | InvalidMessageParamException e )
-            // {
-            // Logger.error( e, "Error sending nick" );
-            // }
+                event.reply( "Nick changed" );
+            }
         }
     }
 }

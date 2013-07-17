@@ -6,40 +6,36 @@
  */
 package com.oldterns.vilebot.handlers.admin;
 
-import net.engio.mbassy.bus.MBassador;
 import net.engio.mbassy.listener.Handler;
+import ca.szc.keratin.bot.KeratinBot;
+import ca.szc.keratin.bot.annotation.AssignedBot;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.IrcEvent;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import ca.szc.keratin.core.event.message.send.SendQuit;
-import ca.szc.keratin.core.net.message.InvalidMessageCommandException;
-import ca.szc.keratin.core.net.message.InvalidMessageParamException;
-import ca.szc.keratin.core.net.message.InvalidMessagePrefixException;
+
+import com.oldterns.vilebot.db.GroupDB;
+import com.oldterns.vilebot.util.Sessions;
 
 @HandlerContainer
 public class Quit
 {
-    /**
-     * Exit on the !quit command
-     */
+    @AssignedBot
+    private KeratinBot bot;
+
     @Handler
     private void quit( ReceivePrivmsg event )
     {
-        MBassador<IrcEvent> bus = event.getBus();
-
         String text = event.getText();
+        String nick = event.getSender();
 
-        if ( text.startsWith( "!quit" ) )
+        if ( "!admin quit".equals( text ) )
         {
-            try
+            String username = Sessions.getSession( nick );
+            if ( GroupDB.isAdmin( username ) )
             {
-                bus.publish( new SendQuit( bus, "Daisy, Daisy, give me your answer, do..." ) );
+                bot.disconnect();
+
+                System.exit( 0 );
             }
-            catch ( InvalidMessagePrefixException | InvalidMessageCommandException | InvalidMessageParamException e )
-            {
-                // TODO
-            }
-            System.exit( 0 );
         }
     }
 }
