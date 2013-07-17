@@ -32,16 +32,16 @@ public class Auth
     {
         String text = event.getText();
         Matcher matcher = authPattern.matcher( text );
+        String sender = event.getSender();
 
         if ( matcher.matches() )
         {
-            String ircNick = matcher.group( 1 );
-            String username = BaseNick.toBaseNick( ircNick );
+            String username = BaseNick.toBaseNick( matcher.group( 1 ) );
             String password = matcher.group( 2 );
 
             if ( GroupDB.isAdmin( username ) && PasswordDB.isValidPassword( username, password ) )
             {
-                Sessions.addSession( ircNick, username, sessionLength );
+                Sessions.addSession( sender, username, sessionLength );
                 event.reply( "Authentication successful. Session active for "
                     + TimeUnit.MILLISECONDS.toMinutes( sessionLength ) + " minutes." );
             }

@@ -111,7 +111,6 @@ public class PasswordDB
         {
             boolean newUser;
 
-            // Create a salt if the user is new
             Transaction trans;
             do
             {
@@ -119,17 +118,22 @@ public class PasswordDB
                 // the query before opening the transaction. The transaction will fail on exec() call if the keys
                 // changed.
                 jedis.watch( keyOfPassHash, keyOfPassSaltsHash );
-                newUser = jedis.hexists( keyOfPassHash, username );
+                boolean exists = jedis.hexists( keyOfPassHash, username );
 
                 trans = jedis.multi();
-                if ( newUser )
+                // Create a salt as well as the new password entry if the user is new
+                if ( !exists )
                 {
+                    newUser = true;
+
                     String salt = generateSalt();
-                    trans.hset( keyOfPassSaltsHash, username, generateSalt() );
+                    trans.hset( keyOfPassSaltsHash, username, salt );
 
                     String hash = hash( password, salt );
-                    jedis.hset( keyOfPassHash, username, hash );
+                    trans.hset( keyOfPassHash, username, hash );
                 }
+                else
+                    newUser = false;
             }
             while ( trans.exec() == null );
 

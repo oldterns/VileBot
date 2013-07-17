@@ -1,7 +1,10 @@
 package com.oldterns.vilebot.util;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.pmw.tinylog.Logger;
 
 /**
  * Provides record-keeping for time limited sessions.
@@ -29,15 +32,25 @@ public class Sessions
         {
             return username;
         }
+
+        public boolean isExpired()
+        {
+            return getExpiryMillis() < System.currentTimeMillis();
+        }
+
+        @Override
+        public String toString()
+        {
+            return "SessionEntry [expiryMillis=" + expiryMillis + ", username=" + username + "]";
+        }
     }
 
     private static final int MASS_CLEANUP_THRESHOLD = 10;
 
     private static int queryCount = 0;
 
-    private static final Object sessionMapMutex = new Object();
-
-    private static final HashMap<String, SessionEntry> sessions = new HashMap<String, SessionEntry>();
+    private static final ConcurrentHashMap<String, SessionEntry> sessions =
+        new ConcurrentHashMap<String, SessionEntry>();
 
     /**
      * Create a session mapping a ircNick to an internal username, with a certain expiry time.
@@ -48,36 +61,31 @@ public class Sessions
      */
     public static void addSession( String ircNick, String username, long sessionlength )
     {
-        synchronized ( sessionMapMutex )
-        {
-            long nowMillis = System.currentTimeMillis();
-            sessions.put( ircNick, new SessionEntry( username, nowMillis + sessionlength ) );
-        }
+        long nowMillis = System.currentTimeMillis();
+        sessions.put( ircNick, new SessionEntry( username, nowMillis + sessionlength ) );
     }
 
     private static void cleanup()
     {
-        synchronized ( sessionMapMutex )
+        if ( queryCount > MASS_CLEANUP_THRESHOLD )
         {
-            if ( queryCount > MASS_CLEANUP_THRESHOLD )
+            queryCount = 0;
+            for ( Entry<String, SessionEntry> sessionEntry : sessions.entrySet() )
             {
-                queryCount = 0;
-                for ( Entry<String, SessionEntry> sessionEntry : sessions.entrySet() )
-                {
-                    String nick = sessionEntry.getKey();
-                    SessionEntry session = sessionEntry.getValue();
+                String nick = sessionEntry.getKey();
+                SessionEntry session = sessionEntry.getValue();
 
-                    if ( isExpired( session ) )
-                    {
-                        sessions.remove( nick );
-                    }
+                if ( session.isExpired() )
+                {
+                    sessions.remove( nick );
                 }
             }
-            else
-            {
-                queryCount++;
-            }
         }
+        else
+        {
+            queryCount++;
+        }
+
     }
 
     /**
@@ -88,13 +96,13 @@ public class Sessions
      */
     public static String getSession( String ircNick )
     {
-        synchronized ( sessionMapMutex )
+        String username = null;
+
+        SessionEntry session = sessions.get( ircNick );
+
+        if ( session != null )
         {
-            String username = null;
-
-            SessionEntry session = sessions.get( ircNick );
-
-            if ( isExpired( session ) )
+            if ( !session.isExpired() )
             {
                 username = session.getUsername();
             }
@@ -102,15 +110,10 @@ public class Sessions
             {
                 sessions.remove( ircNick );
             }
-
-            cleanup();
-
-            return username;
         }
-    }
 
-    private static boolean isExpired( SessionEntry session )
-    {
-        return session.getExpiryMillis() < System.currentTimeMillis();
+        cleanup();
+
+        return username;
     }
 }

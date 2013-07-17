@@ -39,6 +39,7 @@ public class Help
         sb.append( "Available Commands:" );
 
         sb.append( " { !admin help }" );
+        sb.append( " { !admin ping }" );
         sb.append( " { !admin auth <user> <pass> }" );
         sb.append( " { !admin quit }" );
         sb.append( " { !admin nick <nick> }" );

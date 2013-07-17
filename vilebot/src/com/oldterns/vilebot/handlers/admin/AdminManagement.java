@@ -39,6 +39,7 @@ public class AdminManagement
                 {
                     GroupDB.addAdmin( editedAdminNick );
                 }
+                event.reply( "Added/modified admin " + editedAdminNick );
             }
         }
     }
@@ -61,6 +62,7 @@ public class AdminManagement
                 {
                     PasswordDB.remUserPassword( editedAdminNick );
                 }
+                event.reply( "Removed admin " + editedAdminNick );
             }
         }
     }

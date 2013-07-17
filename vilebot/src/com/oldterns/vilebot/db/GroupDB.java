@@ -61,7 +61,7 @@ public class GroupDB
         Jedis jedis = pool.getResource();
         try
         {
-            return jedis.sismember( keyOfGroupSetsPrefix + group, nick );
+            return nick != null && jedis.sismember( keyOfGroupSetsPrefix + group, nick );
         }
         finally
         {

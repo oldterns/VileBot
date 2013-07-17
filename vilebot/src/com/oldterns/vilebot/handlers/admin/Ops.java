@@ -25,7 +25,7 @@ public class Ops
     private static final Pattern nickPattern = Pattern.compile( "(\\S+)" );
 
     private static final Pattern addRemOpPattern = Pattern.compile( "!admin (un|)op ((?:" + nickPattern
-        + ")+(?:, +| +|$))" );
+        + "(?:, +| +|$))+)" );
 
     @Handler
     private void addRemOp( ReceivePrivmsg event )
@@ -40,13 +40,13 @@ public class Ops
             if ( GroupDB.isAdmin( username ) )
             {
                 String mode = BaseNick.toBaseNick( matcher.group( 1 ) );
-                String nickBlob = BaseNick.toBaseNick( matcher.group( 2 ) );
+                String nickBlob = matcher.group( 2 );
 
                 List<String> nicks = new LinkedList<String>();
                 Matcher nickMatcher = nickPattern.matcher( nickBlob );
                 while ( nickMatcher.find() )
                 {
-                    nicks.add( nickMatcher.group( 1 ) );
+                    nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
                 }
 
                 StringBuilder successNicks = new StringBuilder();
@@ -63,7 +63,7 @@ public class Ops
                             selectedSB = failureNicks;
 
                         selectedSB.append( nick );
-                        selectedSB.append( "" );
+                        selectedSB.append( " " );
                     }
 
                     if ( successNicks.length() > 0 )
@@ -82,7 +82,7 @@ public class Ops
                             selectedSB = failureNicks;
 
                         selectedSB.append( nick );
-                        selectedSB.append( "" );
+                        selectedSB.append( " " );
                     }
 
                     if ( successNicks.length() > 0 )
