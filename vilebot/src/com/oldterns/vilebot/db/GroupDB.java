@@ -15,6 +15,29 @@ public class GroupDB
 
     private static final String opGroupName = "ops";
 
+    private static final String adminGroupName = "admins";
+
+    /**
+     * Checks if the the Admin group is empty.
+     * 
+     * @return true iff the Admin group has no members.
+     */
+    public static boolean noAdmins()
+    {
+        return groupSize( adminGroupName ) == 0;
+    }
+
+    /**
+     * Checks if the given nick is in the Admins group.
+     * 
+     * @param nick The nick to check
+     * @return true iff the nick is in the Admin group
+     */
+    public static boolean isAdmin( String nick )
+    {
+        return isInGroup( adminGroupName, nick );
+    }
+
     /**
      * Checks if the given nick is in the Operators group.
      * 
@@ -44,6 +67,30 @@ public class GroupDB
         {
             pool.returnResource( jedis );
         }
+    }
+
+    private static long groupSize( String group )
+    {
+        Jedis jedis = pool.getResource();
+        try
+        {
+            return jedis.scard( keyOfGroupSetsPrefix + group );
+        }
+        finally
+        {
+            pool.returnResource( jedis );
+        }
+    }
+
+    /**
+     * Adds the given nick to the Admins group.
+     * 
+     * @param nick The nick to add
+     * @return true iff the nick was not already there
+     */
+    public static boolean addAdmin( String nick )
+    {
+        return addToGroup( adminGroupName, nick );
     }
 
     /**
@@ -76,6 +123,17 @@ public class GroupDB
         {
             pool.returnResource( jedis );
         }
+    }
+
+    /**
+     * Removes the given nick from the Admins group.
+     * 
+     * @param nick The nick to remove
+     * @return true iff the nick existed
+     */
+    public static boolean remAdmin( String nick )
+    {
+        return remFromGroup( adminGroupName, nick );
     }
 
     /**
