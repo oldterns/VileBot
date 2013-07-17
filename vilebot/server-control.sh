@@ -63,7 +63,8 @@ mode_start() {
     msg "Starting services"
     msg ">> Testing prerequisites"
     local required_files=("$VB_JAR_PATH"
-                          "$VB_REDIS_CONF_PATH")
+                          "$VB_REDIS_CONF_PATH"
+                          "cfg/vilebot.conf")
 
     for filepath in "${required_files[@]}"
     do
