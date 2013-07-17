@@ -1,10 +1,7 @@
 package com.oldterns.vilebot.util;
 
-import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.pmw.tinylog.Logger;
 
 /**
  * Provides record-keeping for time limited sessions.
