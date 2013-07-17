@@ -23,7 +23,9 @@ Import the maven source style definitions by downloading
 
     http://maven.apache.org/developers/maven-eclipse-codestyle.xml
 
-and then using Project > Properties > Java Code Style > Formatter > Enable Project Specific Settings > Import ...
+and then use it with
+
+    Project > Properties > Java Code Style > Formatter > Enable Project Specific Settings > Import ...
 
 ### Redis
 
