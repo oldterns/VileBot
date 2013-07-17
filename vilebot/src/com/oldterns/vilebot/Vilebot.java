@@ -17,6 +17,7 @@ import org.pmw.tinylog.LoggingLevel;
 
 import com.oldterns.vilebot.util.BaseNick;
 import com.oldterns.vilebot.util.ConfMap;
+import com.oldterns.vilebot.util.Ignore;
 
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -76,6 +77,7 @@ public class Vilebot
             int ircPort = Integer.parseInt( cfg.get( "ircPort" + i ) );
             SslMode ircSslMode = SslMode.valueOf( cfg.get( "ircSslMode" + i ) );
             String ircChannel = cfg.get( "ircChannel" + i );
+            boolean ircChannelAutoOp = Boolean.parseBoolean( cfg.get( "ircChannelAutoOp" + i ) );
 
             BaseNick.addBotNick( ircNick );
 
@@ -87,6 +89,9 @@ public class Vilebot
             keratinBot.setServerPort( ircPort );
             keratinBot.setSslMode( ircSslMode );
             keratinBot.addChannel( ircChannel );
+
+            if ( !ircChannelAutoOp )
+                Ignore.addAutoOp( ircChannel );
 
             keratinBot.connect();
         }

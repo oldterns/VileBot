@@ -19,6 +19,7 @@ import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
 
 import com.oldterns.vilebot.db.GroupDB;
 import com.oldterns.vilebot.util.BaseNick;
+import com.oldterns.vilebot.util.Ignore;
 
 @HandlerContainer
 public class Ops
@@ -34,8 +35,11 @@ public class Ops
 
         Channel channel = bot.getChannel( event.getChannel() );
 
-        if ( !bot.getNick().equals( joiner ) && channel.isOp( bot.getNick() ) && GroupDB.isOp( joinerBaseNick ) )
-            bot.opNick( event.getChannel(), joiner );
+        if ( !Ignore.getAutoOp().contains( channel.getName() ) )
+        {
+            if ( !bot.getNick().equals( joiner ) && channel.isOp( bot.getNick() ) && GroupDB.isOp( joinerBaseNick ) )
+                bot.opNick( event.getChannel(), joiner );
+        }
     }
 
     @Handler
@@ -47,22 +51,25 @@ public class Ops
 
         String botNick = bot.getNick();
 
-        if ( flagParams.contains( botNick ) && flags.contains( "+o" ) )
+        if ( !Ignore.getAutoOp().contains( channel.getName() ) )
         {
-            List<String> nicks = channel.getRegularNicks();
-
-            List<String> newOpNicks = new LinkedList<String>();
-            for ( String nick : nicks )
+            if ( flagParams.contains( botNick ) && flags.contains( "+o" ) )
             {
-                if ( !botNick.equals( nick ) )
-                {
-                    String baseNick = BaseNick.toBaseNick( nick );
-                    if ( GroupDB.isOp( baseNick ) )
-                        newOpNicks.add( nick );
-                }
-            }
+                List<String> nicks = channel.getRegularNicks();
 
-            bot.opNicks( channel.getName(), newOpNicks );
+                List<String> newOpNicks = new LinkedList<String>();
+                for ( String nick : nicks )
+                {
+                    if ( !botNick.equals( nick ) )
+                    {
+                        String baseNick = BaseNick.toBaseNick( nick );
+                        if ( GroupDB.isOp( baseNick ) )
+                            newOpNicks.add( nick );
+                    }
+                }
+
+                bot.opNicks( channel.getName(), newOpNicks );
+            }
         }
     }
 }
