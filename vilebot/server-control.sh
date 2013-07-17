@@ -137,13 +137,8 @@ mode_stop() {
         msg ">> No pid for vilebot"
     fi
 
-    if [ -n "$redis_pid" ]
-    then
-        msg ">> Stopping local redis server"
-        redis-cli -p "$(get_redis_port)" SHUTDOWN || msg ">> Couldn't send shutdown command to redis server"
-    else
-        msg ">> No pid for redis"
-    fi
+    msg ">> Stopping local redis server"
+    redis-cli -p "$(get_redis_port)" SHUTDOWN || msg ">> Couldn't send shutdown command to redis server"
 }
 
 mode_status() {
