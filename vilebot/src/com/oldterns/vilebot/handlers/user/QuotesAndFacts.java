@@ -17,7 +17,7 @@ import java.util.regex.PatternSyntaxException;
 
 import com.oldterns.vilebot.db.QuoteFactDB;
 import com.oldterns.vilebot.util.BaseNick;
-import com.oldterns.vilebot.util.NickIgnore;
+import com.oldterns.vilebot.util.Ignore;
 
 import net.engio.mbassy.listener.Handler;
 
@@ -186,7 +186,7 @@ public class QuotesAndFacts
     {
         String baseNick = BaseNick.toBaseNick( event.getJoiner() );
 
-        if ( !NickIgnore.getOnJoin().contains( baseNick ) )
+        if ( !Ignore.getOnJoin().contains( baseNick ) )
         {
             if ( random.nextBoolean() )
             {

@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 import com.oldterns.vilebot.db.KarmaDB;
 import com.oldterns.vilebot.util.BaseNick;
-import com.oldterns.vilebot.util.NickIgnore;
+import com.oldterns.vilebot.util.Ignore;
 
 import net.engio.mbassy.listener.Handler;
 
@@ -48,7 +48,7 @@ public class Karma
     {
         String noun = BaseNick.toBaseNick( event.getJoiner() );
 
-        if ( !NickIgnore.getOnJoin().contains( noun ) )
+        if ( !Ignore.getOnJoin().contains( noun ) )
             replyWithRankAndKarma( noun, event );
     }
 

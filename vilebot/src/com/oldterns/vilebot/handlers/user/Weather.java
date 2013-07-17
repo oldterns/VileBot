@@ -26,7 +26,7 @@ import ca.szc.keratin.bot.annotation.AssignedBot;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
-import com.oldterns.vilebot.util.NickIgnore;
+import com.oldterns.vilebot.util.Ignore;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
@@ -39,7 +39,7 @@ public class Weather
     private static final String LESS_NICK = "owilliams";
     static
     {
-        NickIgnore.addOnJoin( LESS_NICK );
+        Ignore.addOnJoin( LESS_NICK );
     }
 
     private static final String defaultLocation = "ytz";

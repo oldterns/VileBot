@@ -9,7 +9,7 @@ package com.oldterns.vilebot.util;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NickIgnore
+public class Ignore
 {
     private static Set<String> onJoin = new HashSet<String>();
 

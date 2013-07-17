@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.oldterns.vilebot.db.LastSeenDB;
 import com.oldterns.vilebot.util.BaseNick;
-import com.oldterns.vilebot.util.NickIgnore;
+import com.oldterns.vilebot.util.Ignore;
 
 import net.engio.mbassy.listener.Handler;
 import ca.szc.keratin.bot.KeratinBot;
@@ -40,7 +40,7 @@ public class LastSeen
     {
         String joiner = BaseNick.toBaseNick( event.getJoiner() );
 
-        if ( !bot.getNick().equals( joiner ) && !NickIgnore.getOnJoin().contains( joiner ) )
+        if ( !bot.getNick().equals( joiner ) && !Ignore.getOnJoin().contains( joiner ) )
         {
             long lastSeen = LastSeenDB.getLastSeenTime( joiner );
             long now = System.currentTimeMillis();
