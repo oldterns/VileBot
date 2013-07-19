@@ -21,7 +21,8 @@ public class Decide
 {
     private static final Pattern choicePattern = Pattern.compile( "(?:(.+?)(?:\\s*\\|\\s*|\\s*$))" );
 
-    private static final Pattern decidePattern = Pattern.compile( "!decide (\\{.*\\} )?(" + choicePattern + "+)" );
+    private static final Pattern decidePattern = Pattern.compile( "!decide (\\[.*\\] )?(\\{.*\\} )?(" + choicePattern
+        + "+)" );
 
     private static final Random random = new Random();
 
@@ -33,7 +34,17 @@ public class Decide
 
         if ( matcher.matches() )
         {
-            String prefix = matcher.group( 1 );
+            String noun = matcher.group( 1 );
+            if ( noun == null || noun.isEmpty() )
+            {
+                noun = "you";
+            }
+            if ( !noun.equals( "you" ) )
+            {
+                noun = noun.substring( 1, noun.length() - 2 );
+            }
+
+            String prefix = matcher.group( 2 );
             if ( prefix == null )
             {
                 prefix = "";
@@ -43,7 +54,7 @@ public class Decide
             {
                 prefix = prefix.substring( 1, prefix.length() - 2 ).concat( " " );
             }
-            String choicesBlob = matcher.group( 2 );
+            String choicesBlob = matcher.group( 3 );
 
             // Process choices blob
             List<String> choices = new LinkedList<String>();
@@ -61,7 +72,7 @@ public class Decide
             }
             else
             {
-                sb.append( "I think you should " );
+                sb.append( "I think " + noun + " should " );
             }
 
             sb.append( prefix );
