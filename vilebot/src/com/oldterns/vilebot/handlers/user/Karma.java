@@ -32,6 +32,8 @@ public class Karma
 
     private static final Pattern decrementPattern = Pattern.compile( "^(" + nounPattern + ")--\\s*$" );
 
+    private static final Pattern selfKarmaQueryPattern = Pattern.compile( "^\\s*!(rev|)rank\\s*$" );
+
     private static final Pattern karmaQueryPattern = Pattern.compile( "!(rev|)rank (" + nounPattern + ")\\s*" );
 
     private static final Pattern ranknPattern = Pattern.compile( "!(rev|)rankn ([0-9]+)\\s*" );
@@ -90,12 +92,22 @@ public class Karma
     @Handler
     private void karmaQuery( ReceivePrivmsg event )
     {
-        Matcher matcher = karmaQueryPattern.matcher( event.getText() );
+        Matcher specificMatcher = karmaQueryPattern.matcher( event.getText() );
+        Matcher selfMatcher = selfKarmaQueryPattern.matcher( event.getText() );
 
-        if ( matcher.matches() )
+        if ( specificMatcher.matches() )
         {
-            String mode = matcher.group( 1 );
-            String noun = BaseNick.toBaseNick( matcher.group( 2 ) );
+            String mode = specificMatcher.group( 1 );
+            String noun = BaseNick.toBaseNick( specificMatcher.group( 2 ) );
+
+            boolean reverse = "rev".equals( mode );
+            if ( !replyWithRankAndKarma( noun, event, reverse ) )
+                event.reply( noun + " has no karma." );
+        }
+        else if ( selfMatcher.matches() )
+        {
+            String mode = selfMatcher.group( 1 );
+            String noun = BaseNick.toBaseNick( event.getSender() );
 
             boolean reverse = "rev".equals( mode );
             if ( !replyWithRankAndKarma( noun, event, reverse ) )
