@@ -66,7 +66,7 @@ public class Help
         sb.append( " { !quotesearch <noun> <regex> }" );
         sb.append( "  Utility:" );
         sb.append( " { s/foo/bar[/[g]] }" );
-        sb.append( " { !decide <choice1>[|choice2]... }" );
+        sb.append( " { !decide [noun] {prefix} <choice1>[|choice2]... }" );
         sb.append( " { !weather [IATA code] }" );
         sb.append( " { !lessweather [IATA code] }" );
         sb.append( " { !moreweather [IATA code] }" );
