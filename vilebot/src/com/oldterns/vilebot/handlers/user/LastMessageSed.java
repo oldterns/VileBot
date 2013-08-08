@@ -65,25 +65,32 @@ public class LastMessageSed
                 {
                     String lastMessage = lastMessageMapByNick.get( nick );
 
-                    String replacedMsg;
-                    String replacedMsgWHL;
-
-                    String replacementWHL = Colors.bold( replacement );
-
-                    // TODO: Probably can be simplified via method reference in Java 8
-                    if ( "g".equals( endFlag ) )
+                    if ( !lastMessage.contains( regexp ) )
                     {
-                        replacedMsg = lastMessage.replaceAll( regexp, replacement );
-                        replacedMsgWHL = lastMessage.replaceAll( regexp, replacementWHL );
+                        event.reply( "Wow. Seriously? Try subbing out a string that actually occurred. Do you even sed, bro?" );
                     }
                     else
                     {
-                        replacedMsg = lastMessage.replaceFirst( regexp, replacement );
-                        replacedMsgWHL = lastMessage.replaceFirst( regexp, replacementWHL );
-                    }
+                        String replacedMsg;
+                        String replacedMsgWHL;
 
-                    event.reply( "Correction: " + replacedMsgWHL );
-                    lastMessageMapByNick.put( nick, replacedMsg );
+                        String replacementWHL = Colors.bold( replacement );
+
+                        // TODO: Probably can be simplified via method reference in Java 8
+                        if ( "g".equals( endFlag ) )
+                        {
+                            replacedMsg = lastMessage.replaceAll( regexp, replacement );
+                            replacedMsgWHL = lastMessage.replaceAll( regexp, replacementWHL );
+                        }
+                        else
+                        {
+                            replacedMsg = lastMessage.replaceFirst( regexp, replacement );
+                            replacedMsgWHL = lastMessage.replaceFirst( regexp, replacementWHL );
+                        }
+
+                        event.reply( "Correction: " + replacedMsgWHL );
+                        lastMessageMapByNick.put( nick, replacedMsg );
+                    }
                 }
             }
         }
