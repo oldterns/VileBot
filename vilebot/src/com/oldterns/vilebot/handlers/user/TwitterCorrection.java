@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2013 Oldterns
+ * Copyright (C) 2013-2014 Oldterns
  *
  * This file may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -14,7 +14,7 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
 @HandlerContainer
-public class Twitter
+public class TwitterCorrection
 {
     private static final Pattern twitterSyntaxUsePattern = Pattern.compile( "(?:^|\\s+)[@](\\S+)(?:\\s|:|)" );
 
