@@ -81,7 +81,7 @@ public class UrlTweetAnnouncer
 
             if (parts[i].toString().equals("twitter.com"))
                 userPosition = i+1;
-            if (parts[i].toString().equals( "status" ))
+            if (parts[i].toString().equals( "status" ) || parts[i].toString().equals( "statuses" ))
                 tweetID = Long.valueOf(parts[i+1].toString()).longValue();
         }
         if (userPosition == 0)
