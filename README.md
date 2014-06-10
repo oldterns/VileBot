@@ -76,3 +76,11 @@ Make sure redis.conf has the following (some may be there already), and that no 
     activerehashing yes
 
 If redis on Fedora upgrades to a more recent verison it's possible that virtual memory will be completely removed. We don't use it anyway, so remove/comment out the virtual memory options if they start being unrecognised after an upgrade.
+
+### Twitter Integration
+
+Create a new application at https://apps.twitter.com
+
+Under the API Keys tab, create a new set of access tokens.
+
+Once generated, copy the API key, API secret, Access Token, and Access Token Secret into the appropriate variables in the UrlTweetAnnouncer class. Do not, at any point in time, commit these values.
