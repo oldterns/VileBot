@@ -12,10 +12,13 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.oldterns.vilebot.Vilebot;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -38,6 +41,11 @@ public class UrlTweetAnnouncer
         Pattern.compile( "((?:http|https)://(?:www.|)(?:(?:twitter)\\.com)[^ ]*)" );
 
     private static final Pattern titlePattern = Pattern.compile( "<title>(.*)</title>" );
+    private final Map<String, String> cfg = Collections.unmodifiableMap(Vilebot.getConfigMap("cfg", "twitter.conf"));
+    private final String consumerKey = cfg.get("consumerKey");  //may be known as 'API key'
+    private final String consumerSecret = cfg.get("consumerSecret"); //may be known as 'API secret'
+    private final String accessToken = cfg.get("accessToken"); //may be known as 'Access token'
+    private final String accessTokenSecret = cfg.get("accessTokenSecret"); //may be known as 'Access token secret'
 
     @Handler
     public void urlAnnouncer( ReceivePrivmsg event )
@@ -90,10 +98,6 @@ public class UrlTweetAnnouncer
         {
             try
             {
-                String consumerKey = ""; //may be known as 'API key'
-                String consumerSecret = ""; //may be known as 'API secret'
-                String accessToken = ""; //may be known as 'Access token'
-                String accessTokenSecret = ""; //may be known as 'Access token secret'
                 ConfigurationBuilder cb = new ConfigurationBuilder();
                 cb.setDebugEnabled(true)
                   .setOAuthConsumerKey(consumerKey)

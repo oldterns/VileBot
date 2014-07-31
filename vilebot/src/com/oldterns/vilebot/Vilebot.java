@@ -31,19 +31,7 @@ public class Vilebot
 
     public static void main( String[] args )
     {
-        FileSystem fs = FileSystems.getDefault();
-        Path cfgPath = fs.getPath( "cfg", "vilebot.conf" );
-
-        Map<String, String> cfg;
-        try
-        {
-            cfg = new ConfMap( cfgPath );
-        }
-        catch ( IOException e )
-        {
-            Logger.error( e, "Can't load cfgPath " + cfgPath );
-            throw new RuntimeException( "Can't load cfgPath " + cfgPath, e );
-        }
+        Map<String, String> cfg = getConfigMap("cfg", "vilebot.conf");
 
         // Logging
         LoggingLevel logLevel = LoggingLevel.valueOf( cfg.get( "logLevel" ) );
@@ -97,6 +85,23 @@ public class Vilebot
         }
 
         // Done
+    }
+
+    public static Map<String, String> getConfigMap(String dir, String conf) {
+        FileSystem fs = FileSystems.getDefault();
+        Path cfgPath = fs.getPath(dir, conf);
+
+        Map<String, String> cfg;
+        try
+        {
+            cfg = new ConfMap( cfgPath );
+        }
+        catch ( IOException e )
+        {
+            Logger.error(e, "Can't load cfgPath " + cfgPath);
+            throw new RuntimeException( "Can't load cfgPath " + cfgPath, e );
+        }
+        return cfg;
     }
 
     public static JedisPool getPool()
