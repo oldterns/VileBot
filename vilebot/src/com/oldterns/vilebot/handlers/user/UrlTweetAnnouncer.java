@@ -69,10 +69,9 @@ public class UrlTweetAnnouncer
     {
         String text = "";
 
-        URL page;
         try
         {
-            page = new URL( url );
+            new URL( url );
         }
         catch ( MalformedURLException x )
         {
