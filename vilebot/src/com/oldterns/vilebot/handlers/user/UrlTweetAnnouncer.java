@@ -18,6 +18,8 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ca.szc.keratin.bot.KeratinBot;
+import ca.szc.keratin.bot.annotation.AssignedBot;
 import com.oldterns.vilebot.Vilebot;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -55,9 +57,18 @@ public class UrlTweetAnnouncer
     private final String accessToken = cfg.get("accessToken"); //may be known as 'Access token'
     private final String accessTokenSecret = cfg.get("accessTokenSecret"); //may be known as 'Access token secret'
 
+    @AssignedBot
+    private KeratinBot bot;
+
     @Handler
     public void urlAnnouncer( ReceivePrivmsg event )
     {
+        if ( consumerKey == null || consumerSecret == null || accessToken == null || accessTokenSecret == null )
+        {
+            event.reply("Sorry, I can't read that tweet because my maintainer is a moron. And I wouldn't want to read it, anyway.");
+            return;
+        }
+
         Matcher urlMatcher = urlPattern.matcher( event.getText() );
 
         if ( urlMatcher.find() )
@@ -130,7 +141,7 @@ public class UrlTweetAnnouncer
             }
             catch (TwitterException x)
             {
-                return text;
+                return bot.getNick() + ": Until my maintainer fixes the API Key, this is the only tweet you're gonna see. U mad, bro?";
             }
         }
     }
