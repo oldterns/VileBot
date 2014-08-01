@@ -12,10 +12,15 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ca.szc.keratin.bot.KeratinBot;
+import ca.szc.keratin.bot.annotation.AssignedBot;
+import com.oldterns.vilebot.Vilebot;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -28,7 +33,14 @@ import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import net.engio.mbassy.listener.Handler;
 
 /**
- * Will grab the text from a tweet given the static tweet URL.
+ * Will grab the text from a tweet given the static tweet URL. To enable, add the following entries to vilebot.conf:
+ *
+ * consumerKey
+ * consumerSecret
+ * accessToken
+ * accessTokenSecret
+ *
+ * Where all of the above are created at https://apps.twitter.com
  */
 @HandlerContainer
 public class UrlTweetAnnouncer
@@ -39,15 +51,30 @@ public class UrlTweetAnnouncer
 
     private static final Pattern titlePattern = Pattern.compile( "<title>(.*)</title>" );
 
+    private final Map<String, String> cfg = Vilebot.getConfig();
+    private final String consumerKey = cfg.get("consumerKey");  //may be known as 'API key'
+    private final String consumerSecret = cfg.get("consumerSecret"); //may be known as 'API secret'
+    private final String accessToken = cfg.get("accessToken"); //may be known as 'Access token'
+    private final String accessTokenSecret = cfg.get("accessTokenSecret"); //may be known as 'Access token secret'
+
+    @AssignedBot
+    private KeratinBot bot;
+
     @Handler
     public void urlAnnouncer( ReceivePrivmsg event )
     {
+        if ( consumerKey == null || consumerSecret == null || accessToken == null || accessTokenSecret == null )
+        {
+            event.reply("Sorry, I can't read that tweet because my maintainer is a moron. And I wouldn't want to read it, anyway.");
+            return;
+        }
+
         Matcher urlMatcher = urlPattern.matcher( event.getText() );
 
         if ( urlMatcher.find() )
         {
             String title = scrapeURLHTMLTitle( urlMatcher.group( 1 ) );
-            event.reply( "'" + title + "'" );
+            event.reply("' " + title + " '");
         }
     }
 
@@ -61,10 +88,9 @@ public class UrlTweetAnnouncer
     {
         String text = "";
 
-        URL page;
         try
         {
-            page = new URL( url );
+            new URL( url );
         }
         catch ( MalformedURLException x )
         {
@@ -90,10 +116,6 @@ public class UrlTweetAnnouncer
         {
             try
             {
-                String consumerKey = ""; //may be known as 'API key'
-                String consumerSecret = ""; //may be known as 'API secret'
-                String accessToken = ""; //may be known as 'Access token'
-                String accessTokenSecret = ""; //may be known as 'Access token secret'
                 ConfigurationBuilder cb = new ConfigurationBuilder();
                 cb.setDebugEnabled(true)
                   .setOAuthConsumerKey(consumerKey)
@@ -119,7 +141,7 @@ public class UrlTweetAnnouncer
             }
             catch (TwitterException x)
             {
-                return text;
+                return bot.getNick() + ": Until my maintainer fixes the API Key, this is the only tweet you're gonna see. U mad, bro?";
             }
         }
     }

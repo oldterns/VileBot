@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.pmw.tinylog.Logger;
@@ -28,23 +30,10 @@ import ca.szc.keratin.core.net.IrcConnection.SslMode;
 public class Vilebot
 {
     private static JedisPool pool;
+    private static final Map<String, String> cfg = Collections.unmodifiableMap( getConfigMap( "cfg", "vilebot.conf" ) );
 
     public static void main( String[] args )
     {
-        FileSystem fs = FileSystems.getDefault();
-        Path cfgPath = fs.getPath( "cfg", "vilebot.conf" );
-
-        Map<String, String> cfg;
-        try
-        {
-            cfg = new ConfMap( cfgPath );
-        }
-        catch ( IOException e )
-        {
-            Logger.error( e, "Can't load cfgPath " + cfgPath );
-            throw new RuntimeException( "Can't load cfgPath " + cfgPath, e );
-        }
-
         // Logging
         LoggingLevel logLevel = LoggingLevel.valueOf( cfg.get( "logLevel" ) );
         Logging.activateLoggingConfig( logLevel );
@@ -99,8 +88,31 @@ public class Vilebot
         // Done
     }
 
+    private static Map<String, String> getConfigMap( String dir, String conf )
+    {
+        FileSystem fs = FileSystems.getDefault();
+        Path cfgPath = fs.getPath( dir, conf );
+
+        Map<String, String> cfg;
+        try
+        {
+            cfg = new ConfMap( cfgPath );
+        }
+        catch ( IOException e )
+        {
+            Logger.error(e, "Can't load cfgPath " + cfgPath);
+            throw new RuntimeException( "Can't load cfgPath " + cfgPath, e );
+        }
+        return Collections.unmodifiableMap( cfg );
+    }
+
     public static JedisPool getPool()
     {
         return pool;
+    }
+
+    public static Map<String, String> getConfig()
+    {
+        return new HashMap<> (cfg);
     }
 }
