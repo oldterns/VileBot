@@ -31,7 +31,14 @@ import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import net.engio.mbassy.listener.Handler;
 
 /**
- * Will grab the text from a tweet given the static tweet URL.
+ * Will grab the text from a tweet given the static tweet URL. To enable, add the following entries to vilebot.conf:
+ *
+ * consumerKey
+ * consumerSecret
+ * accessToken
+ * accessTokenSecret
+ *
+ * Where all of the above are created at https://apps.twitter.com
  */
 @HandlerContainer
 public class UrlTweetAnnouncer
@@ -41,7 +48,8 @@ public class UrlTweetAnnouncer
         Pattern.compile( "((?:http|https)://(?:www.|)(?:(?:twitter)\\.com)[^ ]*)" );
 
     private static final Pattern titlePattern = Pattern.compile( "<title>(.*)</title>" );
-    private final Map<String, String> cfg = Collections.unmodifiableMap(Vilebot.getConfigMap("cfg", "twitter.conf"));
+
+    private final Map<String, String> cfg = Vilebot.getConfig();
     private final String consumerKey = cfg.get("consumerKey");  //may be known as 'API key'
     private final String consumerSecret = cfg.get("consumerSecret"); //may be known as 'API secret'
     private final String accessToken = cfg.get("accessToken"); //may be known as 'Access token'
