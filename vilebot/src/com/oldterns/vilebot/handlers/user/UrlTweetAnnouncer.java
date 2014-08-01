@@ -55,7 +55,7 @@ public class UrlTweetAnnouncer
         if ( urlMatcher.find() )
         {
             String title = scrapeURLHTMLTitle( urlMatcher.group( 1 ) );
-            event.reply( "'" + title + "'" );
+            event.reply("' " + title + " '");
         }
     }
 
