@@ -30,7 +30,7 @@ public class Karma
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
-    private static final Pattern nickBlobPattern = Pattern.compile( "(?:(\\S+?)(?:, +| +|$))" );
+    private static final Pattern nickBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?)(?:, +| +|$))" );
 
     private static final Pattern incrementPattern = Pattern.compile( "^(" + nounPattern + ")\\+\\+\\s*.*$" );
 
