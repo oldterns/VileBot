@@ -28,9 +28,9 @@ public class Karma
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
-    private static final Pattern incrementPattern = Pattern.compile( "^(" + nounPattern + ")\\+\\+\\s*$" );
+    private static final Pattern incrementPattern = Pattern.compile( "^(" + nounPattern + ")\\+\\+\\s*.*$" );
 
-    private static final Pattern decrementPattern = Pattern.compile( "^(" + nounPattern + ")--\\s*$" );
+    private static final Pattern decrementPattern = Pattern.compile( "^(" + nounPattern + ")--\\s*.*$" );
 
     private static final Pattern selfKarmaQueryPattern = Pattern.compile( "^\\s*!(rev|)rank\\s*$" );
 
