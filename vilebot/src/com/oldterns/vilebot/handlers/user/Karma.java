@@ -103,10 +103,6 @@ public class Karma
         {
             String mode = specificMatcher.group( 1 );
             String nickBlob = specificMatcher.group( 2 );
-            if ( nickBlob == null )
-            {
-                nickBlob = specificMatcher.group( 3 );
-            }
 
             List<String> nicks = new LinkedList<String>();
             Matcher nickMatcher = nickBlobPattern.matcher( nickBlob );
