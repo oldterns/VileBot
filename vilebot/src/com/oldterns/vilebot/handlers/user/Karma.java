@@ -6,6 +6,8 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,13 +30,15 @@ public class Karma
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
+    private static final Pattern nickBlobPattern = Pattern.compile( "(?:(\\S+?)(?:, +| +|$))" );
+
     private static final Pattern incrementPattern = Pattern.compile( "^(" + nounPattern + ")\\+\\+\\s*.*$" );
 
     private static final Pattern decrementPattern = Pattern.compile( "^(" + nounPattern + ")--\\s*.*$" );
 
     private static final Pattern selfKarmaQueryPattern = Pattern.compile( "^\\s*!(rev|)rank\\s*$" );
 
-    private static final Pattern karmaQueryPattern = Pattern.compile( "!(rev|)rank (" + nounPattern + ")\\s*" );
+    private static final Pattern karmaQueryPattern = Pattern.compile( "!(rev|)rank (" + nickBlobPattern + "+)" );
 
     private static final Pattern ranknPattern = Pattern.compile( "!(rev|)rankn ([0-9]+)\\s*" );
 
@@ -98,11 +102,26 @@ public class Karma
         if ( specificMatcher.matches() )
         {
             String mode = specificMatcher.group( 1 );
-            String noun = BaseNick.toBaseNick( specificMatcher.group( 2 ) );
+            String nickBlob = specificMatcher.group( 2 );
+            if ( nickBlob == null )
+            {
+                nickBlob = specificMatcher.group( 3 );
+            }
+
+            List<String> nicks = new LinkedList<String>();
+            Matcher nickMatcher = nickBlobPattern.matcher( nickBlob );
+            while ( nickMatcher.find() )
+            {
+                nicks.add( nickMatcher.group( 1 ) );
+            }
 
             boolean reverse = "rev".equals( mode );
-            if ( !replyWithRankAndKarma( noun, event, reverse ) )
-                event.reply( noun + " has no karma." );
+
+            for ( String nick : nicks )
+            {
+                if (!replyWithRankAndKarma(nick, event, reverse))
+                    event.reply(nick + " has no karma.");
+            }
         }
         else if ( selfMatcher.matches() )
         {
