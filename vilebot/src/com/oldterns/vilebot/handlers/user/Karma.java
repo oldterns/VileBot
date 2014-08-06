@@ -36,7 +36,7 @@ public class Karma
 
     private static final Pattern decrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + nounPattern + ")--\\s*.*$" );
 
-    private static final Pattern selfKarmaQueryPattern = Pattern.compile( "^\\s*!(rev|)rank\\s*$" );
+    private static final Pattern selfKarmaQueryPattern = Pattern.compile( "!(rev|)rank\\s*$" );
 
     private static final Pattern karmaQueryPattern = Pattern.compile( "!(rev|)rank (" + nickBlobPattern + "+)" );
 
