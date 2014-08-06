@@ -30,8 +30,6 @@ public class Karma
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
-    private static final Pattern nickBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?)(?:, +| +|$))" );
-
     private static final Pattern incrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + nounPattern + ")\\+\\+\\s*.*$" );
 
     private static final Pattern decrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + nounPattern + ")--\\s*.*$" );
@@ -39,6 +37,8 @@ public class Karma
     private static final Pattern selfKarmaQueryPattern = Pattern.compile( "!(rev|)rank\\s*$" );
 
     private static final Pattern karmaQueryPattern = Pattern.compile( "!(rev|)rank (" + nickBlobPattern + "+)" );
+
+    private static final Pattern nickBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?)(?:, +| +|$))" );
 
     private static final Pattern ranknPattern = Pattern.compile( "!(rev|)rankn ([0-9]+)\\s*" );
 
