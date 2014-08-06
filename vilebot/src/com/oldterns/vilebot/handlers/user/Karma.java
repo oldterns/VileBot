@@ -30,15 +30,19 @@ public class Karma
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
-    private static final Pattern incrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + nounPattern + ")\\+\\+\\s*.*$" );
+    private static final Pattern incBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?)\\+\\+(?: +|$))" );
 
-    private static final Pattern decrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + nounPattern + ")--\\s*.*$" );
+    private static final Pattern incrementPattern = Pattern.compile( "(?:^|^.*\\s+)(?:" + incBlobPattern + "+)(?:.*|$)" );
+
+    private static final Pattern decBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?)--(?: +|$))" );
+
+    private static final Pattern decrementPattern = Pattern.compile( "(?:^|^.*\\s+)(?:" + decBlobPattern + "+)(?:.*|$)" );
 
     private static final Pattern selfKarmaQueryPattern = Pattern.compile( "!(rev|)rank\\s*$" );
 
-    private static final Pattern karmaQueryPattern = Pattern.compile( "!(rev|)rank (" + nickBlobPattern + "+)" );
-
     private static final Pattern nickBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?)(?:, +| +|$))" );
+
+    private static final Pattern karmaQueryPattern = Pattern.compile( "!(rev|)rank (" + nickBlobPattern + "+)" );
 
     private static final Pattern ranknPattern = Pattern.compile( "!(rev|)rankn ([0-9]+)\\s*" );
 
@@ -61,35 +65,67 @@ public class Karma
     @Handler
     private void karmaInc( ReceivePrivmsg event )
     {
+        // Match any string that has at least one word that ends with ++
         Matcher incMatcher = incrementPattern.matcher( event.getText() );
 
         if ( incMatcher.matches() )
         {
-            String noun = BaseNick.toBaseNick( incMatcher.group( 1 ) );
+            // Take entire matched line "group( 0 )" and split it into individual words
+            String wordBlob[] = incMatcher.group( 0 ).split( " " );
             String sender = BaseNick.toBaseNick( event.getSender() );
+            List<String> nicks = new LinkedList<String>();
 
-            if ( !noun.equals( sender ) )
-                KarmaDB.modNounKarma( noun, 1 );
-            else
-                // TODO insult generator?
-                event.reply( "I think I'm supposed to insult you now." );
+            // Iterate over words, checking each individually for trailing ++
+            for ( String word : wordBlob)
+            {
+                Matcher nickMatcher = incBlobPattern.matcher( word );
+                if ( nickMatcher.find() )
+                {
+                    nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
+                }
+            }
+
+            for ( String nick : nicks )
+            {
+                if ( !nick.equals( sender ) )
+                    KarmaDB.modNounKarma( nick, 1 );
+                else
+                    // TODO insult generator?
+                    event.reply( "I think I'm supposed to insult you now." );
+            }
         }
     }
 
     @Handler
     private void karmaDec( ReceivePrivmsg event )
     {
+        // Match any string that has at least one word that ends with --
         Matcher decMatcher = decrementPattern.matcher( event.getText() );
 
         if ( decMatcher.matches() )
         {
-            String noun = BaseNick.toBaseNick( decMatcher.group( 1 ) );
+            // Take entire matched line "group( 0 )" and split it into individual words
+            String wordBlob[] = decMatcher.group( 0 ).split( " " );
+            List<String> nicks = new LinkedList<String>();
 
-            if ( !noun.equals( bot.getNick() ) )
-                KarmaDB.modNounKarma( noun, -1 );
-            else
-                // TODO insult generator?
-                event.reply( "I think I'm supposed to insult you now." );
+            // Iterate over words, checking each individually for trailing --
+            for ( String word : wordBlob)
+            {
+                Matcher nickMatcher = decBlobPattern.matcher( word );
+                if ( nickMatcher.find() )
+                {
+                    nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
+                }
+            }
+
+            for ( String nick : nicks )
+            {
+                if ( !nick.equals( bot.getNick() ) )
+                    KarmaDB.modNounKarma( nick, -1 );
+                else
+                    // TODO insult generator?
+                    event.reply( "I think I'm supposed to insult you now." );
+            }
         }
     }
 
