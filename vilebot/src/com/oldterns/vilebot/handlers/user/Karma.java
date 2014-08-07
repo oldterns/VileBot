@@ -41,7 +41,7 @@ public class Karma
     private static final Pattern decrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + decBlobPattern + "+)(?:.*|$)" );
     // The opening (?:^|^.*\\s+) and closing (?:.*|$) are needed when only part of the message is ++ or -- events
 
-    private static final Pattern selfKarmaQueryPattern = Pattern.compile( "!(rev|)rank\\s*$" );
+    private static final Pattern selfKarmaQueryPattern = Pattern.compile( "^\\s*!(rev|)rank\\s*$" );
 
     private static final Pattern karmaQueryPattern = Pattern.compile( "!(rev|)rank (" + nickBlobPattern + "+)" );
 
