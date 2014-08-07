@@ -30,17 +30,18 @@ public class Karma
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
-    private static final Pattern incBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?)\\+\\+(?: +|$))" );
+    private static final Pattern nickBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?)(?:, +| +|$))" );
 
-    private static final Pattern incrementPattern = Pattern.compile( "(?:^|^.*\\s+)(?:" + incBlobPattern + "+)(?:.*|$)" );
+    private static final Pattern incBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?\\+\\+)(?:, +| +|$))" );
 
-    private static final Pattern decBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?)--(?: +|$))" );
+    private static final Pattern decBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?--)(?:, +| +|$))" );
 
-    private static final Pattern decrementPattern = Pattern.compile( "(?:^|^.*\\s+)(?:" + decBlobPattern + "+)(?:.*|$)" );
+    private static final Pattern incrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + incBlobPattern + "+)(?:.*|$)" );
+
+    private static final Pattern decrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + decBlobPattern + "+)(?:.*|$)" );
+    // The opening (?:^|^.*\\s+) and closing (?:.*|$) are needed when only part of the message is ++ or -- events
 
     private static final Pattern selfKarmaQueryPattern = Pattern.compile( "!(rev|)rank\\s*$" );
-
-    private static final Pattern nickBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?)(?:, +| +|$))" );
 
     private static final Pattern karmaQueryPattern = Pattern.compile( "!(rev|)rank (" + nickBlobPattern + "+)" );
 
@@ -70,19 +71,16 @@ public class Karma
 
         if ( incMatcher.matches() )
         {
-            // Take entire matched line "group( 0 )" and split it into individual words
-            String wordBlob[] = incMatcher.group( 0 ).split( " " );
+            // If one match is found, take the entire text of the message (group(0)) and check each word
+            // This is needed in the case that only part of the message is karma events (ie "wow anestico++")
+            String wordBlob = incMatcher.group( 0 );
             String sender = BaseNick.toBaseNick( event.getSender() );
-            List<String> nicks = new LinkedList<String>();
 
-            // Iterate over words, checking each individually for trailing ++
-            for ( String word : wordBlob)
+            List<String> nicks = new LinkedList<String>();
+            Matcher nickMatcher = incBlobPattern.matcher( wordBlob );
+            while ( nickMatcher.find() )
             {
-                Matcher nickMatcher = incBlobPattern.matcher( word );
-                if ( nickMatcher.find() )
-                {
-                    nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
-                }
+                nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
             }
 
             for ( String nick : nicks )
@@ -104,18 +102,14 @@ public class Karma
 
         if ( decMatcher.matches() )
         {
-            // Take entire matched line "group( 0 )" and split it into individual words
-            String wordBlob[] = decMatcher.group( 0 ).split( " " );
-            List<String> nicks = new LinkedList<String>();
+            // If one match is found, take the entire text of the message (group(0)) and check each word
+            String wordBlob = decMatcher.group( 0 );
 
-            // Iterate over words, checking each individually for trailing --
-            for ( String word : wordBlob)
+            List<String> nicks = new LinkedList<String>();
+            Matcher nickMatcher = decBlobPattern.matcher( wordBlob );
+            while ( nickMatcher.find() )
             {
-                Matcher nickMatcher = decBlobPattern.matcher( word );
-                if ( nickMatcher.find() )
-                {
-                    nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
-                }
+                nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
             }
 
             for ( String nick : nicks )
