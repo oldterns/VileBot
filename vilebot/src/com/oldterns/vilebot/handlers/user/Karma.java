@@ -6,6 +6,8 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,13 +30,20 @@ public class Karma
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
-    private static final Pattern incrementPattern = Pattern.compile( "^(" + nounPattern + ")\\+\\+\\s*$" );
+    private static final Pattern nickBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?)(?:, +| +|$))" );
 
-    private static final Pattern decrementPattern = Pattern.compile( "^(" + nounPattern + ")--\\s*$" );
+    private static final Pattern incBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?\\+\\+)(?:, +| +|$))" );
+
+    private static final Pattern decBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?--)(?:, +| +|$))" );
+
+    private static final Pattern incrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + incBlobPattern + "+)(?:.*|$)" );
+
+    private static final Pattern decrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + decBlobPattern + "+)(?:.*|$)" );
+    // The opening (?:^|^.*\\s+) and closing (?:.*|$) are needed when only part of the message is ++ or -- events
 
     private static final Pattern selfKarmaQueryPattern = Pattern.compile( "^\\s*!(rev|)rank\\s*$" );
 
-    private static final Pattern karmaQueryPattern = Pattern.compile( "!(rev|)rank (" + nounPattern + ")\\s*" );
+    private static final Pattern karmaQueryPattern = Pattern.compile( "!(rev|)rank (" + nickBlobPattern + "+)" );
 
     private static final Pattern ranknPattern = Pattern.compile( "!(rev|)rankn ([0-9]+)\\s*" );
 
@@ -57,16 +66,34 @@ public class Karma
     @Handler
     private void karmaInc( ReceivePrivmsg event )
     {
+        // Match any string that has at least one word that ends with ++
         Matcher incMatcher = incrementPattern.matcher( event.getText() );
 
         if ( incMatcher.matches() )
         {
-            String noun = BaseNick.toBaseNick( incMatcher.group( 1 ) );
+            // If one match is found, take the entire text of the message (group(0)) and check each word
+            // This is needed in the case that only part of the message is karma events (ie "wow anestico++")
+            String wordBlob = incMatcher.group( 0 );
             String sender = BaseNick.toBaseNick( event.getSender() );
 
-            if ( !noun.equals( sender ) )
-                KarmaDB.modNounKarma( noun, 1 );
-            else
+            List<String> nicks = new LinkedList<String>();
+            Matcher nickMatcher = incBlobPattern.matcher( wordBlob );
+            while ( nickMatcher.find() )
+            {
+                nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
+            }
+
+            boolean insult = false;
+
+            for ( String nick : nicks )
+            {
+                if ( !nick.equals( sender ) )
+                    KarmaDB.modNounKarma( nick, 1 );
+                else
+                    insult = true;
+            }
+
+            if ( insult )
                 // TODO insult generator?
                 event.reply( "I think I'm supposed to insult you now." );
         }
@@ -75,15 +102,32 @@ public class Karma
     @Handler
     private void karmaDec( ReceivePrivmsg event )
     {
+        // Match any string that has at least one word that ends with --
         Matcher decMatcher = decrementPattern.matcher( event.getText() );
 
         if ( decMatcher.matches() )
         {
-            String noun = BaseNick.toBaseNick( decMatcher.group( 1 ) );
+            // If one match is found, take the entire text of the message (group(0)) and check each word
+            String wordBlob = decMatcher.group( 0 );
 
-            if ( !noun.equals( bot.getNick() ) )
-                KarmaDB.modNounKarma( noun, -1 );
-            else
+            List<String> nicks = new LinkedList<String>();
+            Matcher nickMatcher = decBlobPattern.matcher( wordBlob );
+            while ( nickMatcher.find() )
+            {
+                nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
+            }
+
+            boolean insult = false;
+
+            for ( String nick : nicks )
+            {
+                if ( !nick.equals( bot.getNick() ) )
+                    KarmaDB.modNounKarma( nick, -1 );
+                else
+                    insult = true;
+            }
+
+            if ( insult )
                 // TODO insult generator?
                 event.reply( "I think I'm supposed to insult you now." );
         }
@@ -98,11 +142,22 @@ public class Karma
         if ( specificMatcher.matches() )
         {
             String mode = specificMatcher.group( 1 );
-            String noun = BaseNick.toBaseNick( specificMatcher.group( 2 ) );
+            String nickBlob = specificMatcher.group( 2 );
+
+            List<String> nicks = new LinkedList<String>();
+            Matcher nickMatcher = nickBlobPattern.matcher( nickBlob );
+            while ( nickMatcher.find() )
+            {
+                nicks.add( nickMatcher.group( 1 ) );
+            }
 
             boolean reverse = "rev".equals( mode );
-            if ( !replyWithRankAndKarma( noun, event, reverse ) )
-                event.reply( noun + " has no karma." );
+
+            for ( String nick : nicks )
+            {
+                if (!replyWithRankAndKarma(nick, event, reverse))
+                    event.reply(nick + " has no karma.");
+            }
         }
         else if ( selfMatcher.matches() )
         {
