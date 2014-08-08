@@ -83,14 +83,19 @@ public class Karma
                 nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
             }
 
+            boolean insult = false;
+
             for ( String nick : nicks )
             {
                 if ( !nick.equals( sender ) )
                     KarmaDB.modNounKarma( nick, 1 );
                 else
-                    // TODO insult generator?
-                    event.reply( "I think I'm supposed to insult you now." );
+                    insult = true;
             }
+
+            if ( insult )
+                // TODO insult generator?
+                event.reply( "I think I'm supposed to insult you now." );
         }
     }
 
@@ -112,14 +117,19 @@ public class Karma
                 nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
             }
 
+            boolean insult = false;
+
             for ( String nick : nicks )
             {
                 if ( !nick.equals( bot.getNick() ) )
                     KarmaDB.modNounKarma( nick, -1 );
                 else
-                    // TODO insult generator?
-                    event.reply( "I think I'm supposed to insult you now." );
+                    insult = true;
             }
+
+            if ( insult )
+                // TODO insult generator?
+                event.reply( "I think I'm supposed to insult you now." );
         }
     }
 
