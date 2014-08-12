@@ -37,7 +37,8 @@ public class LastMessageSed
 
     /**
      * Matches a standard sed-like replace pattern (ex: s/foo/bar/), the forward slash divisor can be replaced with any
-     * punctuation character. The given seperator character cannot be used elsewhere.
+     * punctuation character. The given separator character cannot be used elsewhere. Optionally, following the last
+     * slash, a user can write another user's name in order to modify that user's message.
      */
     private static final Pattern replacePattern = Pattern.compile( "^s(\\p{Punct})((?!\\1).+?)\\1((?!\\1).+?)(?:\\1(g|)(?:\\s+(\\S+)\\s*|)|)$" );
 
@@ -57,6 +58,9 @@ public class LastMessageSed
         {
             String correction = "Correction: ";
 
+            /**
+             * If the last group of the regex captures a non-null string, the user is fixing another user's message.
+             */
             if ( sedMatcher.group( 5 ) != null )
             {
                 nick = sedMatcher.group( 5 );
