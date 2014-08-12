@@ -39,7 +39,7 @@ public class LastMessageSed
      * Matches a standard sed-like replace pattern (ex: s/foo/bar/), the forward slash divisor can be replaced with any
      * punctuation character. The given seperator character cannot be used elsewhere.
      */
-    private static final Pattern replacePattern = Pattern.compile( "^s(\\p{Punct})((?!\\1).+?)\\1((?!\\1).+?)(?:\\1(g|)(?:\\s+(\\S+)|)|)$" );
+    private static final Pattern replacePattern = Pattern.compile( "^s(\\p{Punct})((?!\\1).+?)\\1((?!\\1).+?)(?:\\1(g|)(?:\\s+(\\S+)\\s*|)|)$" );
 
     /**
      * Say the last thing the person said, replaced as specified. Otherwise just record the line as the last thing the
