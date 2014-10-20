@@ -29,7 +29,7 @@ public class UrlTitleAnnouncer
 {
 
     private static final Pattern urlPattern =
-        Pattern.compile( "((?:http|https)://(?:www.|)(?:(?:abstrusegoose|xkcd)\\.com|youtube\\.(?:com|ca))[^ ]*)" );
+        Pattern.compile( "((?:http|https)://(?:www.|)(?:(?:abstrusegoose|xkcd)\\.com|youtube\\.(?:com|ca)|youtu\\.be)[^ ]*)" );
 
     private static final Pattern titlePattern = Pattern.compile( "<title>(.*)</title>" );
 
