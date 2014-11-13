@@ -33,7 +33,7 @@ public class QuotesAndFacts
 
     private static final Pattern addPattern = Pattern.compile( "^!(fact|quote)add (" + nounPattern + ") (.+)$" );
 
-    private static final Pattern queryPattern = Pattern.compile( "^!(fact|quote) (" + nounPattern + ")$" );
+    private static final Pattern queryPattern = Pattern.compile( "^!(fact|quote) (" + nounPattern + ")\\s*$" );
 
     private static final Pattern searchPattern = Pattern.compile( "^!(fact|quote)search (" + nounPattern + ") (.*)$" );
 
