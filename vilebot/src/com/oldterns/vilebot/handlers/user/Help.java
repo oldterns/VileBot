@@ -49,7 +49,6 @@ public class Help
         sb.append( " { noun-- }" );
         sb.append( " { !rank <noun> }" );
         sb.append( " { !revrank <place> }" );
-        sb.append( " { !unrank <noun> }" );
         sb.append( " { !rankn <place> }" );
         sb.append( " { !revrankn <place> }" );
         sb.append( " { !topthree }" );

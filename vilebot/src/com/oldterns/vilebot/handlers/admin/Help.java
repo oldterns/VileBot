@@ -44,6 +44,7 @@ public class Help
         sb.append( " { !admin quit }" );
         sb.append( " { !admin nick <nick> }" );
         sb.append( " { !admin op <nick> }" );
+        sb.append( " { !admin unrank <noun> }" );
         sb.append( " { !admin unop <nick> }" );
         sb.append( " { !admin setadmin <nick> <pass> }" );
         sb.append( " { !admin remadmin <nick> }" );

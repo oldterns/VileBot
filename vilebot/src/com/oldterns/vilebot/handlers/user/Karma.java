@@ -12,10 +12,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.oldterns.vilebot.db.GroupDB;
 import com.oldterns.vilebot.db.KarmaDB;
 import com.oldterns.vilebot.util.BaseNick;
 import com.oldterns.vilebot.util.Ignore;
 
+import com.oldterns.vilebot.util.Sessions;
 import net.engio.mbassy.listener.Handler;
 
 import ca.szc.keratin.bot.KeratinBot;
@@ -49,7 +51,7 @@ public class Karma
 
     private static final Pattern topBottomThreePattern = Pattern.compile( "!(top|bottom)three\\s*" );
 
-    private static final Pattern removePattern = Pattern.compile( "!unrank (" + nounPattern + ")\\s*" );
+    private static final Pattern removePattern = Pattern.compile( "!admin unrank (" + nounPattern + ")\\s*" );
 
     @AssignedBot
     private KeratinBot bot;
@@ -231,9 +233,11 @@ public class Karma
     @Handler
     private void unrank( ReceivePrivmsg event )
     {
+        // Admin-only command: remove all of a user's karma.
         Matcher matcher = removePattern.matcher( event.getText() );
+        String username = Sessions.getSession( event.getSender() );
 
-        if ( matcher.matches() )
+        if ( matcher.matches() && GroupDB.isAdmin(username) )
         {
             String noun = BaseNick.toBaseNick( matcher.group( 1 ) );
 
