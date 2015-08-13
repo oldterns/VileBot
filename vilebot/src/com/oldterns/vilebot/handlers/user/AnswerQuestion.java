@@ -47,7 +47,8 @@ public class AnswerQuestion {
     String makeURL(String searchTerm) {
         searchTerm = searchTerm.replace("+", "%2B");
         searchTerm = searchTerm.replace(" ", "+");
-        String URL = "http://api.wolframalpha.com/v2/query?input="+searchTerm+"&appid="+API_KEY;
+        String URL = "http://api.wolframalpha.com/v2/query?input="+searchTerm+"&appid="+API_KEY+
+                "&podstate=InstantaneousWeather:WeatherData__Show+metric";
         return URL;
     }
 
