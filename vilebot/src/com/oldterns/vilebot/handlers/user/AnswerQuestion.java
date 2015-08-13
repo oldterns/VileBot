@@ -65,7 +65,7 @@ public class AnswerQuestion {
         }
         return content;
     }
-    static String parseResponse(String response) {
+    String parseResponse(String response) {
         try {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
