@@ -79,6 +79,7 @@ public class Help
         sb.append( " { !randommeme }" );
         sb.append( " { !chuck }" );
         sb.append( " { !dance }" );
+        sb.append( " { !tellme <question> }" );
 
         return sb.toString();
     }
