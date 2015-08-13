@@ -27,16 +27,15 @@ public class AnswerQuestion {
     private final String API_KEY = Vilebot.getConfig().get("wolframKey");
 
     @Handler
-    private void decideOMatic( ReceivePrivmsg event )
+    private void tellMe( ReceivePrivmsg event )
     {
         String text = event.getText();
         Matcher matcher = questionPattern.matcher( text );
 
-        if ( matcher.matches() )
-        {
+        if (matcher.matches()) {
             String question = matcher.group(2);
-
-            event.reply(getAnswer(question));
+            String answer = getAnswer(question);
+            event.reply(answer);
         }
     }
     String getAnswer(String searchTerm) {
