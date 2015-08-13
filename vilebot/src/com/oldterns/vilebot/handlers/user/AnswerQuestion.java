@@ -27,8 +27,7 @@ public class AnswerQuestion {
     private final String API_KEY = Vilebot.getConfig().get("wolframKey");
 
     @Handler
-    private void tellMe( ReceivePrivmsg event )
-    {
+    private void tellMe( ReceivePrivmsg event ) {
         String text = event.getText();
         Matcher matcher = questionPattern.matcher( text );
 
@@ -49,7 +48,6 @@ public class AnswerQuestion {
         searchTerm = searchTerm.replace("+", "%2B");
         searchTerm = searchTerm.replace(" ", "+");
         String URL = "http://api.wolframalpha.com/v2/query?input="+searchTerm+"&appid="+API_KEY;
-        System.out.println(URL);
         return URL;
     }
 
@@ -65,7 +63,6 @@ public class AnswerQuestion {
         catch ( Exception ex ) {
             ex.printStackTrace();
         }
-        System.out.println(content);
         return content;
     }
     static String parseResponse(String response) {
