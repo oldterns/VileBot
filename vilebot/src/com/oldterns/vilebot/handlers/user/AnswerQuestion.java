@@ -10,8 +10,10 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,8 +47,12 @@ public class AnswerQuestion {
     }
 
     String makeURL(String searchTerm) {
-        searchTerm = searchTerm.replace("+", "%2B");
-        searchTerm = searchTerm.replace(" ", "+");
+        try {
+            searchTerm = URLEncoder.encode(searchTerm, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         String URL = "http://api.wolframalpha.com/v2/query?input="+searchTerm+"&appid="+API_KEY+
                 "&podstate=InstantaneousWeather:WeatherData__Show+metric";
         return URL;
