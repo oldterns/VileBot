@@ -57,7 +57,7 @@ public class GetInfoOn {
         return wikiURL;
     }
     String makeGoogleURL(String query) {
-        query += "site:wikipedia.org";
+        query += " site:wikipedia.org";
         query = encode(query);
         return "https://www.google.com/search?q=" + query;
     }
