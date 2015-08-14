@@ -27,13 +27,22 @@ import java.util.regex.Pattern;
 public class GetInfoOn {
 
     private static final Pattern questionPattern = Pattern.compile("^!(infoon)\\s(.+)$");
+    private static final Pattern dumbQuestionPattern = Pattern.compile("^!(infun)\\s(.+)$");
     @Handler
     public void getInfo(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = questionPattern.matcher( text );
+        Matcher foonMatch = questionPattern.matcher( text );
+        Matcher funMatch = dumbQuestionPattern.matcher( text );
 
-        if (matcher.matches()) {
-            String question = matcher.group(2);
+        if (foonMatch.matches()) {
+            String question = foonMatch.group(2);
+            question += " site:wikipedia.org";
+            String answer = getWiki(question);
+            event.reply(answer);
+        }
+        else if(funMatch.matches()) {
+            String question = funMatch.group(2);
+            question += "site:wikipedia.org";
             String answer = getWiki(question);
             event.reply(answer);
         }
@@ -57,7 +66,6 @@ public class GetInfoOn {
         return wikiURL;
     }
     String makeGoogleURL(String query) {
-        query += " site:wikipedia.org";
         query = encode(query);
         return "https://www.google.com/search?q=" + query;
     }
