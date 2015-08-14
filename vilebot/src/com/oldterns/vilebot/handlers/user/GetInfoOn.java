@@ -62,12 +62,9 @@ public class GetInfoOn {
         return "https://www.google.com/search?q=" + query;
     }
 
-    String getWikiLink(String goolgeHTML) {
-        Document doc = Jsoup.parse(goolgeHTML);
+    String getWikiLink(String googleHTML) {
+        Document doc = Jsoup.parse(googleHTML);
         Element link = doc.select("a[href*=/url?q=https://en.wikipedia]").first();
-        if(link == null) {
-            return null;
-        }
         return link.attr("href").replace("/url?q=","").split("&")[0];
     }
 
@@ -87,10 +84,11 @@ public class GetInfoOn {
         Document doc = Jsoup.parse(response);
         Element bodyDiv = doc.getElementById("mw-content-text");
         Element firstParagraph = bodyDiv.getElementsByTag("p").first();
-        String answer = firstParagraph.text().replace('\n', ' ');
+        String answer = firstParagraph.text();
         if(answer.isEmpty()) {
             throw new Exception();
         }
+        answer = answer.replaceAll("\\[[0-9]+\\]", "");
         return answer;
     }
     String encode(String string) {
