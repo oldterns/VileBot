@@ -40,7 +40,7 @@ public class ImageToAscii {
         URL url = new URL(strURL);
         BufferedImage image = ImageIO.read(url);
         image = shrink(image);
-        return new ASCII(true).convert(image);
+        return new ASCII().convert(image);
     }
     BufferedImage shrink(BufferedImage image) {
         int MAX_WIDTH = 35;
