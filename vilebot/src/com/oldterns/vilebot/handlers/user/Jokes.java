@@ -100,7 +100,7 @@ public class Jokes
 
         dances.add( "No. " + CharactersThatBreakEclipse.LODEMOT );
         dances.add( "Bots as vile as I do not dance." );
-        dances.add( "ScumbagBot does does not dance." );
+        dances.add( "ScumbagBot does not dance." );
         dances.add( "Chuck Norris once asked me to dance. He didn't have a comeback after the roundhouse kickban." );
         dances.add( CharactersThatBreakEclipse.KIRBYFLIP + "\n*kills Kirby*\n*kills dance*" );
         dances.add( "Does doing a barrel roll count?" );
