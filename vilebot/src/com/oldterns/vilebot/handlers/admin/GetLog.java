@@ -2,10 +2,11 @@ package com.oldterns.vilebot.handlers.admin;
 
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import com.oldterns.vilebot.db.GroupDB;
 import com.oldterns.vilebot.db.LogDB;
+import com.oldterns.vilebot.util.Sessions;
 import net.engio.mbassy.listener.Handler;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -14,20 +15,24 @@ import java.util.regex.Pattern;
 @HandlerContainer
 public class GetLog {
 
-    private static final Pattern showLog = Pattern.compile("^!showLog$");
-    private static final Pattern deleteLog = Pattern.compile("^!deleteLog$");
+    private static final Pattern showLog = Pattern.compile("!admin showLog$");
+    private static final Pattern deleteLog = Pattern.compile("!admin deleteLog$");
 
     @Handler
     private void getLog(ReceivePrivmsg event) {
         String text = event.getText();
+        String sender = event.getSender();
+        String username = Sessions.getSession(sender);
+
         boolean showLogMatches = showLog.matcher(text).matches();
         boolean deleteLogMatches = deleteLog.matcher(text).matches();
 
-        if (showLogMatches) {
-            event.reply(LogDB.getLog());
-        }
-        else if(deleteLogMatches) {
-            LogDB.deleteLog();
+        if(GroupDB.isAdmin(username)) {
+            if (showLogMatches) {
+                event.reply(LogDB.getLog());
+            } else if (deleteLogMatches) {
+                LogDB.deleteLog();
+            }
         }
     }
 }
