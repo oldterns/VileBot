@@ -43,11 +43,11 @@ public class ImageToAscii {
         return new ASCII().convert(image);
     }
     BufferedImage shrink(BufferedImage image) {
-        int MAX_WIDTH = 35;
+        int MAX_WIDTH = 50;
         int height = image.getHeight();
         int width = image.getWidth();
         float ratio = (float) height/width;
-        int newHeight = Math.round(MAX_WIDTH*ratio);
+        int newHeight = Math.round((MAX_WIDTH*ratio)*0.56f);
 
         BufferedImage newImage = new BufferedImage(MAX_WIDTH, newHeight, BufferedImage.TYPE_INT_RGB);
 
