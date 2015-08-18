@@ -26,4 +26,13 @@ public class LogDB extends RedisDB {
             pool.returnResource(jedis);
         }
     }
+
+    public static void deleteLog() {
+        Jedis jedis = pool.getResource();
+        try {
+            jedis.del(logKey);
+        } finally {
+            pool.returnResource(jedis);
+        }
+    }
 }

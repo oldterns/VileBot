@@ -14,15 +14,20 @@ import java.util.regex.Pattern;
 @HandlerContainer
 public class GetLog {
 
-    private static final Pattern command = Pattern.compile("^!log$");
+    private static final Pattern showLog = Pattern.compile("^!showLog$");
+    private static final Pattern deleteLog = Pattern.compile("^!deleteLog$");
 
     @Handler
     private void getLog(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = command.matcher(text);
+        boolean showLogMatches = showLog.matcher(text).matches();
+        boolean deleteLogMatches = deleteLog.matcher(text).matches();
 
-        if (matcher.matches()) {
+        if (showLogMatches) {
             event.reply(LogDB.getLog());
+        }
+        else if(deleteLogMatches) {
+            LogDB.deleteLog();
         }
     }
 }
