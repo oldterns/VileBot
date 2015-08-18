@@ -13,7 +13,7 @@ import net.engio.mbassy.listener.Handler;
 public class ChatLogger {
     @Handler
     protected void logMessage(ReceivePrivmsg event) {
-        String text = event.getText() + " ";
+        String text = event.getText() + "\n";
         LogDB.addItem(text);
     }
 }
