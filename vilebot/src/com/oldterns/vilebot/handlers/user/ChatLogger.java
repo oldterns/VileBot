@@ -14,7 +14,7 @@ public class ChatLogger {
     @Handler
     protected void logMessage(ReceivePrivmsg event) {
         if(event.getChannel().equals("#thefoobar")) {
-            String text = event.getText() + "\n";
+            String text = (event.getText() + "\n");
             LogDB.addItem(text);
         }
     }

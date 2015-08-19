@@ -64,7 +64,7 @@ public class Markov {
 
         while(key != null && phrase.length() < 1000) {
             phrase += key + " ";
-            if(key.endsWith("\n")) {
+            if(key.contains("\n")) {
                 break;
             }
             key = nextKey(key, random);
