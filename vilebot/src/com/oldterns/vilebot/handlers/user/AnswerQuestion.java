@@ -10,8 +10,10 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,16 +29,14 @@ public class AnswerQuestion {
     private final String API_KEY = Vilebot.getConfig().get("wolframKey");
 
     @Handler
-    private void decideOMatic( ReceivePrivmsg event )
-    {
+    private void tellMe( ReceivePrivmsg event ) {
         String text = event.getText();
         Matcher matcher = questionPattern.matcher( text );
 
-        if ( matcher.matches() )
-        {
+        if (matcher.matches()) {
             String question = matcher.group(2);
-
-            event.reply(getAnswer(question));
+            String answer = getAnswer(question);
+            event.reply(answer);
         }
     }
     String getAnswer(String searchTerm) {
@@ -47,10 +47,14 @@ public class AnswerQuestion {
     }
 
     String makeURL(String searchTerm) {
-        searchTerm = searchTerm.replace("+", "%2B");
-        searchTerm = searchTerm.replace(" ", "+");
-        String URL = "http://api.wolframalpha.com/v2/query?input="+searchTerm+"&appid="+API_KEY;
-        System.out.println(URL);
+        try {
+            searchTerm = URLEncoder.encode(searchTerm, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        String URL = "http://api.wolframalpha.com/v2/query?input="+searchTerm+"&appid="+API_KEY+
+                "&podstate=InstantaneousWeather:WeatherData__Show+metric";
         return URL;
     }
 
@@ -66,10 +70,9 @@ public class AnswerQuestion {
         catch ( Exception ex ) {
             ex.printStackTrace();
         }
-        System.out.println(content);
         return content;
     }
-    static String parseResponse(String response) {
+    String parseResponse(String response) {
         try {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
