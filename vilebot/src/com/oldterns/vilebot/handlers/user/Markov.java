@@ -37,7 +37,7 @@ public class Markov {
     }
 
     private void fillMarkovMap(String data) {
-        String[] words = data.split("\\s+");
+        String[] words = data.split(" ");
 
         for(int i = 0; i < words.length - 3; i++) {
             String key = words[i] + " " + words[i+1];
