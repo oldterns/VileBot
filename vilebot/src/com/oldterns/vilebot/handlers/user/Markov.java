@@ -5,12 +5,7 @@ import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.db.LogDB;
 import net.engio.mbassy.listener.Handler;
 
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -67,8 +62,8 @@ public class Markov {
         String key = getRandomKey(random);
         String phrase = new String();
 
-        while(key != null) {
-            phrase += " " + key;
+        while(key != null && phrase.length() < 1000) {
+            phrase += key + " ";
             if(key.endsWith("\n")) {
                 break;
             }

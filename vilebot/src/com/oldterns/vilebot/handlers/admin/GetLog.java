@@ -29,9 +29,11 @@ public class GetLog {
 
         if(GroupDB.isAdmin(username)) {
             if (showLogMatches) {
+                event.reply("Getting log...");
                 event.reply(LogDB.getLog());
             } else if (deleteLogMatches) {
                 LogDB.deleteLog();
+                event.reply("Log deleted");
             }
         }
     }
