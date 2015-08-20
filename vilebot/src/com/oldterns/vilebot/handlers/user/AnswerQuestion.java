@@ -42,8 +42,8 @@ public class AnswerQuestion {
     }
     String getAnswer(String searchTerm) {
         try {
-            String URL = makeURL(searchTerm);
-            String response = getContent(URL);
+            String url = makeURL(searchTerm);
+            String response = getContent(url);
             String answer = parseResponse(response);
             return answer;
         }
@@ -54,16 +54,16 @@ public class AnswerQuestion {
 
     String makeURL(String searchTerm) throws UnsupportedEncodingException {
         searchTerm = URLEncoder.encode(searchTerm, "UTF-8");
-        String URL = "http://api.wolframalpha.com/v2/query?input="+searchTerm+"&appid="+API_KEY+
+        String url = "http://api.wolframalpha.com/v2/query?input="+searchTerm+"&appid="+API_KEY+
                 "&podstate=InstantaneousWeather:WeatherData__Show+metric";
-        return URL;
+        return url;
     }
 
-    String getContent(String URL) {
+    String getContent(String url) {
         String content = null;
         URLConnection connection;
         try {
-            connection =  new URL(URL).openConnection();
+            connection =  new URL(url).openConnection();
             Scanner scanner = new Scanner(connection.getInputStream());
             scanner.useDelimiter("\\Z");
             content = scanner.next();
