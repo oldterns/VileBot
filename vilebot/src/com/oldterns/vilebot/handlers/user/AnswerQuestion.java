@@ -4,6 +4,7 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
 import net.engio.mbassy.listener.Handler;
+import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
@@ -40,19 +41,19 @@ public class AnswerQuestion {
         }
     }
     String getAnswer(String searchTerm) {
-        String URL = makeURL(searchTerm);
-        String response = getContent(URL);
-        String answer = parseResponse(response);
-        return answer;
+        try {
+            String URL = makeURL(searchTerm);
+            String response = getContent(URL);
+            String answer = parseResponse(response);
+            return answer;
+        }
+        catch (Exception e) {
+            return "I couldn't find an answer for that";
+        }
     }
 
-    String makeURL(String searchTerm) {
-        try {
-            searchTerm = URLEncoder.encode(searchTerm, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+    String makeURL(String searchTerm) throws UnsupportedEncodingException {
+        searchTerm = URLEncoder.encode(searchTerm, "UTF-8");
         String URL = "http://api.wolframalpha.com/v2/query?input="+searchTerm+"&appid="+API_KEY+
                 "&podstate=InstantaneousWeather:WeatherData__Show+metric";
         return URL;
@@ -72,22 +73,17 @@ public class AnswerQuestion {
         }
         return content;
     }
-    String parseResponse(String response) {
-        try {
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            org.w3c.dom.Document document = documentBuilder.parse(new InputSource(new StringReader(response)));
-            NodeList nodeList = document.getElementsByTagName("subpod");
-            String answer = nodeList.item(1).getTextContent().trim();
+    String parseResponse(String response) throws Exception {
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document document = documentBuilder.parse(new InputSource(new StringReader(response)));
+        NodeList nodeList = document.getElementsByTagName("subpod");
+        String answer = nodeList.item(1).getTextContent().trim();
 
-            if (answer.isEmpty()) {
-                throw new Exception();
-            }
+        if (answer.isEmpty()) {
+            throw new Exception();
+        }
 
-            return answer;
-        }
-        catch(Exception e) {
-            return "I couldn't find an answer for that.";
-        }
+        return answer;
     }
 }
