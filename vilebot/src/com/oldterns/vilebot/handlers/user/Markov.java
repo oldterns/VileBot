@@ -64,7 +64,7 @@ public class Markov {
 
         while(key != null && phrase.length() < 1000) {
             phrase += key + " ";
-            if(key.endsWith(".")) {
+            if(shouldEnd(key)) {
                 break;
             }
             key = nextKey(key, random);
@@ -87,5 +87,8 @@ public class Markov {
         Object[] values = markovMap.keySet().toArray();
         String randomValue = (String) values[random.nextInt(values.length)];
         return randomValue;
+    }
+    private boolean shouldEnd(String key) {
+       return (key.endsWith("!") || key.endsWith("?") || key.endsWith("."));
     }
 }
