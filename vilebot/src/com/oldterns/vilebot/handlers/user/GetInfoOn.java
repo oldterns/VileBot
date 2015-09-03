@@ -11,7 +11,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -28,29 +27,34 @@ public class GetInfoOn {
 
     private static final Pattern questionPattern = Pattern.compile("^!(infoon)\\s(.+)$");
     private static final Pattern dumbQuestionPattern = Pattern.compile("^!(infun)\\s(.+)$");
+
     @Handler
     public void getInfo(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher foonMatch = questionPattern.matcher( text );
-        Matcher funMatch = dumbQuestionPattern.matcher( text );
+        Matcher foonMatch = questionPattern.matcher(text);
+        Matcher funMatch = dumbQuestionPattern.matcher(text);
 
-        if (foonMatch.matches()) {
-            String question = foonMatch.group(2);
-            question += " site:wikipedia.org";
-            String answer = getWiki(question);
-            event.reply(answer);
+        String question = new String();
+        String queryModifier = new String();
+
+        if(foonMatch.matches()) {
+            question = foonMatch.group(2);
+            queryModifier = " site:wikipedia.org";
         }
         else if(funMatch.matches()) {
-            String question = funMatch.group(2);
-            question += "site:wikipedia.org";
-            String answer = getWiki(question);
+            question = funMatch.group(2);
+            queryModifier = "site:wikipedia.org";
+        }
+
+        if (question != null) {
+            String answer = getWiki(question, queryModifier);
             event.reply(answer);
         }
     }
 
-    String getWiki(String query) {
+    String getWiki(String query, String queryModifier) {
         try {
-            String wikiURL = getWikiURLFromGoogle(query);
+            String wikiURL = getWikiURLFromGoogle(query + queryModifier);
             String wikipediaContent = getContent(wikiURL);
             String parsedWikiContent = parseResponse(wikipediaContent);
             return parsedWikiContent;
@@ -65,7 +69,7 @@ public class GetInfoOn {
         String wikiURL = getWikiLink(googleResponse);
         return wikiURL;
     }
-    String makeGoogleURL(String query) {
+    String makeGoogleURL(String query) throws Exception {
         query = encode(query);
         return "https://www.google.com/search?q=" + query;
     }
@@ -76,10 +80,10 @@ public class GetInfoOn {
         return link.attr("href").replace("/url?q=","").split("&")[0];
     }
 
-    String getContent(String URL) throws Exception {
+    String getContent(String url) throws Exception {
         String content;
         URLConnection connection;
-        connection =  new URL(URL).openConnection();
+        connection =  new URL(url).openConnection();
         connection.addRequestProperty(
                 "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"
         );
@@ -99,13 +103,7 @@ public class GetInfoOn {
         answer = answer.replaceAll("\\[[0-9]+\\]", "");
         return answer;
     }
-    String encode(String string) {
-        try {
-            return URLEncoder.encode(string, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return string;
-        }
+    String encode(String string) throws Exception {
+        return URLEncoder.encode(string, "UTF-8");
     }
 }
