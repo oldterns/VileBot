@@ -1,9 +1,5 @@
 package com.oldterns.vilebot.util;
 
-/**
- * Created by eunderhi on 17/08/15.
- */
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
