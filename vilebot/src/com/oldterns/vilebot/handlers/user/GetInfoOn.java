@@ -60,7 +60,7 @@ public class GetInfoOn {
             return parsedWikiContent;
         }
         catch(Exception e) {
-            return "Look I don't know.";
+            return "Look, I don't know.";
         }
     }
     String getWikiURLFromGoogle(String query) throws Exception {
