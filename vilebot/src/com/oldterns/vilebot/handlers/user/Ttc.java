@@ -45,9 +45,13 @@ public class Ttc {
     }
 
     private Elements parseContent(String content) throws Exception {
+        Elements alerts = new Elements();
         Document doc = Jsoup.parse(content);
-        Element alertDiv = doc.select("div[class=alert-content]").first();
-        return alertDiv.select("p");
+        Elements alertDivs = doc.select("div[class=alert-content]");
+        for(Element element : alertDivs) {
+            alerts.addAll(element.select("p"));
+        }
+        return alerts;
     }
 
     private String getContent() throws Exception {
