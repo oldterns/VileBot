@@ -49,7 +49,9 @@ public class Ttc {
         Document doc = Jsoup.parse(content);
         Elements alertDivs = doc.select("div[class=alert-content]");
         for(Element element : alertDivs) {
-            alerts.addAll(element.select("p[class=veh-replace]"));
+            if(!element.text().startsWith("Elevator")) {
+                alerts.addAll(element.select("p[class=veh-replace]"));
+            }
         }
         return alerts;
     }
