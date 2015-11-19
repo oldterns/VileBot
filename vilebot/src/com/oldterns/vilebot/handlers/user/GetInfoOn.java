@@ -32,21 +32,11 @@ public class GetInfoOn {
     public void getInfo(ReceivePrivmsg event) {
         String text = event.getText();
         Matcher foonMatch = questionPattern.matcher(text);
-        Matcher funMatch = dumbQuestionPattern.matcher(text);
-
-        String question = new String();
-        String queryModifier = new String();
+        //Matcher funMatch = dumbQuestionPattern.matcher(text);
 
         if(foonMatch.matches()) {
-            question = foonMatch.group(2);
-            queryModifier = " site:wikipedia.org";
-        }
-        else if(funMatch.matches()) {
-            question = funMatch.group(2);
-            queryModifier = "site:wikipedia.org";
-        }
-
-        if (question != null) {
+            String question = foonMatch.group(2);
+            String queryModifier = " site:wikipedia.org";
             String answer = getWiki(question, queryModifier);
             event.reply(answer);
         }

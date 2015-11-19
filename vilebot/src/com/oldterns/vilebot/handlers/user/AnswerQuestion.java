@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 public class AnswerQuestion {
 
     private static final Pattern questionPattern = Pattern.compile("^!(tellme)\\s(.+)$");
-    private final String API_KEY = Vilebot.getConfig().get("wolframKey");
+    private static final String API_KEY = Vilebot.getConfig().get("wolframKey");
 
     @Handler
     private void tellMe( ReceivePrivmsg event ) {
@@ -40,6 +40,7 @@ public class AnswerQuestion {
             event.reply(answer);
         }
     }
+
     String getAnswer(String searchTerm) {
         try {
             String url = makeURL(searchTerm);
@@ -73,6 +74,7 @@ public class AnswerQuestion {
         }
         return content;
     }
+
     String parseResponse(String response) throws Exception {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
