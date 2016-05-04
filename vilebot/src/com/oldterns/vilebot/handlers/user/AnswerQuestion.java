@@ -28,7 +28,7 @@ public class AnswerQuestion {
 
     private static final Pattern questionPattern = Pattern.compile("^!(tellme)\\s(.+)$");
     private static final String API_KEY = Vilebot.getConfig().get("wolframKey");
-    private static final int MAX_RESPONSE = 1000;
+    private static final int MAX_RESPONSE = 500;
 
     @Handler
     private void tellMe( ReceivePrivmsg event ) {
