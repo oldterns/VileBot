@@ -104,10 +104,19 @@ public class Markov {
         for (String word : phrase.split(" ")) {
             reply.append(" ");
             reply.append(
-                    nicks.contains(word) ? mangled(word) : word
+                    inside(nicks, word) ? mangled(word) : word
             );
         }
         return reply.toString().trim();
+    }
+
+    private boolean inside (List<String> nicks, String word) {
+        for (String nick : nicks) {
+            if (word.contains(nick)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String mangled(String word) {
