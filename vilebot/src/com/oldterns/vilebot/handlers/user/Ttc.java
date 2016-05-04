@@ -49,7 +49,7 @@ public class Ttc {
         Document doc = Jsoup.parse(content);
         Elements alertDivs = doc.select("div[class=alert-content]");
         for(Element element : alertDivs) {
-            if(!element.text().startsWith("Elevator")) {
+            if(!element.text().toLowerCase().contains("elevator")) {
                 alerts.addAll(element.select("p[class=veh-replace]"));
             }
         }

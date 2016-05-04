@@ -28,6 +28,7 @@ public class AnswerQuestion {
 
     private static final Pattern questionPattern = Pattern.compile("^!(tellme)\\s(.+)$");
     private static final String API_KEY = Vilebot.getConfig().get("wolframKey");
+    private static final int MAX_RESPONSE = 500;
 
     @Handler
     private void tellMe( ReceivePrivmsg event ) {
@@ -37,6 +38,7 @@ public class AnswerQuestion {
         if (matcher.matches()) {
             String question = matcher.group(2);
             String answer = getAnswer(question);
+            answer = truncate(answer);
             event.reply(answer);
         }
     }
@@ -88,4 +90,12 @@ public class AnswerQuestion {
 
         return answer;
     }
+
+    private String truncate(String response) {
+        if (response.length() > MAX_RESPONSE) {
+            response = response.substring(0, MAX_RESPONSE) + "...";
+        }
+        return response;
+    }
+
 }
