@@ -1,5 +1,7 @@
 package com.oldterns.vilebot.handlers.user;
 
+import ca.szc.keratin.bot.KeratinBot;
+import ca.szc.keratin.bot.annotation.AssignedBot;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.db.LogDB;
@@ -18,6 +20,9 @@ public class Markov {
     Map<String, List<String>> markovMap = new HashMap<String, List<String>>();
     private static final Pattern cmd = Pattern.compile("^!speak$");
 
+    @AssignedBot
+    private KeratinBot bot;
+
     @Handler
     public void speak(ReceivePrivmsg message) {
 
@@ -27,6 +32,7 @@ public class Markov {
         if(markovMap) {
             train();
             String phrase = generatePhrase();
+            phrase = mangleNicks(phrase, message);
             message.reply(phrase);
         }
     }
@@ -60,7 +66,7 @@ public class Markov {
     private String generatePhrase() {
         Random random = new Random();
         String key = getRandomKey(random);
-        String phrase = new String();
+        String phrase = "";
 
         while(key != null && phrase.length() < 1000) {
             phrase += key + " ";
@@ -79,16 +85,33 @@ public class Markov {
             return null;
         }
 
-        String newKey = valueList.get(random.nextInt(valueList.size()));
-        return newKey;
+        return valueList.get(random.nextInt(valueList.size()));
     }
 
     private String getRandomKey(Random random) {
         Object[] values = markovMap.keySet().toArray();
-        String randomValue = (String) values[random.nextInt(values.length)];
-        return randomValue;
+        return (String) values[random.nextInt(values.length)];
     }
+
     private boolean shouldEnd(String key) {
        return (key.endsWith("!") || key.endsWith("?") || key.endsWith("."));
     }
+
+    private String mangleNicks(String phrase, ReceivePrivmsg msg) {
+        List<String> nicks = bot.getChannel(msg.getChannel()).getNicks();
+
+        StringBuilder reply = new StringBuilder();
+        for (String word : phrase.split(" ")) {
+            reply.append(" ");
+            reply.append(
+                    nicks.contains(word) ? mangled(word) : word
+            );
+        }
+        return reply.toString().trim();
+    }
+
+    private String mangled(String word) {
+        return new StringBuilder(word).reverse().toString();
+    }
+
 }
