@@ -98,7 +98,11 @@ public class Markov {
     }
 
     private String mangleNicks(String phrase, ReceivePrivmsg msg) {
-        List<String> nicks = bot.getChannel(msg.getChannel()).getNicks();
+        List<String> nicks = getNicks(msg);
+
+        if (nicks.isEmpty()) {
+            return phrase;
+        }
 
         StringBuilder reply = new StringBuilder();
         for (String word : phrase.split(" ")) {
@@ -108,6 +112,15 @@ public class Markov {
             );
         }
         return reply.toString().trim();
+    }
+
+    private List<String> getNicks(ReceivePrivmsg msg) {
+        try {
+            return bot.getChannel(msg.getChannel()).getNicks();
+        }
+        catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     private boolean inside (List<String> nicks, String word) {
