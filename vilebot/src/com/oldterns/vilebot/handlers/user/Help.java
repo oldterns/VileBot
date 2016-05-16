@@ -69,6 +69,9 @@ public class Help
         sb.append( " { !weather [<IATA code>] }" );
         sb.append( " { !lessweather [<IATA code>] }" );
         sb.append( " { !moreweather [<IATA code>] }" );
+        sb.append( " { !tellme <question> }" );
+        sb.append( " { !infoon <wikipedia query> }" );
+        sb.append( " { !ttc }" );
         sb.append( "  Userlists:" );
         sb.append( " { !list <listname> }" );
         sb.append( " { !listadd <listname> <noun>[,|, | ][<noun2>]... }" );
@@ -79,8 +82,7 @@ public class Help
         sb.append( " { !randommeme }" );
         sb.append( " { !chuck }" );
         sb.append( " { !dance }" );
-        sb.append( " { !tellme <question> }" );
-
+        sb.append( " { !speak }" );
         return sb.toString();
     }
 }
