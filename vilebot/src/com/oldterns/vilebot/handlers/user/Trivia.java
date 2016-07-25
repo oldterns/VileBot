@@ -4,6 +4,7 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.db.KarmaDB;
 import net.engio.mbassy.listener.Handler;
+import org.jsoup.Jsoup;
 import twitter4j.JSONArray;
 import twitter4j.JSONObject;
 
@@ -88,7 +89,7 @@ public class Trivia {
             JSONObject triviaJSON = new JSONArray(jsonContent).getJSONObject(0);
             question = triviaJSON.getString("question");
             category= triviaJSON.getJSONObject("category").getString("title");
-            answer = triviaJSON.getString("answer");
+            answer = formatAnswer(triviaJSON.getString("answer"));
             stakes = getRandomKarma();
         }
 
@@ -113,17 +114,19 @@ public class Trivia {
         }
 
         private boolean isCorrect(String answer) {
-            String formattedCorrectAnswer = formatAnswer(this.answer);
             String formattedUserAnswer = formatAnswer(answer);
-            return formattedCorrectAnswer.equals(formattedUserAnswer);
+            return this.answer.toLowerCase()
+                   .equals(formattedUserAnswer.toLowerCase());
         }
 
         private String formatAnswer(String answer) {
-            return answer.toLowerCase()
-                    .replace("\\", "")
+            return Jsoup.parse(answer
+                    .replaceAll("\\\\", "")
+                    .replace("/", "")
                     .replaceAll("^the", "")
                     .replaceAll("^a", "")
-                    .replace("\"", "");
+                    .replaceAll("\"", ""))
+                    .text();
         }
 
         private String getQuestionBlurb() {
