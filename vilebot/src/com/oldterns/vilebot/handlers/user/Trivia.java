@@ -94,7 +94,7 @@ public class Trivia {
         }
 
         private int getRandomKarma() {
-            return new Random().nextInt(9) + 1;
+            return new Random().nextInt(10) + 1;
         }
 
         public String getQuestion() {
@@ -123,8 +123,8 @@ public class Trivia {
             return Jsoup.parse(answer
                     .replaceAll("\\\\", "")
                     .replace("/", "")
-                    .replaceAll("^the", "")
-                    .replaceAll("^a", "")
+                    .replaceAll("^the ", "")
+                    .replaceAll("^a ", "")
                     .replaceAll("\"", ""))
                     .text();
         }
