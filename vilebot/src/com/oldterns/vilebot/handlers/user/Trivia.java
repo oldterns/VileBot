@@ -29,7 +29,7 @@ public class Trivia {
     private static TriviaGame currentGame = null;
     private static final String JEOPARDY_CHANNEL = "jeopardyChannel";
     private static final int TIMEOUT  = 30000;
-    private static final ExecutorService timer = Executors.newFixedThreadPool(1);
+    private static ExecutorService timer = Executors.newScheduledThreadPool(1);
 
     @Handler
     public void doTrivia(ReceivePrivmsg event) {
@@ -87,7 +87,8 @@ public class Trivia {
     }
 
     private void stopTimer() {
-        timer.shutdown();
+        timer.shutdownNow();
+        timer = Executors.newFixedThreadPool(1);
     }
 
 
