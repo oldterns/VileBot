@@ -122,11 +122,12 @@ public class Trivia {
         private boolean isCorrect(String answer) {
             String formattedUserAnswer = formatAnswer(answer);
             String formattedActualAnswer = formatAnswer(this.answer);
-            return scoreAnswer(formattedActualAnswer, formattedUserAnswer) >= 30;
+            return formattedActualAnswer.equals(formattedUserAnswer);
         }
 
         private String formatAnswer(String answer) {
             return  answer.toLowerCase()
+                    .replaceAll("[A-Za-z\\s\\d]", "")
                     .replaceAll("^the ", "")
                     .replaceAll("^a ", "")
                     .replaceAll("^an ", "");
