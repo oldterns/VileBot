@@ -31,8 +31,8 @@ public class Trivia {
     private static final int TIMEOUT  = 30000;
     public static final String ANSI_RED = "\u000304";
     public static final String ANSI_RESET = "\u000f";
-    public static final String ANSI_GREEN = "\u000309";
-    public static final String ANSI_YELLOW = "\u000308";
+    public static final String ANSI_GREEN = "\u000303";
+    public static final String ANSI_BLUE = "\u000302";
     private static ExecutorService timer = Executors.newScheduledThreadPool(1);
 
     @Handler
@@ -132,8 +132,7 @@ public class Trivia {
         private static final String API_URL = "http://jservice.io/api/random";
 
         public TriviaGame() throws Exception {
-            String jsonContent = getQuestionJson();
-            JSONObject triviaJSON = new JSONArray(jsonContent).getJSONObject(0);
+            JSONObject triviaJSON = getQuestionJSON();
             question = triviaJSON.getString("question");
             category= triviaJSON.getJSONObject("category").getString("title");
             answer = Jsoup.parse(triviaJSON.getString("answer")).text();
@@ -164,17 +163,18 @@ public class Trivia {
 
         private String formatAnswer(String answer) {
             return  answer.toLowerCase()
-                    .replaceAll("[^A-Za-z\\d]", "")
+                    .replaceAll("\\(.*\\)", "")
                     .replaceAll("^the ", "")
                     .replaceAll("^a ", "")
-                    .replaceAll("^an ", "");
+                    .replaceAll("^an ", "")
+                    .replaceAll("[^A-Za-z\\d]", "");
         }
 
         private String getQuestionBlurb() {
             return String.format(
                     "Your category is: %s\nFor %s karma:\n%s",
                     ANSI_RED + category + ANSI_RESET,
-                    ANSI_YELLOW + String.valueOf(stakes) + ANSI_RESET,
+                    ANSI_BLUE + String.valueOf(stakes) + ANSI_RESET,
                     ANSI_GREEN + question + ANSI_RESET);
         }
 
@@ -191,7 +191,7 @@ public class Trivia {
                     ANSI_GREEN + answer + ANSI_RESET);
         }
 
-        private String getQuestionJson() throws Exception {
+        private String getQuestionContent() throws Exception {
             String content;
             URLConnection connection;
             connection = new URL(API_URL).openConnection();
@@ -202,6 +202,16 @@ public class Trivia {
             scanner.useDelimiter("\\Z");
             content = scanner.next();
             return content;
+        }
+
+        private JSONObject getQuestionJSON() throws Exception {
+            String triviaContent = getQuestionContent();
+            JSONObject triviaJSON = new JSONArray(triviaContent).getJSONObject(0);
+            String question = triviaJSON.getString("question").trim();
+            if (question.equals("") || question.contains("seen here")) {
+                return getQuestionJSON();
+            }
+            return triviaJSON;
         }
     }
 
