@@ -29,10 +29,10 @@ public class Trivia {
     private static TriviaGame currentGame = null;
     private static final String JEOPARDY_CHANNEL = Vilebot.getConfig().get("jeopardyChannel");
     private static final int TIMEOUT  = 30000;
-    public static final String ANSI_RED = "\u000304";
-    public static final String ANSI_RESET = "\u000f";
-    public static final String ANSI_GREEN = "\u000303";
-    public static final String ANSI_BLUE = "\u000302";
+    public static final String RED = "\u000304";
+    public static final String RESET = "\u000f";
+    public static final String BLUE = "\u000302";
+    public static final String GREEN = "\u000303";
     private static ExecutorService timer = Executors.newScheduledThreadPool(1);
 
     @Handler
@@ -173,9 +173,9 @@ public class Trivia {
         private String getQuestionBlurb() {
             return String.format(
                     "Your category is: %s\nFor %s karma:\n%s",
-                    ANSI_RED + category + ANSI_RESET,
-                    ANSI_BLUE + String.valueOf(stakes) + ANSI_RESET,
-                    ANSI_GREEN + question + ANSI_RESET);
+                    RED + category + RESET,
+                    GREEN + String.valueOf(stakes) + RESET,
+                    BLUE + question + RESET);
         }
 
         public String getIntroString() {
@@ -188,7 +188,7 @@ public class Trivia {
 
         public String getTimeoutString() {
             return String.format("Your 30 seconds is up! The answer we were looking for was:\n%s",
-                    ANSI_GREEN + answer + ANSI_RESET);
+                    BLUE + answer + RESET);
         }
 
         private String getQuestionContent() throws Exception {
