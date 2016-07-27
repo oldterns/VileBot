@@ -29,6 +29,10 @@ public class Trivia {
     private static TriviaGame currentGame = null;
     private static final String JEOPARDY_CHANNEL = Vilebot.getConfig().get("jeopardyChannel");
     private static final int TIMEOUT  = 30000;
+    public static final String ANSI_RED = "\u000304";
+    public static final String ANSI_RESET = "\u000f";
+    public static final String ANSI_GREEN = "\u000309";
+    public static final String ANSI_YELLOW = "\u000308";
     private static ExecutorService timer = Executors.newScheduledThreadPool(1);
 
     @Handler
@@ -160,7 +164,7 @@ public class Trivia {
 
         private String formatAnswer(String answer) {
             return  answer.toLowerCase()
-                    .replaceAll("[^A-Za-z\\s\\d]", "")
+                    .replaceAll("[^A-Za-z\\d]", "")
                     .replaceAll("^the ", "")
                     .replaceAll("^a ", "")
                     .replaceAll("^an ", "");
@@ -168,12 +172,14 @@ public class Trivia {
 
         private String getQuestionBlurb() {
             return String.format(
-                    "Your category is: %s\nFor %d karma:\n%s",
-                    category, stakes, question);
+                    "Your category is: %s\nFor %s karma:\n%s",
+                    ANSI_GREEN + category + ANSI_RESET,
+                    ANSI_YELLOW + String.valueOf(stakes) + ANSI_RESET,
+                    ANSI_RED + question + ANSI_RESET);
         }
 
         public String getIntroString() {
-            return "Welcome to VileBot trivia!\n" + getQuestionBlurb() + "\nYou have 30 seconds!";
+            return "Welcome to VileBot trivia!\n" + getQuestionBlurb() + "\n30 seconds on the clock.";
         }
 
         public String getAlreadyPlayingString() {
