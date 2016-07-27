@@ -173,9 +173,9 @@ public class Trivia {
         private String getQuestionBlurb() {
             return String.format(
                     "Your category is: %s\nFor %s karma:\n%s",
-                    ANSI_GREEN + category + ANSI_RESET,
+                    ANSI_RED + category + ANSI_RESET,
                     ANSI_YELLOW + String.valueOf(stakes) + ANSI_RESET,
-                    ANSI_RED + question + ANSI_RESET);
+                    ANSI_GREEN + question + ANSI_RESET);
         }
 
         public String getIntroString() {
@@ -187,7 +187,8 @@ public class Trivia {
         }
 
         public String getTimeoutString() {
-            return String.format("Your 30 seconds is up! The answer we were looking for was:\n%s", answer);
+            return String.format("Your 30 seconds is up! The answer we were looking for was:\n%s",
+                    ANSI_GREEN + answer + ANSI_RESET);
         }
 
         private String getQuestionJson() throws Exception {
