@@ -27,7 +27,7 @@ public class Trivia {
     private static final Pattern questionPattern = Pattern.compile( "^!jeopardy" );
     private static final Pattern answerPattern = Pattern.compile( "^!(whatis|whois) (.*)" );
     private static TriviaGame currentGame = null;
-    private static final String JEOPARDY_CHANNEL = "jeopardyChannel";
+    private static final String JEOPARDY_CHANNEL = Vilebot.getConfig().get("jeopardyChannel");
     private static final int TIMEOUT  = 30000;
     private static ExecutorService timer = Executors.newScheduledThreadPool(1);
 
@@ -38,9 +38,9 @@ public class Trivia {
         Matcher answerMatcher = answerPattern.matcher(text);
 
         try {
-            if (questionMatcher.matches() && shouldStartGame(event.getChannel())) {
+            if (questionMatcher.matches() && shouldStartGame(event)) {
                 startGame(event);
-            } else if (answerMatcher.matches() && shouldStartGame(event.getChannel())) {
+            } else if (answerMatcher.matches() && shouldStartGame(event)) {
                 String answer = answerMatcher.group(2);
                 finishGame(event, answer);
             }
@@ -50,9 +50,14 @@ public class Trivia {
         }
     }
 
-    private boolean shouldStartGame(String channel) {
-        String limitingChannel = Vilebot.getConfig().get(JEOPARDY_CHANNEL);
-        return limitingChannel == null || limitingChannel.equals(channel);
+    private boolean shouldStartGame(ReceivePrivmsg event) {
+        String actualChannel = event.getChannel();
+
+        if (JEOPARDY_CHANNEL.equals(actualChannel)) {
+            return true;
+        }
+        event.reply("To play jeopardy join: " + JEOPARDY_CHANNEL);
+        return false;
     }
 
     private synchronized void startGame(ReceivePrivmsg event) throws Exception {
