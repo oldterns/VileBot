@@ -2,6 +2,7 @@ package com.oldterns.vilebot.handlers.user;
 
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.db.KarmaDB;
 import net.engio.mbassy.listener.Handler;
 import org.jsoup.Jsoup;
@@ -10,13 +11,13 @@ import twitter4j.JSONObject;
 
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Created by eunderhi on 25/07/16.
+ * Simple Jeopardy implementation.
  */
 @HandlerContainer
 public class Trivia {
@@ -24,6 +25,7 @@ public class Trivia {
     private static final Pattern questionPattern = Pattern.compile( "^!jeopardy" );
     private static final Pattern answerPattern = Pattern.compile( "^!(whatis|whois) (.*)" );
     private static TriviaGame currentGame = null;
+    private static final String JEOPARDY_CHANNEL = "jeopardyChannel";
 
     @Handler
     public void doTrivia(ReceivePrivmsg event) {
@@ -32,9 +34,9 @@ public class Trivia {
         Matcher answerMatcher = answerPattern.matcher(text);
 
         try {
-            if (questionMatcher.matches()) {
+            if (questionMatcher.matches() && shouldStartGame(event.getChannel())) {
                 startGame(event);
-            } else if (answerMatcher.matches()) {
+            } else if (answerMatcher.matches() && shouldStartGame(event.getChannel())) {
                 String answer = answerMatcher.group(2);
                 finishGame(event, answer);
             }
@@ -42,7 +44,11 @@ public class Trivia {
             event.reply("I don't feel like playing.");
             e.printStackTrace();
         }
+    }
 
+    private boolean shouldStartGame(String channel) {
+        String limitingChannel = Vilebot.getConfig().get(JEOPARDY_CHANNEL);
+        return limitingChannel == null || limitingChannel.equals(channel);
     }
 
     private synchronized void startGame(ReceivePrivmsg event) throws Exception {
@@ -89,7 +95,7 @@ public class Trivia {
             JSONObject triviaJSON = new JSONArray(jsonContent).getJSONObject(0);
             question = triviaJSON.getString("question");
             category= triviaJSON.getJSONObject("category").getString("title");
-            answer = formatAnswer(triviaJSON.getString("answer"));
+            answer = Jsoup.parse(formatAnswer(triviaJSON.getString("answer"))).text();
             stakes = getRandomKarma();
         }
 
@@ -115,18 +121,15 @@ public class Trivia {
 
         private boolean isCorrect(String answer) {
             String formattedUserAnswer = formatAnswer(answer);
-            return this.answer.toLowerCase()
-                   .equals(formattedUserAnswer.toLowerCase());
+            String formattedActualAnswer = formatAnswer(this.answer);
+            return scoreAnswer(formattedActualAnswer, formattedUserAnswer) >= 30;
         }
 
         private String formatAnswer(String answer) {
-            return Jsoup.parse(answer
-                    .replaceAll("\\\\", "")
-                    .replace("/", "")
+            return  answer.toLowerCase()
                     .replaceAll("^the ", "")
                     .replaceAll("^a ", "")
-                    .replaceAll("\"", ""))
-                    .text();
+                    .replaceAll("^an ", "");
         }
 
         private String getQuestionBlurb() {
