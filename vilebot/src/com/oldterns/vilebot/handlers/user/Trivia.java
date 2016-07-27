@@ -179,7 +179,7 @@ public class Trivia {
         }
 
         public String getIntroString() {
-            return "Welcome to VileBot trivia!\n" + getQuestionBlurb() + "\n30 seconds on the clock.";
+            return "Welcome to Bot Jeopardy!\n" + getQuestionBlurb() + "\n30 seconds on the clock.";
         }
 
         public String getAlreadyPlayingString() {
