@@ -12,6 +12,8 @@ import twitter4j.JSONObject;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +28,8 @@ public class Trivia {
     private static final Pattern answerPattern = Pattern.compile( "^!(whatis|whois) (.*)" );
     private static TriviaGame currentGame = null;
     private static final String JEOPARDY_CHANNEL = "jeopardyChannel";
+    private static final int TIMEOUT  = 30000;
+    private static final ExecutorService timer = Executors.newFixedThreadPool(1);
 
     @Handler
     public void doTrivia(ReceivePrivmsg event) {
@@ -58,22 +62,49 @@ public class Trivia {
         else {
             currentGame = new TriviaGame();
             event.reply(currentGame.getIntroString());
+            startTimer(event);
         }
     }
+
+    private void startTimer(final ReceivePrivmsg event) {
+        timer.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(TIMEOUT);
+                    timeoutTimer(event);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void timeoutTimer(ReceivePrivmsg event) {
+        String message = currentGame.getTimeoutString();
+        event.reply(message);
+        currentGame = null;
+    }
+
+    private void stopTimer() {
+        timer.shutdown();
+    }
+
 
     private synchronized void finishGame(ReceivePrivmsg event, String answer) {
         if (currentGame != null) {
             String answerer = event.getSender();
-            if (currentGame.sendAnswer(answer)) {
+            if (currentGame.isCorrect(answer)) {
+                stopTimer();
                 event.reply(String.format("Congrats %s, you win %d karma!", event.getSender(), currentGame.getStakes()));
                 KarmaDB.modNounKarma(answerer, currentGame.getStakes());
+                currentGame = null;
             }
             else {
-                event.reply(String.format("Sorry %s! We were looking for \"%s\", you lose %d karma.",
-                        event.getSender(), currentGame.getAnswer(), currentGame.getStakes()));
+                event.reply(String.format("Sorry %s! That is incorrect, you lose %d karma.",
+                        event.getSender(), currentGame.getStakes()));
                 KarmaDB.modNounKarma(answerer, -1 * currentGame.getStakes());
             }
-            currentGame = null;
         }
         else {
             event.reply("No active game. Start a new one with !jeopardy");
@@ -95,7 +126,7 @@ public class Trivia {
             JSONObject triviaJSON = new JSONArray(jsonContent).getJSONObject(0);
             question = triviaJSON.getString("question");
             category= triviaJSON.getJSONObject("category").getString("title");
-            answer = Jsoup.parse(formatAnswer(triviaJSON.getString("answer"))).text();
+            answer = Jsoup.parse(triviaJSON.getString("answer")).text();
             stakes = getRandomKarma();
         }
 
@@ -115,10 +146,6 @@ public class Trivia {
             return stakes;
         }
 
-        public boolean sendAnswer(String answer) {
-            return isCorrect(answer);
-        }
-
         private boolean isCorrect(String answer) {
             String formattedUserAnswer = formatAnswer(answer);
             String formattedActualAnswer = formatAnswer(this.answer);
@@ -127,7 +154,7 @@ public class Trivia {
 
         private String formatAnswer(String answer) {
             return  answer.toLowerCase()
-                    .replaceAll("[A-Za-z\\s\\d]", "")
+                    .replaceAll("[^A-Za-z\\s\\d]", "")
                     .replaceAll("^the ", "")
                     .replaceAll("^a ", "")
                     .replaceAll("^an ", "");
@@ -140,11 +167,15 @@ public class Trivia {
         }
 
         public String getIntroString() {
-            return "Welcome to VileBot trivia!\n" + getQuestionBlurb();
+            return "Welcome to VileBot trivia!\n" + getQuestionBlurb() + "\nYou have 30 seconds!";
         }
 
         public String getAlreadyPlayingString() {
             return "A game is already in session!\n" + getQuestionBlurb();
+        }
+
+        public String getTimeoutString() {
+            return String.format("Your 30 seconds is up! The answer we were looking for was:\n%s", answer);
         }
 
         private String getQuestionJson() throws Exception {
