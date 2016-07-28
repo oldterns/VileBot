@@ -163,10 +163,12 @@ public class Trivia {
 
         private String formatAnswer(String answer) {
             return  answer.toLowerCase()
-                    .replaceAll("\\(.*\\)", "")
                     .replaceAll("^the ", "")
                     .replaceAll("^a ", "")
                     .replaceAll("^an ", "")
+                    .replaceAll("\\(.*\\)", "")
+                    .replaceAll("/.*", "")
+                    .replaceAll("&", "and")
                     .replaceAll("[^A-Za-z\\d]", "");
         }
 
