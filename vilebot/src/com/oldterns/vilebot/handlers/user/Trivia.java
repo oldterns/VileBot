@@ -4,6 +4,7 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.db.KarmaDB;
+import info.debatty.java.stringsimilarity.Levenshtein;
 import net.engio.mbassy.listener.Handler;
 import org.jsoup.Jsoup;
 import twitter4j.JSONArray;
@@ -136,11 +137,11 @@ public class Trivia {
             question = triviaJSON.getString("question");
             category= triviaJSON.getJSONObject("category").getString("title");
             answer = Jsoup.parse(triviaJSON.getString("answer")).text();
-            stakes = getRandomKarma();
+            stakes = getStakes(triviaJSON);
         }
 
-        private int getRandomKarma() {
-            return new Random().nextInt(10) + 1;
+        private int getStakes(JSONObject trivia) throws Exception {
+            return trivia.has("value") ? (trivia.getInt("value") / 100) : 5;
         }
 
         public String getQuestion() {
@@ -158,7 +159,8 @@ public class Trivia {
         private boolean isCorrect(String answer) {
             String formattedUserAnswer = formatAnswer(answer);
             String formattedActualAnswer = formatAnswer(this.answer);
-            return formattedActualAnswer.equals(formattedUserAnswer);
+            double distance = new Levenshtein().distance(formattedActualAnswer, formattedUserAnswer);
+            return distance < 0.7;
         }
 
         private String formatAnswer(String answer) {
