@@ -55,7 +55,6 @@ public class Help
         sb.append( " { !bottomthree }" );
         sb.append( " { !roll [for] [<karma wager>] }" );
         sb.append( " { !rollcancel }" );
-        sb.append( "  Karma:" );
         sb.append( "  Fun:" );
         sb.append( "  { !jeopardy }" );
         sb.append( "  { !whatis <answer to jeopardy question>}" );
