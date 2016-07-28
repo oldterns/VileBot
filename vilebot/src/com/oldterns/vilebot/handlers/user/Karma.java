@@ -73,6 +73,11 @@ public class Karma
 
         if ( incMatcher.matches() )
         {
+            if (isPrivate(event)) {
+                KarmaDB.modNounKarma(event.getSender(), -1);
+                return;
+            }
+
             // If one match is found, take the entire text of the message (group(0)) and check each word
             // This is needed in the case that only part of the message is karma events (ie "wow anestico++")
             String wordBlob = incMatcher.group( 0 );
@@ -109,6 +114,10 @@ public class Karma
 
         if ( decMatcher.matches() )
         {
+            if (isPrivate(event)) {
+                KarmaDB.modNounKarma(event.getSender(), -1);
+                return;
+            }
             // If one match is found, take the entire text of the message (group(0)) and check each word
             String wordBlob = decMatcher.group( 0 );
 
@@ -133,6 +142,16 @@ public class Karma
                 // TODO insult generator?
                 event.reply( "I think I'm supposed to insult you now." );
         }
+    }
+
+    private boolean isPrivate(ReceivePrivmsg event) {
+        try {
+            bot.getChannel(event.getChannel()).getNicks();
+        }
+        catch (Exception e) {
+            return true;
+        }
+        return false;
     }
 
     @Handler
