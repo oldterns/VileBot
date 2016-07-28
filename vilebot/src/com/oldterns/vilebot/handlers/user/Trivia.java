@@ -160,7 +160,7 @@ public class Trivia {
             String formattedUserAnswer = formatAnswer(answer);
             String formattedActualAnswer = formatAnswer(this.answer);
             double distance = new Levenshtein().distance(formattedActualAnswer, formattedUserAnswer);
-            return distance < 0.7;
+            return distance < 0.8;
         }
 
         private String formatAnswer(String answer) {
