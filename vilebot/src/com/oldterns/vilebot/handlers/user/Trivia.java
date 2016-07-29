@@ -29,7 +29,7 @@ public class Trivia {
     private static final Pattern answerPattern = Pattern.compile( "^!(whatis|whois) (.*)" );
     private static TriviaGame currentGame = null;
     private static final String JEOPARDY_CHANNEL = Vilebot.getConfig().get("jeopardyChannel");
-    private static final int TIMEOUT  = 30000;
+    private static final long TIMEOUT  = 30000L;
     public static final String RED = "\u000304";
     public static final String RESET = "\u000f";
     public static final String BLUE = "\u000302";
@@ -141,7 +141,10 @@ public class Trivia {
         }
 
         private int getStakes(JSONObject trivia) throws Exception {
-            return trivia.has("value") ? (trivia.getInt("value") / 100) : 5;
+            if (trivia.has("value") && trivia.get("value") != null) {
+                return trivia.getInt("value") / 100;
+            }
+            return 5;
         }
 
         public String getQuestion() {
