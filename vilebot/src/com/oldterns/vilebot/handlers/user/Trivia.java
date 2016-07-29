@@ -5,6 +5,7 @@ import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.db.KarmaDB;
 import info.debatty.java.stringsimilarity.Levenshtein;
+import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import net.engio.mbassy.listener.Handler;
 import org.jsoup.Jsoup;
 import twitter4j.JSONArray;
@@ -141,7 +142,7 @@ public class Trivia {
         }
 
         private int getStakes(JSONObject trivia) throws Exception {
-            if (trivia.has("value") && trivia.get("value") != null) {
+            if (trivia.has("value") && !trivia.isNull("value")) {
                 return trivia.getInt("value") / 100;
             }
             return 5;
@@ -162,8 +163,8 @@ public class Trivia {
         private boolean isCorrect(String answer) {
             String formattedUserAnswer = formatAnswer(answer);
             String formattedActualAnswer = formatAnswer(this.answer);
-            double distance = new Levenshtein().distance(formattedActualAnswer, formattedUserAnswer);
-            return distance < 0.8;
+            double distance = new NormalizedLevenshtein().distance(formattedActualAnswer, formattedUserAnswer);
+            return distance < 0.5;
         }
 
         private String formatAnswer(String answer) {
