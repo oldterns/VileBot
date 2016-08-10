@@ -53,6 +53,8 @@ public class Karma
 
     private static final Pattern removePattern = Pattern.compile( "!admin unrank (" + nounPattern + ")\\s*" );
 
+    private static final Pattern totalPattern = Pattern.compile( "^!total" );
+
     @AssignedBot
     private KeratinBot bot;
 
@@ -213,6 +215,15 @@ public class Karma
                 replyWithRankAndKarma( noun, event, reverse );
             else
                 event.reply( "No noun at that rank." );
+        }
+    }
+
+    @Handler
+    private void totalKarma( ReceivePrivmsg event )
+    {
+        Matcher matcher = totalPattern.matcher( event.getText() );
+        if (matcher.matches()) {
+            event.reply("" + KarmaDB.getTotalKarma());
         }
     }
 
