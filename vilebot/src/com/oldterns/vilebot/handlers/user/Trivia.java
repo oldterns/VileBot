@@ -4,7 +4,7 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.db.KarmaDB;
-import info.debatty.java.stringsimilarity.Levenshtein;
+import com.oldterns.vilebot.util.BaseNick;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import net.engio.mbassy.listener.Handler;
 import org.jsoup.Jsoup;
@@ -104,17 +104,17 @@ public class Trivia {
 
 
     private synchronized void finishGame(ReceivePrivmsg event, String answer) {
+        String answerer = BaseNick.toBaseNick(event.getSender());
         if (currentGame != null) {
-            String answerer = event.getSender();
             if (currentGame.isCorrect(answer)) {
                 stopTimer();
-                event.reply(String.format("Congrats %s, you win %d karma!", event.getSender(), currentGame.getStakes()));
+                event.reply(String.format("Congrats %s, you win %d karma!", answerer, currentGame.getStakes()));
                 KarmaDB.modNounKarma(answerer, currentGame.getStakes());
                 currentGame = null;
             }
             else {
                 event.reply(String.format("Sorry %s! That is incorrect, you lose %d karma.",
-                        event.getSender(), currentGame.getStakes()));
+                        answerer, currentGame.getStakes()));
                 KarmaDB.modNounKarma(answerer, -1 * currentGame.getStakes());
             }
         }
