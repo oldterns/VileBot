@@ -56,10 +56,13 @@ public class KarmaRoll
 
                     // Check the wager value is in the acceptable range.
                     Integer wager = Integer.parseInt( rawWager );
-                    if ( wager > UPPER_WAGER || wager < 1 )
+                    Integer senderKarma = KarmaDB.getNounKarma(sender);
+                    senderKarma = senderKarma == null ? 0 : senderKarma;
+
+                    if ( !validWager(wager, senderKarma) )
                     {
-                        event.reply( wager + " isn't a valid wager. Wagers must be between 1 and " + UPPER_WAGER
-                            + " (both inclusive)." );
+                        event.reply( wager + " isn't a valid wager. Must be greater than 0. If you wager is larger than " + UPPER_WAGER
+                            + " you must have at least as much karma as your wager." );
                     }
                     else
                     {
@@ -146,6 +149,23 @@ public class KarmaRoll
                 }
             }
         }
+    }
+
+    /**
+     * A valid wager is one that meets the following standards:
+     * 1. Is greater than 0.
+     * 2. If it is greater than 10, then the user's karma is equal to
+     * or greater than the wager.
+     * The reasoning behind this is to have some base amount of karma that user's can
+     * bet with, but also provide a way of betting large amounts of karma. To avoid
+     * destroying the karma economy users cannot bet more than their current amount
+     * of karma.
+     * @param wager the amount wagered
+     * @param senderKarma the wagerer's karma
+     * @return
+     */
+    private boolean validWager(int wager, int senderKarma) {
+        return !(wager > 10) && (wager > 0) || (wager > 10) && (senderKarma >= wager);
     }
 
     @Handler
