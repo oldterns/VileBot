@@ -91,7 +91,7 @@
     <dependency>
       <groupId>info.debatty</groupId>
       <artifactId>java-string-similarity</artifactId>
-      <version>RELEASE</version>
+      <version>0.17</version>
     </dependency>
   </dependencies>
 </project>
