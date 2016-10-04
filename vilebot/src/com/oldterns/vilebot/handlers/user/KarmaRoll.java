@@ -176,6 +176,11 @@ public class KarmaRoll
 
         if ( matcher.matches() )
         {
+	    if ( !currentGame.getFirstPlayerNick().equals( event.getSender() ) )
+	    {
+		event.reply( "Only " + currentGame.getFirstPlayerNick() + " may cancel this game." );
+		return;
+	    }
             synchronized ( currentGameMutex )
             {
                 currentGame = null;
