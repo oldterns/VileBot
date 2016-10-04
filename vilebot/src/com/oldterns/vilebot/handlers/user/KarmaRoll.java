@@ -42,8 +42,9 @@ public class KarmaRoll
 
         if ( matcher.matches() )
         {
+            // Infers ircChannel1 in JSON is #thefoobar for production Vilebot
 	    if ( !event.getChannel().matches(Vilebot.getConfig().get( "ircChannel1" ) ) ) {
-		event.reply("You must be in " + Vilebot.getConfig().get( "ircChannel1" ) + " to make or accept wagers");
+		event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" ) + " to make or accept wagers." );
 	       return;
 	    }
 
