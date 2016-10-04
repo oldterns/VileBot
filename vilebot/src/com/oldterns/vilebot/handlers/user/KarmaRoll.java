@@ -18,6 +18,8 @@ import net.engio.mbassy.listener.Handler;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
+import com.oldterns.vilebot.Vilebot;
+
 @HandlerContainer
 public class KarmaRoll
 {
@@ -40,6 +42,12 @@ public class KarmaRoll
 
         if ( matcher.matches() )
         {
+            // Infers ircChannel1 in JSON is #thefoobar for production Vilebot
+	    if ( !event.getChannel().matches(Vilebot.getConfig().get( "ircChannel1" ) ) ) {
+		event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" ) + " to make or accept wagers." );
+	       return;
+	    }
+
             String rawWager = matcher.group( 1 );
 
             synchronized ( currentGameMutex )
