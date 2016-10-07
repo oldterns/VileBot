@@ -13,6 +13,7 @@ public class ChurchDB
 
 	private static final String keyOfChurchDonorSortedSet = "church-donor-karma";
 	private static final String keyOfChurchSortedSet = "church-karma";
+	private static final String keyOfChurchDonorTitleSortedSet = "church-title-";
 
     /**
      * Change the karma of a noun by an integer.
@@ -46,6 +47,30 @@ public class ChurchDB
         finally
         {
             pool.returnResource( jedis );
+        }
+    }
+
+    /**
+     * Change the title of noun to a string.
+     *
+     *  @param noun The noun to change the karma of
+     *  @param newTitle The string to change the title to
+     */
+    public static void modDonorTitle( String noun, String newTitle )
+    {
+        Jedis jedis = pool.getResource();
+        Long titleCount = jedis.scard(keyOfChurchDonorTitleSortedSet + noun);
+        try
+        {
+           for ( Long i = 0L; i < titleCount; i++ )
+           {
+                jedis.spop( keyOfChurchDonorTitleSortedSet + noun );
+           }
+           jedis.sadd ( keyOfChurchDonorTitleSortedSet + noun, newTitle );
+        }
+        finally
+        {
+          pool.returnResource( jedis );
         }
     }
 
@@ -104,6 +129,25 @@ public class ChurchDB
     }
 
     /**
+     * Get the title of a noun.
+     *
+     * @param noun The noun to query the rank of
+     * @return String iff the noun has a defined value, else null
+     */
+    public static String getDonorTitle( String noun )
+    {
+        Jedis jedis = pool.getResource();
+        try
+        {
+            return jedis.srandmember( keyOfChurchDonorTitleSortedSet + noun );
+        }
+        finally
+        {
+            pool.returnResource( jedis );
+        }
+    }
+
+     /**
      * Get nouns from karma ranks.
      *
      * @param lower The lower rank to get the nouns of.

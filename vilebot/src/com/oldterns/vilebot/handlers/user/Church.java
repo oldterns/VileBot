@@ -19,6 +19,7 @@ public class Church
     private static final Pattern donatePattern = Pattern.compile( "^!donate (-?[0-9]+)\\s*" );
     private static final Pattern churchTotalPattern = Pattern.compile( "^!churchtotal" );
     private static final Pattern topDonorsPattern = Pattern.compile( "^!topdonors" );
+    private static final Pattern setTitlesPattern = Pattern.compile( "^!settitle (.+)$" );
 
     // churchKarmaEntryString will be stored in the database for all non-donated karma (tax, forfeiture)
     private static final String churchKarmaEntryString = "Church of VileBot";
@@ -49,8 +50,11 @@ public class Church
             {
                 ChurchDB.modDonorKarma( donor, donationAmount );
                 KarmaDB.modNounKarma( donor, -1 * donationAmount );
-
-                event.reply("Thank you for your donation " + donor + " of " + donationAmount
+                if ( ChurchDB.getDonorKarma ( donor ) - donationAmount <= 0 )
+                {
+                     ChurchDB.modDonorTitle ( donor, " " );
+                }
+                event.reply("Thank you for your donation of " + donationAmount + " " + donor
                             + "! You are now rank " + ChurchDB.getDonorRank(donor) + " in donations.");
             }
         }
@@ -78,7 +82,7 @@ public class Church
         {
             Set<String> nouns = null;
 
-            nouns = ChurchDB.getDonorsByRanks( 0, 6 );
+            nouns = ChurchDB.getDonorsByRanks( 0, 3 );
 
             if ( nouns != null && nouns.size() > 0 )
             {
@@ -95,11 +99,31 @@ public class Church
         }
     }
 
+    @Handler
+    private void setTitle( ReceivePrivmsg event )
+    {
+        Matcher matcher = setTitlesPattern.matcher( event.getText() );
+        if ( matcher.matches() )
+        {
+           String donor = BaseNick.toBaseNick( event.getSender() );
+           String newTitle = matcher.group( 1 );
+           if ( newTitle.length() > 40 )
+           {
+                newTitle = newTitle.substring(0,39);
+           }
+           String oldTitle = ChurchDB.getDonorTitle ( donor );
+           ChurchDB.modDonorTitle( donor, newTitle );
+           event.reply( donor + " is now to be referred to as " + newTitle + " instead of " + oldTitle + ".");
+        }
+    }
+
     private static boolean replyWithRankAndDonationAmount( String noun, Replyable event )
     {
         Integer nounRank = ChurchDB.getDonorRank( noun );
 
         Integer nounKarma = ChurchDB.getDonorKarma( noun );
+
+        String nounTitle = ChurchDB.getDonorTitle( noun );
 
         if ( nounKarma != null )
         {
@@ -129,7 +153,7 @@ public class Church
             }
 
             String spaces_second = String.format("%" + spaceLength + "s", "");
-            event.reply( nounString + spaces_first + nounKarma.toString() + spaces_second + "Cardinal");
+            event.reply( nounString + spaces_first + nounKarma.toString() + spaces_second + nounTitle);
             return true;
         }
         return false;
