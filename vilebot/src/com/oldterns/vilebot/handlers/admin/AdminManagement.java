@@ -12,57 +12,48 @@ import com.oldterns.vilebot.db.PasswordDB;
 import com.oldterns.vilebot.util.Sessions;
 
 @HandlerContainer
-public class AdminManagement
-{
-    private static final Pattern adminSetPattern = Pattern.compile( "!admin setadmin (\\S+) (\\S+)" );
+public class AdminManagement {
+    private static final Pattern adminSetPattern = Pattern.compile("!admin setadmin (\\S+) (\\S+)");
 
-    private static final Pattern adminRemPattern = Pattern.compile( "!admin remadmin (\\S+)" );
+    private static final Pattern adminRemPattern = Pattern.compile("!admin remadmin (\\S+)");
 
     @Handler
-    private void set( ReceivePrivmsg event )
-    {
+    private void set(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = adminSetPattern.matcher( text );
+        Matcher matcher = adminSetPattern.matcher(text);
         String sender = event.getSender();
 
-        if ( matcher.matches() )
-        {
-            String editedAdminNick = matcher.group( 1 );
-            String password = matcher.group( 2 );
+        if (matcher.matches()) {
+            String editedAdminNick = matcher.group(1);
+            String password = matcher.group(2);
 
             // Note that an empty admin group will allow a setadmin command to succeed (self-bootstrapping)
 
-            String username = Sessions.getSession( sender );
-            if ( GroupDB.noAdmins() || GroupDB.isAdmin( username ) )
-            {
-                if ( PasswordDB.setUserPassword( editedAdminNick, password ) )
-                {
-                    GroupDB.addAdmin( editedAdminNick );
+            String username = Sessions.getSession(sender);
+            if (GroupDB.noAdmins() || GroupDB.isAdmin(username)) {
+                if (PasswordDB.setUserPassword(editedAdminNick, password)) {
+                    GroupDB.addAdmin(editedAdminNick);
                 }
-                event.reply( "Added/modified admin " + editedAdminNick );
+                event.reply("Added/modified admin " + editedAdminNick);
             }
         }
     }
 
     @Handler
-    private void rem( ReceivePrivmsg event )
-    {
+    private void rem(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = adminRemPattern.matcher( text );
+        Matcher matcher = adminRemPattern.matcher(text);
         String sender = event.getSender();
 
-        if ( matcher.matches() )
-        {
-            String editedAdminNick = matcher.group( 1 );
+        if (matcher.matches()) {
+            String editedAdminNick = matcher.group(1);
 
-            String username = Sessions.getSession( sender );
-            if ( GroupDB.isAdmin( username ) )
-            {
-                if ( GroupDB.remAdmin( editedAdminNick ) )
-                {
-                    PasswordDB.remUserPassword( editedAdminNick );
+            String username = Sessions.getSession(sender);
+            if (GroupDB.isAdmin(username)) {
+                if (GroupDB.remAdmin(editedAdminNick)) {
+                    PasswordDB.remUserPassword(editedAdminNick);
                 }
-                event.reply( "Removed admin " + editedAdminNick );
+                event.reply("Removed admin " + editedAdminNick);
             }
         }
     }

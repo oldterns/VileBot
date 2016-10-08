@@ -13,9 +13,7 @@ import redis.clients.jedis.Transaction;
 
 import com.oldterns.vilebot.util.HMAC;
 
-public class PasswordDB
-    extends RedisDB
-{
+public class PasswordDB extends RedisDB {
     private static final String keyOfPassHash = "password";
 
     private static final String keyOfPassSaltsHash = "password-salts";
@@ -27,27 +25,21 @@ public class PasswordDB
     /**
      * @return A long random string
      */
-    private static String generateSalt()
-    {
+    private static String generateSalt() {
         return UUID.randomUUID().toString();
     }
 
-    private static String getSalt( String username )
-    {
+    private static String getSalt(String username) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            return jedis.hget( keyOfPassSaltsHash, username );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            return jedis.hget(keyOfPassSaltsHash, username);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
-    private static String hash( String salt, String input )
-    {
-        return HMAC.generateHMAC( input, salt );
+    private static String hash(String salt, String input) {
+        return HMAC.generateHMAC(input, salt);
     }
 
     /**
@@ -57,23 +49,19 @@ public class PasswordDB
      * @param password the password to check
      * @return true iff the given password is valid
      */
-    public static boolean isValidPassword( String username, String password )
-    {
+    public static boolean isValidPassword(String username, String password) {
         String storedHash;
 
         Jedis jedis = pool.getResource();
-        try
-        {
-            storedHash = jedis.hget( keyOfPassHash, username );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            storedHash = jedis.hget(keyOfPassHash, username);
+        } finally {
+            pool.returnResource(jedis);
         }
 
-        String hash = hash( password, getSalt( username ) );
+        String hash = hash(password, getSalt(username));
 
-        return hash.equals( storedHash );
+        return hash.equals(storedHash);
     }
 
     /**
@@ -81,19 +69,15 @@ public class PasswordDB
      * 
      * @param username unique user name
      */
-    public static void remUserPassword( String username )
-    {
+    public static void remUserPassword(String username) {
         Jedis jedis = pool.getResource();
-        try
-        {
+        try {
             Transaction trans = jedis.multi();
-            trans.hdel( keyOfPassHash, username );
-            trans.hdel( keyOfPassSaltsHash, username );
+            trans.hdel(keyOfPassHash, username);
+            trans.hdel(keyOfPassSaltsHash, username);
             trans.exec();
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -104,44 +88,37 @@ public class PasswordDB
      * @param password the user's password (will be hashed)
      * @return true iff a new element was inserted
      */
-    public static boolean setUserPassword( String username, String password )
-    {
+    public static boolean setUserPassword(String username, String password) {
         Jedis jedis = pool.getResource();
-        try
-        {
+        try {
             boolean newUser;
 
             Transaction trans;
-            do
-            {
+            do {
                 // Can't use intermediate results of a Redis transaction in that transaction, so watch the keys and do
                 // the query before opening the transaction. The transaction will fail on exec() call if the keys
                 // changed.
-                jedis.watch( keyOfPassHash, keyOfPassSaltsHash );
-                boolean exists = jedis.hexists( keyOfPassHash, username );
+                jedis.watch(keyOfPassHash, keyOfPassSaltsHash);
+                boolean exists = jedis.hexists(keyOfPassHash, username);
 
                 trans = jedis.multi();
                 // Create a salt as well as the new password entry if the user is new
-                if ( !exists )
-                {
+                if (!exists) {
                     newUser = true;
 
                     String salt = generateSalt();
-                    trans.hset( keyOfPassSaltsHash, username, salt );
+                    trans.hset(keyOfPassSaltsHash, username, salt);
 
-                    String hash = hash( password, salt );
-                    trans.hset( keyOfPassHash, username, hash );
-                }
-                else
+                    String hash = hash(password, salt);
+                    trans.hset(keyOfPassHash, username, hash);
+                } else
                     newUser = false;
             }
-            while ( trans.exec() == null );
+            while (trans.exec() == null);
 
             return newUser;
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 }

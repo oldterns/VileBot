@@ -26,78 +26,70 @@ import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import ca.szc.keratin.core.event.message.recieve.ReceiveQuit;
 
 @HandlerContainer
-public class LastSeen
-{
+public class LastSeen {
     @AssignedBot
     private KeratinBot bot;
 
-    private static TimeZone timeZone = TimeZone.getTimeZone( "America/Toronto" );
+    private static TimeZone timeZone = TimeZone.getTimeZone("America/Toronto");
 
     private static DateFormat dateFormat = makeDateFormat();
 
     @Handler
-    private void longTimeNoSee( ReceiveJoin event )
-    {
-        String joiner = BaseNick.toBaseNick( event.getJoiner() );
+    private void longTimeNoSee(ReceiveJoin event) {
+        String joiner = BaseNick.toBaseNick(event.getJoiner());
 
-        if ( !bot.getNick().equals( joiner ) && !Ignore.getOnJoin().contains( joiner ) )
-        {
-            long lastSeen = LastSeenDB.getLastSeenTime( joiner );
+        if (!bot.getNick().equals(joiner) && !Ignore.getOnJoin().contains(joiner)) {
+            long lastSeen = LastSeenDB.getLastSeenTime(joiner);
             long now = System.currentTimeMillis();
             long timeAgo = now - lastSeen;
 
-            long daysAgo = TimeUnit.MILLISECONDS.toDays( timeAgo );
+            long daysAgo = TimeUnit.MILLISECONDS.toDays(timeAgo);
 
-            if ( daysAgo > 30 )
-            {
+            if (daysAgo > 30) {
                 StringBuilder sb = new StringBuilder();
 
-                sb.append( "Hi " );
-                sb.append( event.getJoiner() );
-                sb.append( "! I last saw you " );
-                sb.append( daysAgo );
-                sb.append( " days ago at " );
-                sb.append( dateFormat.format( new Date( lastSeen ) ) );
-                sb.append( ". Long time, no see." );
+                sb.append("Hi ");
+                sb.append(event.getJoiner());
+                sb.append("! I last saw you ");
+                sb.append(daysAgo);
+                sb.append(" days ago at ");
+                sb.append(dateFormat.format(new Date(lastSeen)));
+                sb.append(". Long time, no see.");
 
-                event.reply( sb.toString() );
+                event.reply(sb.toString());
             }
 
-            LastSeenDB.updateLastSeenTime( joiner );
+            LastSeenDB.updateLastSeenTime(joiner);
         }
     }
 
     @Handler
-    private void updateLastSeenOnPrivmsg( ReceivePrivmsg event )
-    {
-        String nick = BaseNick.toBaseNick( event.getSender() );
+    private void updateLastSeenOnPrivmsg(ReceivePrivmsg event) {
+        String nick = BaseNick.toBaseNick(event.getSender());
 
-        if ( !bot.getNick().equals( nick ) )
-            LastSeenDB.updateLastSeenTime( nick );
+        if (!bot.getNick().equals(nick))
+            LastSeenDB.updateLastSeenTime(nick);
     }
 
     @Handler
-    private void updateLastSeenOnPart( ReceivePart event )
-    {
-        String nick = BaseNick.toBaseNick( event.getParter() );
+    private void updateLastSeenOnPart(ReceivePart event) {
+        String nick = BaseNick.toBaseNick(event.getParter());
 
-        if ( !bot.getNick().equals( nick ) )
-            LastSeenDB.updateLastSeenTime( nick );
+        if (!bot.getNick().equals(nick))
+            LastSeenDB.updateLastSeenTime(nick);
     }
 
     @Handler
-    private void updateLastSeenOnQuit( ReceiveQuit event )
-    {
-        String nick = BaseNick.toBaseNick( event.getQuitter() );
+    private void updateLastSeenOnQuit(ReceiveQuit event) {
+        String nick = BaseNick.toBaseNick(event.getQuitter());
 
-        if ( !bot.getNick().equals( nick ) )
-            LastSeenDB.updateLastSeenTime( nick );
+        if (!bot.getNick().equals(nick))
+            LastSeenDB.updateLastSeenTime(nick);
     }
 
-    private static DateFormat makeDateFormat()
-    {
-        SimpleDateFormat df = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mmX" );
-        df.setTimeZone( timeZone );
+    private static DateFormat makeDateFormat() {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmX");
+        df.setTimeZone(timeZone);
         return df;
     }
 }

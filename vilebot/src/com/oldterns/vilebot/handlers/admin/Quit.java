@@ -16,25 +16,21 @@ import com.oldterns.vilebot.db.GroupDB;
 import com.oldterns.vilebot.util.Sessions;
 
 @HandlerContainer
-public class Quit
-{
+public class Quit {
     @AssignedBot
     private KeratinBot bot;
 
     @Handler
-    private void quit( ReceivePrivmsg event )
-    {
+    private void quit(ReceivePrivmsg event) {
         String text = event.getText();
         String nick = event.getSender();
 
-        if ( "!admin quit".equals( text ) )
-        {
-            String username = Sessions.getSession( nick );
-            if ( GroupDB.isAdmin( username ) )
-            {
+        if ("!admin quit".equals(text)) {
+            String username = Sessions.getSession(nick);
+            if (GroupDB.isAdmin(username)) {
                 bot.disconnect();
 
-                System.exit( 0 );
+                System.exit(0);
             }
         }
     }

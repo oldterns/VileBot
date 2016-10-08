@@ -13,7 +13,6 @@ import com.oldterns.vilebot.Vilebot;
 /**
  * Interact with Redis database via Jedis. See http://redis.io/commands for info about the command methods.
  */
-public abstract class RedisDB
-{
+public abstract class RedisDB {
     protected static final JedisPool pool = Vilebot.getPool();
 }

@@ -14,8 +14,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.pmw.tinylog.Logger;
 
-public class HMAC
-{
+public class HMAC {
     /**
      * Generate an HMAC signature from message and key, using the SHA2 512 bit hash algo.
      * 
@@ -23,15 +22,11 @@ public class HMAC
      * @param key The key
      * @return HMAC signature of message using key if no error, else null
      */
-    public static String generateHMAC( String message, String key )
-    {
-        try
-        {
-            return generateHMAC( "HmacSHA512", message, key );
-        }
-        catch ( NoSuchAlgorithmException e )
-        {
-            Logger.error( e, "Hash algorithim unsupported" );
+    public static String generateHMAC(String message, String key) {
+        try {
+            return generateHMAC("HmacSHA512", message, key);
+        } catch (NoSuchAlgorithmException e) {
+            Logger.error(e, "Hash algorithim unsupported");
         }
         return null;
     }
@@ -44,21 +39,15 @@ public class HMAC
      * @param key The key
      * @return HMAC signature of message using key if no error, else null
      */
-    public static String generateHMAC( String algo, String message, String key )
-        throws NoSuchAlgorithmException
-    {
-        Mac mac = Mac.getInstance( algo );
-        SecretKeySpec secret = new SecretKeySpec( key.getBytes(), algo );
-        try
-        {
-            mac.init( secret );
-
-            byte[] digest = mac.doFinal( message.getBytes() );
-            return new String( bytesToHex( digest ) );
-        }
-        catch ( InvalidKeyException e )
-        {
-            Logger.error( e, "Can't init Mac instance with key" );
+    public static String generateHMAC(String algo, String message, String key) throws NoSuchAlgorithmException {
+        Mac mac = Mac.getInstance(algo);
+        SecretKeySpec secret = new SecretKeySpec(key.getBytes(), algo);
+        try {
+            mac.init(secret);
+            byte[] digest = mac.doFinal(message.getBytes());
+            return new String(bytesToHex(digest));
+        } catch (InvalidKeyException e) {
+            Logger.error(e, "Can't init Mac instance with key");
         }
         return null;
     }
@@ -69,17 +58,15 @@ public class HMAC
      * @param bytes byte array
      * @return String of byte array converted to hex characters. Lower case alphabet.
      */
-    private static String bytesToHex( byte[] bytes )
-    {
-        final char[] hexArray = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+    private static String bytesToHex(byte[] bytes) {
+        final char[] hexArray = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
         char[] hexChars = new char[bytes.length * 2];
         int v;
-        for ( int j = 0; j < bytes.length; j++ )
-        {
+        for (int j = 0; j < bytes.length; j++) {
             v = bytes[j] & 0xFF;
             hexChars[j * 2] = hexArray[v >>> 4];
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
-        return new String( hexChars );
+        return new String(hexChars);
     }
 }

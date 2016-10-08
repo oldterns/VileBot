@@ -10,9 +10,7 @@ import java.util.Set;
 
 import redis.clients.jedis.Jedis;
 
-public class QuoteFactDB
-    extends RedisDB
-{
+public class QuoteFactDB extends RedisDB {
     private static final String keyOfQuoteSetsPrefix = "noun-quotes-";
 
     private static final String keyOfFactSetsPrefix = "noun-facts-";
@@ -23,16 +21,12 @@ public class QuoteFactDB
      * @param noun The noun to add a quote to
      * @param quote The new quote
      */
-    public static void addQuote( String noun, String quote )
-    {
+    public static void addQuote(String noun, String quote) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            jedis.sadd( keyOfQuoteSetsPrefix + noun, quote );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            jedis.sadd(keyOfQuoteSetsPrefix + noun, quote);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -42,16 +36,12 @@ public class QuoteFactDB
      * @param noun The noun to get the quotes of
      * @return The set of quotes for the noun
      */
-    public static Set<String> getQuotes( String noun )
-    {
+    public static Set<String> getQuotes(String noun) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            return jedis.smembers( keyOfQuoteSetsPrefix + noun );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            return jedis.smembers(keyOfQuoteSetsPrefix + noun);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -61,16 +51,12 @@ public class QuoteFactDB
      * @param noun The noun to get the quotes of
      * @return A random quote for the noun
      */
-    public static String getRandQuote( String noun )
-    {
+    public static String getRandQuote(String noun) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            return jedis.srandmember( keyOfQuoteSetsPrefix + noun );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            return jedis.srandmember(keyOfQuoteSetsPrefix + noun);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -80,16 +66,12 @@ public class QuoteFactDB
      * @param noun The noun to add the fact to
      * @param quote The new quote
      */
-    public static void addFact( String noun, String fact )
-    {
+    public static void addFact(String noun, String fact) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            jedis.sadd( keyOfFactSetsPrefix + noun, fact );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            jedis.sadd(keyOfFactSetsPrefix + noun, fact);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -99,16 +81,12 @@ public class QuoteFactDB
      * @param noun The noun to get the facts of
      * @return The set of facts for the noun
      */
-    public static Set<String> getFacts( String noun )
-    {
+    public static Set<String> getFacts(String noun) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            return jedis.smembers( keyOfFactSetsPrefix + noun );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            return jedis.smembers(keyOfFactSetsPrefix + noun);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -118,16 +96,12 @@ public class QuoteFactDB
      * @param noun The noun to get the facts of
      * @return A random fact for the noun
      */
-    public static String getRandFact( String noun )
-    {
+    public static String getRandFact(String noun) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            return jedis.srandmember( keyOfFactSetsPrefix + noun );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            return jedis.srandmember(keyOfFactSetsPrefix + noun);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 }

@@ -14,27 +14,24 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
 @HandlerContainer
-public class TwitterCorrection
-{
-    private static final Pattern twitterSyntaxUsePattern = Pattern.compile( "(?:^|\\s+)[@](\\S+)(?:\\s|:|)" );
+public class TwitterCorrection {
+    private static final Pattern twitterSyntaxUsePattern = Pattern.compile("(?:^|\\s+)[@](\\S+)(?:\\s|:|)");
 
     @Handler
-    private void twitterBeGone( ReceivePrivmsg event )
-    {
+    private void twitterBeGone(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = twitterSyntaxUsePattern.matcher( text );
+        Matcher matcher = twitterSyntaxUsePattern.matcher(text);
 
-        if ( matcher.find() )
-        {
-            String word = matcher.group( 1 );
+        if (matcher.find()) {
+            String word = matcher.group(1);
 
             StringBuilder sb = new StringBuilder();
 
-            sb.append( "You seem to be using twitter addressing syntax. On IRC you would say this instead: " );
-            sb.append( word );
-            sb.append( ": message" );
+            sb.append("You seem to be using twitter addressing syntax. On IRC you would say this instead: ");
+            sb.append(word);
+            sb.append(": message");
 
-            event.replyDirectly( sb.toString() );
+            event.replyDirectly(sb.toString());
         }
     }
 }

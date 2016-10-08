@@ -26,7 +26,7 @@ public class Jaziz {
     public static final String API_FORMAT = "/json";
     private static final Random random = new Random();
 
-    private static final Pattern jazizPattern = Pattern.compile( "^!jaziz (.+)" );
+    private static final Pattern jazizPattern = Pattern.compile("^!jaziz (.+)");
 
     @Handler
     public void jaziz(ReceivePrivmsg event) {
@@ -36,8 +36,7 @@ public class Jaziz {
             try {
                 message = jazizify(message);
                 event.reply(message);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 event.reply("eeeh");
                 e.printStackTrace();
             }
@@ -107,7 +106,7 @@ public class Jaziz {
     private String getContent(String word) throws Exception {
         String content;
         URLConnection connection;
-        connection =  new URL(API_URL + word + API_FORMAT).openConnection();
+        connection = new URL(API_URL + word + API_FORMAT).openConnection();
         connection.addRequestProperty(
                 "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"
         );
@@ -116,8 +115,7 @@ public class Jaziz {
             scanner.useDelimiter("\\Z");
             content = scanner.next();
             return content;
-        }
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             return "{}";
         }
     }

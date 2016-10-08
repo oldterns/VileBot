@@ -26,11 +26,11 @@ import java.util.regex.Pattern;
 @HandlerContainer
 public class Trivia {
 
-    private static final Pattern questionPattern = Pattern.compile( "^!jeopardy" );
-    private static final Pattern answerPattern = Pattern.compile( "^!(whatis|whois) (.*)" );
+    private static final Pattern questionPattern = Pattern.compile("^!jeopardy");
+    private static final Pattern answerPattern = Pattern.compile("^!(whatis|whois) (.*)");
     private static TriviaGame currentGame = null;
     private static final String JEOPARDY_CHANNEL = Vilebot.getConfig().get("jeopardyChannel");
-    private static final long TIMEOUT  = 30000L;
+    private static final long TIMEOUT = 30000L;
     public static final String RED = "\u000304";
     public static final String RESET = "\u000f";
     public static final String BLUE = "\u000302";
@@ -50,7 +50,7 @@ public class Trivia {
                 String answer = answerMatcher.group(2);
                 finishGame(event, answer);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             event.reply("I don't feel like playing.");
             e.printStackTrace();
         }
@@ -69,8 +69,7 @@ public class Trivia {
     private synchronized void startGame(ReceivePrivmsg event) throws Exception {
         if (currentGame != null) {
             event.reply(currentGame.getAlreadyPlayingString());
-        }
-        else {
+        } else {
             currentGame = new TriviaGame();
             event.reply(currentGame.getIntroString());
             startTimer(event);
@@ -111,14 +110,12 @@ public class Trivia {
                 event.reply(String.format("Congrats %s, you win %d karma!", answerer, currentGame.getStakes()));
                 KarmaDB.modNounKarma(answerer, currentGame.getStakes());
                 currentGame = null;
-            }
-            else {
+            } else {
                 event.reply(String.format("Sorry %s! That is incorrect, you lose %d karma.",
                         answerer, currentGame.getStakes()));
                 KarmaDB.modNounKarma(answerer, -1 * currentGame.getStakes());
             }
-        }
-        else {
+        } else {
             event.reply("No active game. Start a new one with !jeopardy");
         }
     }
@@ -136,7 +133,7 @@ public class Trivia {
         public TriviaGame() throws Exception {
             JSONObject triviaJSON = getQuestionJSON();
             question = triviaJSON.getString("question");
-            category= triviaJSON.getJSONObject("category").getString("title");
+            category = triviaJSON.getJSONObject("category").getString("title");
             answer = Jsoup.parse(triviaJSON.getString("answer")).text();
             stakes = getStakes(triviaJSON);
         }
@@ -168,7 +165,7 @@ public class Trivia {
         }
 
         private String formatAnswer(String answer) {
-            return  answer.toLowerCase()
+            return answer.toLowerCase()
                     .replaceAll("^the ", "")
                     .replaceAll("^a ", "")
                     .replaceAll("^an ", "")

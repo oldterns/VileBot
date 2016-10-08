@@ -20,75 +20,65 @@ import com.oldterns.vilebot.util.BaseNick;
 import com.oldterns.vilebot.util.Sessions;
 
 @HandlerContainer
-public class Ops
-{
-    private static final Pattern nickPattern = Pattern.compile( "(\\S+)" );
+public class Ops {
+    private static final Pattern nickPattern = Pattern.compile("(\\S+)");
 
-    private static final Pattern addRemOpPattern = Pattern.compile( "!admin (un|)op ((?:" + nickPattern
-        + "(?:, +| +|$))+)" );
+    private static final Pattern addRemOpPattern = Pattern.compile("!admin (un|)op ((?:" + nickPattern
+            + "(?:, +| +|$))+)");
 
     @Handler
-    private void addRemOp( ReceivePrivmsg event )
-    {
+    private void addRemOp(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = addRemOpPattern.matcher( text );
+        Matcher matcher = addRemOpPattern.matcher(text);
         String sender = event.getSender();
 
-        if ( matcher.matches() )
-        {
-            String username = Sessions.getSession( sender );
-            if ( GroupDB.isAdmin( username ) )
-            {
-                String mode = BaseNick.toBaseNick( matcher.group( 1 ) );
-                String nickBlob = matcher.group( 2 );
+        if (matcher.matches()) {
+            String username = Sessions.getSession(sender);
+            if (GroupDB.isAdmin(username)) {
+                String mode = BaseNick.toBaseNick(matcher.group(1));
+                String nickBlob = matcher.group(2);
 
                 List<String> nicks = new LinkedList<String>();
-                Matcher nickMatcher = nickPattern.matcher( nickBlob );
-                while ( nickMatcher.find() )
-                {
-                    nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
+                Matcher nickMatcher = nickPattern.matcher(nickBlob);
+                while (nickMatcher.find()) {
+                    nicks.add(BaseNick.toBaseNick(nickMatcher.group(1)));
                 }
 
                 StringBuilder successNicks = new StringBuilder();
                 StringBuilder failureNicks = new StringBuilder();
 
-                if ( "un".equals( mode ) )
-                {
-                    for ( String nick : nicks )
-                    {
+                if ("un".equals(mode)) {
+                    for (String nick : nicks) {
                         StringBuilder selectedSB;
-                        if ( GroupDB.remOp( nick ) )
+                        if (GroupDB.remOp(nick))
                             selectedSB = successNicks;
                         else
                             selectedSB = failureNicks;
 
-                        selectedSB.append( nick );
-                        selectedSB.append( " " );
+                        selectedSB.append(nick);
+                        selectedSB.append(" ");
                     }
 
-                    if ( successNicks.length() > 0 )
-                        event.reply( "Removed " + successNicks.toString() + "from operator group" );
-                    if ( failureNicks.length() > 0 )
-                        event.reply( failureNicks.toString() + "was/were not in the operator group" );
-                }
-                else
-                {
-                    for ( String nick : nicks )
-                    {
+                    if (successNicks.length() > 0)
+                        event.reply("Removed " + successNicks.toString() + "from operator group");
+                    if (failureNicks.length() > 0)
+                        event.reply(failureNicks.toString() + "was/were not in the operator group");
+                } else {
+                    for (String nick : nicks) {
                         StringBuilder selectedSB;
-                        if ( GroupDB.addOp( nick ) )
+                        if (GroupDB.addOp(nick))
                             selectedSB = successNicks;
                         else
                             selectedSB = failureNicks;
 
-                        selectedSB.append( nick );
-                        selectedSB.append( " " );
+                        selectedSB.append(nick);
+                        selectedSB.append(" ");
                     }
 
-                    if ( successNicks.length() > 0 )
-                        event.reply( "Added " + successNicks.toString() + "to operator group" );
-                    if ( failureNicks.length() > 0 )
-                        event.reply( failureNicks.toString() + "was/were already in the operator group" );
+                    if (successNicks.length() > 0)
+                        event.reply("Added " + successNicks.toString() + "to operator group");
+                    if (failureNicks.length() > 0)
+                        event.reply(failureNicks.toString() + "was/were already in the operator group");
                 }
             }
         }

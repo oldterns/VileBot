@@ -25,16 +25,12 @@ import java.util.regex.Pattern;
  * @see {@link ConfMap.DefaultConfParser}
  * @see {@link ConfMap.ConfParser}
  */
-public class ConfMap
-    extends AbstractMap<String, String>
-{
+public class ConfMap extends AbstractMap<String, String> {
     /**
      * Interface used to parse a conf file to an entry set.
      */
-    public static interface ConfParser
-    {
-        public Set<Entry<String, String>> parse( BufferedReader reader )
-            throws IOException;
+    public interface ConfParser {
+        Set<Entry<String, String>> parse(BufferedReader reader) throws IOException;
     }
 
     /**
@@ -48,34 +44,24 @@ public class ConfMap
      * 
      * @see {@link ConfMap.ConfParser}
      */
-    public static class DefaultConfParser
-        implements ConfParser
-    {
+    public static class DefaultConfParser implements ConfParser {
         private static final String SEP = "=";
 
         private static final Pattern linePattern = Pattern.compile( "\\s*([^" + SEP + "\\s]+)\\s*" + SEP
             + "\\s*(.*?)\\s*" );
 
         @Override
-        public Set<Entry<String, String>> parse( BufferedReader reader )
-            throws IOException
-        {
+        public Set<Entry<String, String>> parse(BufferedReader reader) throws IOException {
             LinkedHashSet<Entry<String, String>> entrySet = new LinkedHashSet<Entry<String, String>>();
-
-            String line = null;
-            while ( ( line = reader.readLine() ) != null )
-            {
+            String line;
+            while ((line = reader.readLine()) != null) {
                 Matcher matcher = linePattern.matcher( line );
-
-                if ( matcher.matches() )
-                {
-                    String key = matcher.group( 1 );
-                    String value = matcher.group( 2 );
-
-                    entrySet.add( new SimpleEntry<String, String>( key, value ) );
+                if (matcher.matches()) {
+                    String key = matcher.group(1);
+                    String value = matcher.group(2);
+                    entrySet.add(new SimpleEntry<>(key, value));
                 }
             }
-
             return entrySet;
         }
     }
@@ -88,10 +74,8 @@ public class ConfMap
      * @param confFile Path to a configuration file in a valid format.
      * @throws IOException If an I/O error occurs with confFile
      */
-    public ConfMap( Path confFile )
-        throws IOException
-    {
-        this( confFile, Charset.forName( "UTF-8" ) );
+    public ConfMap(Path confFile) throws IOException {
+        this(confFile, Charset.forName( "UTF-8" ));
     }
 
     /**
@@ -101,10 +85,8 @@ public class ConfMap
      * @param charset The character set confFile is in.
      * @throws IOException If an I/O error occurs with confFile
      */
-    public ConfMap( Path confFile, Charset charset )
-        throws IOException
-    {
-        this( confFile, charset, new DefaultConfParser() );
+    public ConfMap(Path confFile, Charset charset) throws IOException {
+        this(confFile, charset, new DefaultConfParser());
     }
 
     /**
@@ -115,19 +97,16 @@ public class ConfMap
      * @param parser The parser to use against confFile's text data.
      * @throws IOException If an I/O error occurs with confFile
      */
-    public ConfMap( Path confFile, Charset charset, ConfParser parser )
-        throws IOException
-    {
-        if ( !Files.exists( confFile ) )
+    public ConfMap(Path confFile, Charset charset, ConfParser parser) throws IOException {
+        if (!Files.exists(confFile))
             throw new IllegalArgumentException( "confFile ( " + confFile + " ) does not point to an existing target." );
-        if ( !Files.isRegularFile( confFile ) )
+        if (!Files.isRegularFile(confFile))
             throw new IllegalArgumentException( "confFile ( " + confFile + " ) points to an existing target, "
                 + "but this target is not a regular file." );
 
         // Create a BufferedReader from the Path and Charset, then pass to the ConfParser
-        try (BufferedReader reader = Files.newBufferedReader( confFile, charset ))
-        {
-            this.entries = parser.parse( reader );
+        try (BufferedReader reader = Files.newBufferedReader(confFile, charset)) {
+            this.entries = parser.parse(reader);
         }
     }
 
@@ -138,15 +117,12 @@ public class ConfMap
      * @param parser The parser to use against confFile's text data.
      * @throws IOException If an I/O error occurs with confFile
      */
-    public ConfMap( Path confFile, ConfParser parser )
-        throws IOException
-    {
-        this( confFile, Charset.forName( "UTF-8" ), parser );
+    public ConfMap(Path confFile, ConfParser parser) throws IOException {
+        this(confFile, Charset.forName("UTF-8"), parser);
     }
 
     @Override
-    public Set<Entry<String, String>> entrySet()
-    {
+    public Set<Entry<String, String>> entrySet() {
         return entries;
     }
 
@@ -154,12 +130,10 @@ public class ConfMap
      * @throws RuntimeException if key does not exist
      */
     @Override
-    public String get( Object key )
-    {
-        String ret = super.get( key );
-        if ( ret == null )
-        {
-            throw new RuntimeException( "Configuration key '" + key + "' does not exist." );
+    public String get(Object key) {
+        String ret = super.get(key);
+        if (ret == null) {
+            throw new RuntimeException("Configuration key '" + key + "' does not exist.");
         }
         return ret;
     }
@@ -170,9 +144,8 @@ public class ConfMap
      * @throws UnsupportedOperationException always
      */
     @Override
-    public String put( String key, String value )
-    {
-        throw new UnsupportedOperationException( "ConfMaps cannot be written to." );
+    public String put(String key, String value) {
+        throw new UnsupportedOperationException("ConfMaps cannot be written to.");
     }
 
     /**
@@ -181,9 +154,8 @@ public class ConfMap
      * @throws UnsupportedOperationException always
      */
     @Override
-    public void putAll( Map<? extends String, ? extends String> m )
-    {
-        throw new UnsupportedOperationException( "ConfMaps cannot be written to." );
+    public void putAll(Map<? extends String, ? extends String> m) {
+        throw new UnsupportedOperationException("ConfMaps cannot be written to.");
     }
 
     /**
@@ -192,8 +164,7 @@ public class ConfMap
      * @throws UnsupportedOperationException always
      */
     @Override
-    public String remove( Object key )
-    {
-        throw new UnsupportedOperationException( "ConfMaps cannot be written to." );
+    public String remove(Object key) {
+        throw new UnsupportedOperationException("ConfMaps cannot be written to.");
     }
 }

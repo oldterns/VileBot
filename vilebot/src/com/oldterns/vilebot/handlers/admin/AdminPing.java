@@ -14,28 +14,22 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
 @HandlerContainer
-public class AdminPing
-{
+public class AdminPing {
 
     /**
      * Do I have admin access?
      */
     @Handler
-    private void ping( ReceivePrivmsg event )
-    {
+    private void ping(ReceivePrivmsg event) {
         String text = event.getText();
         String sender = event.getSender();
 
-        if ( "!admin ping".equals( text ) )
-        {
-            String username = Sessions.getSession( sender );
-            if ( GroupDB.isAdmin( username ) )
-            {
-                event.replyDirectly( "You have an active admin session" );
-            }
-            else
-            {
-                event.replyDirectly( "You do not have an active admin session" );
+        if ("!admin ping".equals(text)) {
+            String username = Sessions.getSession(sender);
+            if (GroupDB.isAdmin(username)) {
+                event.replyDirectly("You have an active admin session");
+            } else {
+                event.replyDirectly("You do not have an active admin session");
             }
         }
     }

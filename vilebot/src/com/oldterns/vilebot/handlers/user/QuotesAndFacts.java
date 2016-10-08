@@ -27,238 +27,185 @@ import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
 @HandlerContainer
-public class QuotesAndFacts
-{
-    private static final Pattern nounPattern = Pattern.compile( "\\S+" );
+public class QuotesAndFacts {
+    private static final Pattern nounPattern = Pattern.compile("\\S+");
 
-    private static final Pattern addPattern = Pattern.compile( "^!(fact|quote)add (" + nounPattern + ") (.+)$" );
+    private static final Pattern addPattern = Pattern.compile("^!(fact|quote)add (" + nounPattern + ") (.+)$");
 
-    private static final Pattern queryPattern = Pattern.compile( "^!(fact|quote) (" + nounPattern + ")\\s*$" );
+    private static final Pattern queryPattern = Pattern.compile("^!(fact|quote) (" + nounPattern + ")\\s*$");
 
-    private static final Pattern searchPattern = Pattern.compile( "^!(fact|quote)search (" + nounPattern + ") (.*)$" );
+    private static final Pattern searchPattern = Pattern.compile("^!(fact|quote)search (" + nounPattern + ") (.*)$");
 
     private static final Random random = new Random();
 
     @Handler
-    private void factQuoteAdd( ReceivePrivmsg event )
-    {
-        Matcher matcher = addPattern.matcher( event.getText() );
+    private void factQuoteAdd(ReceivePrivmsg event) {
+        Matcher matcher = addPattern.matcher(event.getText());
 
-        if ( matcher.matches() )
-        {
-            String mode = matcher.group( 1 );
-            String noun = BaseNick.toBaseNick( matcher.group( 2 ) );
-            String text = matcher.group( 3 );
+        if (matcher.matches()) {
+            String mode = matcher.group(1);
+            String noun = BaseNick.toBaseNick(matcher.group(2));
+            String text = matcher.group(3);
 
-            text = trimChars( text, " '\"" );
+            text = trimChars(text, " '\"");
 
-            if ( "fact".equals( mode ) )
-            {
-                QuoteFactDB.addFact( noun, text );
-                event.reply( formatFactReply( noun, text ) );
-            }
-            else
-            {
-                QuoteFactDB.addQuote( noun, text );
-                event.reply( formatQuoteReply( noun, text ) );
+            if ("fact".equals(mode)) {
+                QuoteFactDB.addFact(noun, text);
+                event.reply(formatFactReply(noun, text));
+            } else {
+                QuoteFactDB.addQuote(noun, text);
+                event.reply(formatQuoteReply(noun, text));
             }
         }
     }
 
     @Handler
-    private void factQuoteQuery( ReceivePrivmsg event )
-    {
-        Matcher matcher = queryPattern.matcher( event.getText() );
+    private void factQuoteQuery(ReceivePrivmsg event) {
+        Matcher matcher = queryPattern.matcher(event.getText());
 
-        if ( matcher.matches() )
-        {
-            String mode = matcher.group( 1 );
-            String noun = BaseNick.toBaseNick( matcher.group( 2 ) );
+        if (matcher.matches()) {
+            String mode = matcher.group(1);
+            String noun = BaseNick.toBaseNick(matcher.group(2));
 
-            if ( "fact".equals( mode ) )
-            {
-                if ( !replyWithFact( noun, event ) )
-                {
-                    event.reply( noun + " has no facts." );
+            if ("fact".equals(mode)) {
+                if (!replyWithFact(noun, event)) {
+                    event.reply(noun + " has no facts.");
                 }
-            }
-            else
-            {
-                if ( !replyWithQuote( noun, event ) )
-                {
-                    event.reply( noun + " has no quotes." );
+            } else {
+                if (!replyWithQuote(noun, event)) {
+                    event.reply(noun + " has no quotes.");
                 }
             }
         }
     }
 
     @Handler
-    private void factQuoteSearch( ReceivePrivmsg event )
-    {
-        Matcher matcher = searchPattern.matcher( event.getText() );
+    private void factQuoteSearch(ReceivePrivmsg event) {
+        Matcher matcher = searchPattern.matcher(event.getText());
 
-        if ( matcher.matches() )
-        {
-            String mode = matcher.group( 1 );
-            String noun = BaseNick.toBaseNick( matcher.group( 2 ) );
-            String regex = matcher.group( 3 );
+        if (matcher.matches()) {
+            String mode = matcher.group(1);
+            String noun = BaseNick.toBaseNick(matcher.group(2));
+            String regex = matcher.group(3);
 
-            try
-            {
+            try {
                 // Case insensitive added automatically, use (?-i) in a message to reenable case sensitivity
-                Pattern pattern = Pattern.compile( "(?i)" + regex );
+                Pattern pattern = Pattern.compile("(?i)" + regex);
 
-                if ( "fact".equals( mode ) )
-                {
-                    Set<String> texts = QuoteFactDB.getFacts( noun );
-                    if ( texts != null )
-                    {
-                        String randomMatch = regexSetSearch( texts, pattern );
-                        if ( randomMatch != null )
-                        {
-                            event.reply( formatFactReply( noun, randomMatch ) );
+                if ("fact".equals(mode)) {
+                    Set<String> texts = QuoteFactDB.getFacts(noun);
+                    if (texts != null) {
+                        String randomMatch = regexSetSearch(texts, pattern);
+                        if (randomMatch != null) {
+                            event.reply(formatFactReply(noun, randomMatch));
+                        } else {
+                            event.reply(noun + " has no matching facts.");
                         }
-                        else
-                        {
-                            event.reply( noun + " has no matching facts." );
-                        }
+                    } else {
+                        event.reply(noun + " has no facts.");
                     }
-                    else
-                    {
-                        event.reply( noun + " has no facts." );
-                    }
-                }
-                else
-                {
-                    Set<String> texts = QuoteFactDB.getQuotes( noun );
-                    if ( texts != null )
-                    {
-                        String randomMatch = regexSetSearch( texts, pattern );
-                        if ( randomMatch != null )
-                        {
-                            event.reply( formatQuoteReply( noun, randomMatch ) );
+                } else {
+                    Set<String> texts = QuoteFactDB.getQuotes(noun);
+                    if (texts != null) {
+                        String randomMatch = regexSetSearch(texts, pattern);
+                        if (randomMatch != null) {
+                            event.reply(formatQuoteReply(noun, randomMatch));
+                        } else {
+                            event.reply(noun + " has no matching quotes.");
                         }
-                        else
-                        {
-                            event.reply( noun + " has no matching quotes." );
-                        }
-                    }
-                    else
-                    {
-                        event.reply( noun + " has no quotes." );
+                    } else {
+                        event.reply(noun + " has no quotes.");
                     }
                 }
-            }
-            catch ( PatternSyntaxException e )
-            {
-                event.reply( "Syntax error in regex pattern" );
+            } catch (PatternSyntaxException e) {
+                event.reply("Syntax error in regex pattern");
             }
         }
     }
 
-    private static String regexSetSearch( Set<String> texts, Pattern pattern )
-    {
+    private static String regexSetSearch(Set<String> texts, Pattern pattern) {
         List<String> matchingTexts = new LinkedList<String>();
 
-        for ( String text : texts )
-        {
-            Matcher matcher = pattern.matcher( text );
-            if ( matcher.find() )
-            {
-                matchingTexts.add( text );
+        for (String text : texts) {
+            Matcher matcher = pattern.matcher(text);
+            if (matcher.find()) {
+                matchingTexts.add(text);
             }
         }
 
         int matchCount = matchingTexts.size();
-        if ( matchCount > 0 )
-        {
-            int selection = random.nextInt( matchCount );
-            return matchingTexts.get( selection );
-        }
-        else
-        {
+        if (matchCount > 0) {
+            int selection = random.nextInt(matchCount);
+            return matchingTexts.get(selection);
+        } else {
             return null;
         }
     }
 
     @Handler
-    private void announceFactOrQuoteOnJoin( ReceiveJoin event )
-    {
-        String baseNick = BaseNick.toBaseNick( event.getJoiner() );
+    private void announceFactOrQuoteOnJoin(ReceiveJoin event) {
+        String baseNick = BaseNick.toBaseNick(event.getJoiner());
 
-        if ( !Ignore.getOnJoin().contains( baseNick ) )
-        {
-            if ( random.nextBoolean() )
-            {
-                if ( !replyWithQuote( baseNick, event ) )
-                    replyWithFact( baseNick, event );
-            }
-            else
-            {
-                if ( !replyWithFact( baseNick, event ) )
-                    replyWithQuote( baseNick, event );
+        if (!Ignore.getOnJoin().contains(baseNick)) {
+            if (random.nextBoolean()) {
+                if (!replyWithQuote(baseNick, event))
+                    replyWithFact(baseNick, event);
+            } else {
+                if (!replyWithFact(baseNick, event))
+                    replyWithQuote(baseNick, event);
             }
         }
     }
 
-    private static boolean replyWithFact( String noun, Replyable event )
-    {
-        String text = QuoteFactDB.getRandFact( noun );
-        if ( text != null )
-        {
-            event.reply( formatFactReply( noun, text ) );
+    private static boolean replyWithFact(String noun, Replyable event) {
+        String text = QuoteFactDB.getRandFact(noun);
+        if (text != null) {
+            event.reply(formatFactReply(noun, text));
             return true;
         }
         return false;
     }
 
-    private static String formatFactReply( String noun, String fact )
-    {
+    private static String formatFactReply(String noun, String fact) {
         return noun + " " + fact;
     }
 
-    private static boolean replyWithQuote( String noun, Replyable event )
-    {
-        String text = QuoteFactDB.getRandQuote( noun );
-        if ( text != null )
-        {
-            event.reply( formatQuoteReply( noun, text ) );
+    private static boolean replyWithQuote(String noun, Replyable event) {
+        String text = QuoteFactDB.getRandQuote(noun);
+        if (text != null) {
+            event.reply(formatQuoteReply(noun, text));
             return true;
         }
         return false;
     }
 
-    private static String formatQuoteReply( String noun, String quote )
-    {
+    private static String formatQuoteReply(String noun, String quote) {
         return noun + " once said, \"" + quote + "\".";
     }
 
     /**
      * Removes all specified leading and trailing characters in the array charsToRemove.
-     * 
-     * @param input The string to process
+     *
+     * @param input         The string to process
      * @param charsToRemove All characters to remove, treated as a set
      * @return A copy of the input String with the characters removed
      * @see String.trim()
      */
-    private static String trimChars( String input, String charsToRemove )
-    {
+    private static String trimChars(String input, String charsToRemove) {
         char[] value = input.toCharArray();
         char[] rmChars = charsToRemove.toCharArray();
-        Arrays.sort( rmChars );
+        Arrays.sort(rmChars);
 
         int len = value.length;
         int st = 0;
 
-        while ( ( st < len ) && ( Arrays.binarySearch( rmChars, value[st] ) >= 0 ) )
-        {
+        while ((st < len) && (Arrays.binarySearch(rmChars, value[st]) >= 0)) {
             st++;
         }
-        while ( ( st < len ) && ( Arrays.binarySearch( rmChars, value[len - 1] ) >= 0 ) )
-        {
+        while ((st < len) && (Arrays.binarySearch(rmChars, value[len - 1]) >= 0)) {
             len--;
         }
 
-        return new String( input.substring( st, len ) );
+        return new String(input.substring(st, len));
     }
 }

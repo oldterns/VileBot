@@ -21,7 +21,7 @@ public class ChatLogger {
         boolean shouldLog = channel.equals(logChannel) &&
                 !text.startsWith("!");
 
-        if(shouldLog) {
+        if (shouldLog) {
             LogDB.addItem(text + "\n");
         }
     }

@@ -29,7 +29,7 @@ public class Markov {
         String text = message.getText();
         boolean markovMap = cmd.matcher(text).matches();
 
-        if(markovMap) {
+        if (markovMap) {
             train();
             String phrase = generatePhrase();
             phrase = mangleNicks(phrase, message);
@@ -45,17 +45,15 @@ public class Markov {
     private void fillMarkovMap(String data) {
         String[] words = data.split("\\s+");
 
-        for(int i = 0; i < words.length - 3; i++) {
-            String key = words[i] + " " + words[i+1];
-            String value = words[i+2] + " " + words[i+3];
+        for (int i = 0; i < words.length - 3; i++) {
+            String key = words[i] + " " + words[i + 1];
+            String value = words[i + 2] + " " + words[i + 3];
 
-            if(key.equals(value)) {
+            if (key.equals(value)) {
                 continue;
-            }
-            else if(markovMap.get(key) != null) {
+            } else if (markovMap.get(key) != null) {
                 markovMap.get(key).add(value);
-            }
-            else {
+            } else {
                 List<String> valueList = new ArrayList<String>();
                 valueList.add(value);
                 markovMap.put(key, valueList);
@@ -68,9 +66,9 @@ public class Markov {
         String key = getRandomKey(random);
         String phrase = "";
 
-        while(key != null && phrase.length() < 1000) {
+        while (key != null && phrase.length() < 1000) {
             phrase += key + " ";
-            if(shouldEnd(key)) {
+            if (shouldEnd(key)) {
                 break;
             }
             key = nextKey(key, random);
@@ -81,7 +79,7 @@ public class Markov {
 
     private String nextKey(String key, Random random) {
         List<String> valueList = markovMap.get(key);
-        if(valueList == null) {
+        if (valueList == null) {
             return null;
         }
 
@@ -94,7 +92,7 @@ public class Markov {
     }
 
     private boolean shouldEnd(String key) {
-       return (key.endsWith("!") || key.endsWith("?") || key.endsWith("."));
+        return (key.endsWith("!") || key.endsWith("?") || key.endsWith("."));
     }
 
     private String mangleNicks(String phrase, ReceivePrivmsg msg) {
@@ -117,13 +115,12 @@ public class Markov {
     private List<String> getNicks(ReceivePrivmsg msg) {
         try {
             return bot.getChannel(msg.getChannel()).getNicks();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return Collections.emptyList();
         }
     }
 
-    private boolean inside (List<String> nicks, String word) {
+    private boolean inside(List<String> nicks, String word) {
         for (String nick : nicks) {
             if (word.contains(nick)) {
                 return true;

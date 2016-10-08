@@ -8,9 +8,7 @@ package com.oldterns.vilebot.db;
 
 import redis.clients.jedis.Jedis;
 
-public class GroupDB
-    extends RedisDB
-{
+public class GroupDB extends RedisDB {
     private static final String keyOfGroupSetsPrefix = "groups-";
 
     private static final String opGroupName = "ops";
@@ -22,9 +20,8 @@ public class GroupDB
      * 
      * @return true iff the Admin group has no members.
      */
-    public static boolean noAdmins()
-    {
-        return groupSize( adminGroupName ) == 0;
+    public static boolean noAdmins() {
+        return groupSize(adminGroupName) == 0;
     }
 
     /**
@@ -33,9 +30,8 @@ public class GroupDB
      * @param nick The nick to check
      * @return true iff the nick is in the Admin group
      */
-    public static boolean isAdmin( String nick )
-    {
-        return isInGroup( adminGroupName, nick );
+    public static boolean isAdmin(String nick) {
+        return isInGroup(adminGroupName, nick);
     }
 
     /**
@@ -44,9 +40,8 @@ public class GroupDB
      * @param nick The nick to check
      * @return true iff the nick is in the Op group
      */
-    public static boolean isOp( String nick )
-    {
-        return isInGroup( opGroupName, nick );
+    public static boolean isOp(String nick) {
+        return isInGroup(opGroupName, nick);
     }
 
     /**
@@ -56,29 +51,21 @@ public class GroupDB
      * @param nick The nick to check
      * @return true iff the nick is in the Op group
      */
-    private static boolean isInGroup( String group, String nick )
-    {
+    private static boolean isInGroup(String group, String nick) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            return nick != null && jedis.sismember( keyOfGroupSetsPrefix + group, nick );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            return nick != null && jedis.sismember(keyOfGroupSetsPrefix + group, nick);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
-    private static long groupSize( String group )
-    {
+    private static long groupSize(String group) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            return jedis.scard( keyOfGroupSetsPrefix + group );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            return jedis.scard(keyOfGroupSetsPrefix + group);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -88,9 +75,8 @@ public class GroupDB
      * @param nick The nick to add
      * @return true iff the nick was not already there
      */
-    public static boolean addAdmin( String nick )
-    {
-        return addToGroup( adminGroupName, nick );
+    public static boolean addAdmin(String nick) {
+        return addToGroup(adminGroupName, nick);
     }
 
     /**
@@ -99,9 +85,8 @@ public class GroupDB
      * @param nick The nick to add
      * @return true iff the nick was not already there
      */
-    public static boolean addOp( String nick )
-    {
-        return addToGroup( opGroupName, nick );
+    public static boolean addOp(String nick) {
+        return addToGroup(opGroupName, nick);
     }
 
     /**
@@ -111,17 +96,13 @@ public class GroupDB
      * @param nick The nick to add
      * @return true iff a new element was inserted
      */
-    private static boolean addToGroup( String group, String nick )
-    {
+    private static boolean addToGroup(String group, String nick) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            long reply = jedis.sadd( keyOfGroupSetsPrefix + group, nick );
+        try {
+            long reply = jedis.sadd(keyOfGroupSetsPrefix + group, nick);
             return reply == 1;
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -131,9 +112,8 @@ public class GroupDB
      * @param nick The nick to remove
      * @return true iff the nick existed
      */
-    public static boolean remAdmin( String nick )
-    {
-        return remFromGroup( adminGroupName, nick );
+    public static boolean remAdmin(String nick) {
+        return remFromGroup(adminGroupName, nick);
     }
 
     /**
@@ -142,9 +122,8 @@ public class GroupDB
      * @param nick The nick to remove
      * @return true iff the nick existed
      */
-    public static boolean remOp( String nick )
-    {
-        return remFromGroup( opGroupName, nick );
+    public static boolean remOp(String nick) {
+        return remFromGroup(opGroupName, nick);
     }
 
     /**
@@ -154,17 +133,13 @@ public class GroupDB
      * @param nick The nick to remove
      * @return true iff an element was removed
      */
-    private static boolean remFromGroup( String group, String nick )
-    {
+    private static boolean remFromGroup(String group, String nick) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            long reply = jedis.srem( keyOfGroupSetsPrefix + group, nick );
+        try {
+            long reply = jedis.srem(keyOfGroupSetsPrefix + group, nick);
             return reply == 1;
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 }

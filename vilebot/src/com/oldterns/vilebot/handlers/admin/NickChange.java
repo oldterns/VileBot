@@ -21,30 +21,26 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
 @HandlerContainer
-public class NickChange
-{
-    private static final Pattern nickChangePattern = Pattern.compile( "!admin nick ([a-zA-Z][a-zA-Z0-9-_|]+)" );
+public class NickChange {
+    private static final Pattern nickChangePattern = Pattern.compile("!admin nick ([a-zA-Z][a-zA-Z0-9-_|]+)");
 
     @AssignedBot
     private KeratinBot bot;
 
     @Handler
-    private void changeNick( ReceivePrivmsg event )
-    {
+    private void changeNick(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = nickChangePattern.matcher( text );
+        Matcher matcher = nickChangePattern.matcher(text);
         String sender = event.getSender();
 
-        if ( matcher.matches() )
-        {
-            String username = Sessions.getSession( sender );
-            if ( GroupDB.isAdmin( username ) )
-            {
-                String newNick = matcher.group( 1 );
-                bot.setNick( newNick );
-                BaseNick.addBotNick( newNick );
+        if (matcher.matches()) {
+            String username = Sessions.getSession(sender);
+            if (GroupDB.isAdmin(username)) {
+                String newNick = matcher.group(1);
+                bot.setNick(newNick);
+                BaseNick.addBotNick(newNick);
 
-                event.reply( "Nick changed" );
+                event.reply("Nick changed");
             }
         }
     }
