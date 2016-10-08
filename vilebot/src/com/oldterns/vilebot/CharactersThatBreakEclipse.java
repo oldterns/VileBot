@@ -11,8 +11,7 @@ import ca.szc.keratin.bot.misc.Colors;
 /**
  * Class to contain characters and strings that cause the Eclipse line spacing to break if viewed directly.
  */
-public class CharactersThatBreakEclipse
-{
+public class CharactersThatBreakEclipse {
     public static final String LODEMOT = Colors.BOLD + "ಠ" + Colors.BOLD + "_" + Colors.BOLD + "ಠ" + Colors.BOLD;
 
     public static final String KIRBYFLIP = "(╯°□°)╯︵<(x˙x)>";

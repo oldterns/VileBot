@@ -34,22 +34,21 @@ import net.engio.mbassy.listener.Handler;
 
 /**
  * Will grab the text from a tweet given the static tweet URL. To enable, add the following entries to vilebot.conf:
- *
+ * <p>
  * consumerKey
  * consumerSecret
  * accessToken
  * accessTokenSecret
- *
+ * <p>
  * Where all of the above are created at https://apps.twitter.com
  */
 @HandlerContainer
-public class UrlTweetAnnouncer
-{
+public class UrlTweetAnnouncer {
 
     private static final Pattern urlPattern =
-        Pattern.compile( "((?:http|https)://(?:www.|)(?:(?:twitter)\\.com)[^ ]*)" );
+            Pattern.compile("((?:http|https)://(?:www.|)(?:(?:twitter)\\.com)[^ ]*)");
 
-    private static final Pattern titlePattern = Pattern.compile( "<title>(.*)</title>" );
+    private static final Pattern titlePattern = Pattern.compile("<title>(.*)</title>");
 
     private final Map<String, String> cfg = Vilebot.getConfig();
     private final String consumerKey = cfg.get("consumerKey");  //may be known as 'API key'
@@ -61,39 +60,32 @@ public class UrlTweetAnnouncer
     private KeratinBot bot;
 
     @Handler
-    public void urlAnnouncer( ReceivePrivmsg event )
-    {
-        if ( consumerKey == null || consumerSecret == null || accessToken == null || accessTokenSecret == null )
-        {
+    public void urlAnnouncer(ReceivePrivmsg event) {
+        if (consumerKey == null || consumerSecret == null || accessToken == null || accessTokenSecret == null) {
             event.reply("Sorry, I can't read that tweet because my maintainer is a moron. And I wouldn't want to read it, anyway.");
             return;
         }
 
-        Matcher urlMatcher = urlPattern.matcher( event.getText() );
+        Matcher urlMatcher = urlPattern.matcher(event.getText());
 
-        if ( urlMatcher.find() )
-        {
-            String title = scrapeURLHTMLTitle( urlMatcher.group( 1 ) );
+        if (urlMatcher.find()) {
+            String title = scrapeURLHTMLTitle(urlMatcher.group(1));
             event.reply("' " + title + " '");
         }
     }
 
     /**
      * Accesses the source of a HTML page and looks for a title element
-     * 
+     *
      * @param url http tweet String
      * @return String of text which represents the tweet.  Empty if error.
      */
-    private String scrapeURLHTMLTitle( String url )
-    {
+    private String scrapeURLHTMLTitle(String url) {
         String text = "";
 
-        try
-        {
-            new URL( url );
-        }
-        catch ( MalformedURLException x )
-        {
+        try {
+            new URL(url);
+        } catch (MalformedURLException x) {
             // System.err.format("scrapeURLHTMLTitle new URL error: %s%n", x);
             return text;
         }
@@ -102,45 +94,39 @@ public class UrlTweetAnnouncer
         String parts[] = url.split("/");
         int userPosition = 0;
         long tweetID = 0;
-        for (int i = 0; i < parts.length; i++)
-        {
+        for (int i = 0; i < parts.length; i++) {
 
             if (parts[i].toString().equals("twitter.com"))
-                userPosition = i+1;
-            if (parts[i].toString().equals( "status" ) || parts[i].toString().equals( "statuses" ))
-                tweetID = Long.valueOf(parts[i+1].toString()).longValue();
+                userPosition = i + 1;
+            if (parts[i].toString().equals("status") || parts[i].toString().equals("statuses"))
+                tweetID = Long.valueOf(parts[i + 1].toString()).longValue();
         }
         if (userPosition == 0)
             return text;
-        else
-        {
-            try
-            {
+        else {
+            try {
                 ConfigurationBuilder cb = new ConfigurationBuilder();
                 cb.setDebugEnabled(true)
-                  .setOAuthConsumerKey(consumerKey)
-                  .setOAuthConsumerSecret(consumerSecret)
-                  .setOAuthAccessToken(accessToken)
-                  .setOAuthAccessTokenSecret(accessTokenSecret);
+                        .setOAuthConsumerKey(consumerKey)
+                        .setOAuthConsumerSecret(consumerSecret)
+                        .setOAuthAccessToken(accessToken)
+                        .setOAuthAccessTokenSecret(accessTokenSecret);
                 TwitterFactory tf = new TwitterFactory(cb.build());
                 Twitter twitter = tf.getInstance();
-                if(tweetID != 0) //tweet of the twitter.com/USERID/status/TWEETID variety
+                if (tweetID != 0) //tweet of the twitter.com/USERID/status/TWEETID variety
                 {
                     Status status = twitter.showStatus(tweetID);
                     return (status.getUser().getName() + ": " + status.getText());
-                }
-                else //just the user is given, ie, twitter.com/USERID 
+                } else //just the user is given, ie, twitter.com/USERID
                 {
-                    User user = twitter.showUser( parts[userPosition].toString() );
-                    if(!user.getDescription().isEmpty()) //the user has a description
+                    User user = twitter.showUser(parts[userPosition].toString());
+                    if (!user.getDescription().isEmpty()) //the user has a description
                         return ("Name: " + user.getName() + " | " + user.getDescription() + "\'\nLast Tweet: \'" + user.getStatus().getText());
                     else //the user doesn't have a description, don't print it
                         return ("Name: " + user.getName() + "\'\nLast Tweet: \'" + user.getStatus().getText());
-                    
+
                 }
-            }
-            catch (TwitterException x)
-            {
+            } catch (TwitterException x) {
                 return bot.getNick() + ": Until my maintainer fixes the API Key, this is the only tweet you're gonna see. U mad, bro?";
             }
         }

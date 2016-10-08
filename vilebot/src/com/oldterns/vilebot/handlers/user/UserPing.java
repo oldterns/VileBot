@@ -11,19 +11,16 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
 @HandlerContainer
-public class UserPing
-{
+public class UserPing {
     /**
      * Reply to user !ping command with username: pong
      */
     @Handler
-    private void userPingPong( ReceivePrivmsg event )
-    {
+    private void userPingPong(ReceivePrivmsg event) {
         String text = event.getText();
 
-        if ( text.startsWith( "!ping" ) )
-        {
-            event.replyDirectly( "pong" );
+        if (text.startsWith("!ping")) {
+            event.replyDirectly("pong");
         }
     }
 }

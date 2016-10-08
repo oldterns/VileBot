@@ -12,9 +12,7 @@ import java.util.Set;
 
 import redis.clients.jedis.Jedis;
 
-public class UserlistDB
-    extends RedisDB
-{
+public class UserlistDB extends RedisDB {
     private static final String keyOfUserlistSetsPrefix = "userlist-";
 
     /**
@@ -23,16 +21,12 @@ public class UserlistDB
      * @param noun The name of the list
      * @return The set of nicks for the list
      */
-    public static Set<String> getUsersIn( String listName )
-    {
+    public static Set<String> getUsersIn(String listName) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            return jedis.smembers( keyOfUserlistSetsPrefix + listName );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            return jedis.smembers(keyOfUserlistSetsPrefix + listName);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -42,18 +36,14 @@ public class UserlistDB
      * @param noun The name of the list param The set of nicks for the list
      * @param nicks The nicks to add
      */
-    public static void addUsersTo( String listName, Collection<String> nicks )
-    {
+    public static void addUsersTo(String listName, Collection<String> nicks) {
         Jedis jedis = pool.getResource();
-        try
-        {
+        try {
             String[] nicksArray = new String[nicks.size()];
-            nicks.toArray( nicksArray );
-            jedis.sadd( keyOfUserlistSetsPrefix + listName, nicksArray );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+            nicks.toArray(nicksArray);
+            jedis.sadd(keyOfUserlistSetsPrefix + listName, nicksArray);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -63,18 +53,14 @@ public class UserlistDB
      * @param noun The name of the list param The set of nicks for the list
      * @param nicks The nicks to remove
      */
-    public static void removeUsersFrom( String listName, Collection<String> nicks )
-    {
+    public static void removeUsersFrom(String listName, Collection<String> nicks) {
         Jedis jedis = pool.getResource();
-        try
-        {
+        try {
             String[] nicksArray = new String[nicks.size()];
-            nicks.toArray( nicksArray );
-            jedis.srem( keyOfUserlistSetsPrefix + listName, nicksArray );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+            nicks.toArray(nicksArray);
+            jedis.srem(keyOfUserlistSetsPrefix + listName, nicksArray);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -83,31 +69,26 @@ public class UserlistDB
      * 
      * @return The set of userlists
      */
-    public static Set<String> getLists()
-    {
+    public static Set<String> getLists() {
         Jedis jedis = pool.getResource();
-        try
-        {
+        try {
             // KEYS is O(n) operation, so it won't scale propery for large numbers of database keys.
             // We're going to use it here however, as the number of keys in our database should never get large enough
             // for this to matter, and the alternative of maintaining a set of userlists has the potential to be buggy.
-            Set<String> rawlists = jedis.keys( keyOfUserlistSetsPrefix + "*" );
+            Set<String> rawlists = jedis.keys(keyOfUserlistSetsPrefix + "*");
 
             Set<String> lists = new HashSet<String>();
 
             // Strip the prefix from each of the keys to isolate the list name
             int cut = keyOfUserlistSetsPrefix.length();
-            for ( String rawlist : rawlists )
-            {
-                String list = rawlist.substring( cut );
-                lists.add( list );
+            for (String rawlist : rawlists) {
+                String list = rawlist.substring(cut);
+                lists.add(list);
             }
 
             return lists;
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 }

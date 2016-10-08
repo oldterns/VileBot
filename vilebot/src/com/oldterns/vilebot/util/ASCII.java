@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.util;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /*Copyright (c) 2011 Aravind Rao

@@ -16,26 +16,20 @@ import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.db.ExcuseDB;
 
 @HandlerContainer
-public class Excuses
-{
-    private static final Pattern excusePattern = Pattern.compile( "!excuse" );
+public class Excuses {
+    private static final Pattern excusePattern = Pattern.compile("!excuse");
 
     @Handler
-    private void excusesQuery( ReceivePrivmsg event )
-    {
+    private void excusesQuery(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = excusePattern.matcher( text );
+        Matcher matcher = excusePattern.matcher(text);
 
-        if ( matcher.matches() )
-        {
+        if (matcher.matches()) {
             String excuse = ExcuseDB.getRandExcuse();
-            if ( excuse != null )
-            {
-                event.reply( excuse );
-            }
-            else
-            {
-                event.reply( "No excuses available" );
+            if (excuse != null) {
+                event.reply(excuse);
+            } else {
+                event.reply("No excuses available");
             }
         }
     }

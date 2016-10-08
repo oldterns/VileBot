@@ -14,40 +14,36 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
 @HandlerContainer
-public class Help
-{
-    private static final Pattern helpPattern = Pattern.compile( "!admin help" );
+public class Help {
+    private static final Pattern helpPattern = Pattern.compile("!admin help");
 
     private static final String helpMessage = generateHelpMessage();
 
     @Handler
-    private void adminHelp( ReceivePrivmsg event )
-    {
+    private void adminHelp(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = helpPattern.matcher( text );
+        Matcher matcher = helpPattern.matcher(text);
 
-        if ( matcher.matches() )
-        {
-            event.replyPrivately( helpMessage );
+        if (matcher.matches()) {
+            event.replyPrivately(helpMessage);
         }
     }
 
-    private static String generateHelpMessage()
-    {
+    private static String generateHelpMessage() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "Available Commands:" );
+        sb.append("Available Commands:");
 
-        sb.append( " { !admin help }" );
-        sb.append( " { !admin ping }" );
-        sb.append( " { !admin auth <user> <pass> }" );
-        sb.append( " { !admin quit }" );
-        sb.append( " { !admin nick <nick> }" );
-        sb.append( " { !admin op <nick> }" );
-        sb.append( " { !admin unrank <noun> }" );
-        sb.append( " { !admin unop <nick> }" );
-        sb.append( " { !admin setadmin <nick> <pass> }" );
-        sb.append( " { !admin remadmin <nick> }" );
+        sb.append(" { !admin help }");
+        sb.append(" { !admin ping }");
+        sb.append(" { !admin auth <user> <pass> }");
+        sb.append(" { !admin quit }");
+        sb.append(" { !admin nick <nick> }");
+        sb.append(" { !admin op <nick> }");
+        sb.append(" { !admin unrank <noun> }");
+        sb.append(" { !admin unop <nick> }");
+        sb.append(" { !admin setadmin <nick> <pass> }");
+        sb.append(" { !admin remadmin <nick> }");
 
         return sb.toString();
     }

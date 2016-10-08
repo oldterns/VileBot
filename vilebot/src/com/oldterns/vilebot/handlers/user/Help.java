@@ -14,9 +14,8 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
 @HandlerContainer
-public class Help
-{
-    private static final Pattern helpPattern = Pattern.compile( "!help" );
+public class Help {
+    private static final Pattern helpPattern = Pattern.compile("!help");
 
     private static final String helpMessage = generateHelpMessage();
 
@@ -24,70 +23,67 @@ public class Help
      * Reply to user !help command with help info
      */
     @Handler
-    private void userHelp( ReceivePrivmsg event )
-    {
+    private void userHelp(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = helpPattern.matcher( text );
+        Matcher matcher = helpPattern.matcher(text);
 
-        if ( matcher.matches() )
-        {
-            event.replyPrivately( helpMessage );
+        if (matcher.matches()) {
+            event.replyPrivately(helpMessage);
         }
     }
 
-    private static String generateHelpMessage()
-    {
+    private static String generateHelpMessage() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "Available Commands:" );
+        sb.append("Available Commands:");
 
-        sb.append( "  General:" );
-        sb.append( " { !help }" );
-        sb.append( " { !ping }" );
-        sb.append( "  Karma:" );
-        sb.append( " { noun++ }" );
-        sb.append( " { noun-- }" );
-        sb.append( " { !rank <noun> }" );
-        sb.append( " { !revrank <place> }" );
-        sb.append( " { !rankn <place> }" );
-        sb.append( " { !revrankn <place> }" );
-        sb.append( " { !topthree }" );
-        sb.append( " { !bottomthree }" );
-        sb.append( " { !roll [for] [<karma wager>] }" );
-        sb.append( " { !rollcancel }" );
-        sb.append( "  Fun:" );
-        sb.append( "  { !jeopardy }" );
-        sb.append( "  { !whatis <answer to jeopardy question>}" );
-        sb.append( "  { !whois <answer to jeopardy question>}" );
-        sb.append( "  Karma:" );
-        sb.append( "  Facts/Quotes:" );
-        sb.append( " { !fact <noun> }" );
-        sb.append( " { !quote <noun> }" );
-        sb.append( " { !factadd <noun> <quote> }" );
-        sb.append( " { !quoteadd <noun> <quote> }" );
-        sb.append( "\n" );
-        sb.append( "{ !factsearch <noun> <regex> }" );
-        sb.append( " { !quotesearch <noun> <regex> }" );
-        sb.append( "  Utility:" );
-        sb.append( " { s/foo/bar[/[g] [<noun>]] }" );
-        sb.append( " { !decide [<noun>] {<prefix>} <choice1>[|<choice2>]... }" );
-        sb.append( " { !weather [<IATA code>] }" );
-        sb.append( " { !lessweather [<IATA code>] }" );
-        sb.append( " { !moreweather [<IATA code>] }" );
-        sb.append( " { !tellme <question> }" );
-        sb.append( " { !infoon <wikipedia query> }" );
-        sb.append( " { !ttc }" );
-        sb.append( "  Userlists:" );
-        sb.append( " { !list <listname> }" );
-        sb.append( " { !listadd <listname> <noun>[,|, | ][<noun2>]... }" );
-        sb.append( " { !listrem <listname> <noun>[,|, | ][<noun2>]... }" );
-        sb.append( " { listname: [message] }" );
-        sb.append( "  Fun:" );
-        sb.append( " { !excuse }" );
-        sb.append( " { !randommeme }" );
-        sb.append( " { !chuck }" );
-        sb.append( " { !dance }" );
-        sb.append( " { !speak }" );
+        sb.append("  General:");
+        sb.append(" { !help }");
+        sb.append(" { !ping }");
+        sb.append("  Karma:");
+        sb.append(" { noun++ }");
+        sb.append(" { noun-- }");
+        sb.append(" { !rank <noun> }");
+        sb.append(" { !revrank <place> }");
+        sb.append(" { !rankn <place> }");
+        sb.append(" { !revrankn <place> }");
+        sb.append(" { !topthree }");
+        sb.append(" { !bottomthree }");
+        sb.append(" { !roll [for] [<karma wager>] }");
+        sb.append(" { !rollcancel }");
+        sb.append("  Fun:");
+        sb.append("  { !jeopardy }");
+        sb.append("  { !whatis <answer to jeopardy question>}");
+        sb.append("  { !whois <answer to jeopardy question>}");
+        sb.append("  Karma:");
+        sb.append("  Facts/Quotes:");
+        sb.append(" { !fact <noun> }");
+        sb.append(" { !quote <noun> }");
+        sb.append(" { !factadd <noun> <quote> }");
+        sb.append(" { !quoteadd <noun> <quote> }");
+        sb.append("\n");
+        sb.append("{ !factsearch <noun> <regex> }");
+        sb.append(" { !quotesearch <noun> <regex> }");
+        sb.append("  Utility:");
+        sb.append(" { s/foo/bar[/[g] [<noun>]] }");
+        sb.append(" { !decide [<noun>] {<prefix>} <choice1>[|<choice2>]... }");
+        sb.append(" { !weather [<IATA code>] }");
+        sb.append(" { !lessweather [<IATA code>] }");
+        sb.append(" { !moreweather [<IATA code>] }");
+        sb.append(" { !tellme <question> }");
+        sb.append(" { !infoon <wikipedia query> }");
+        sb.append(" { !ttc }");
+        sb.append("  Userlists:");
+        sb.append(" { !list <listname> }");
+        sb.append(" { !listadd <listname> <noun>[,|, | ][<noun2>]... }");
+        sb.append(" { !listrem <listname> <noun>[,|, | ][<noun2>]... }");
+        sb.append(" { listname: [message] }");
+        sb.append("  Fun:");
+        sb.append(" { !excuse }");
+        sb.append(" { !randommeme }");
+        sb.append(" { !chuck }");
+        sb.append(" { !dance }");
+        sb.append(" { !speak }");
         return sb.toString();
     }
 }

@@ -23,44 +23,37 @@ import org.jsoup.nodes.Document;
  * that don't include titles in the URL for SEO.
  */
 @HandlerContainer
-public class UrlTitleAnnouncer
-{
+public class UrlTitleAnnouncer {
 
     private static final Pattern urlPattern =
-        Pattern.compile( "((?:http|https)://(?:www.|)(?:(?:abstrusegoose|xkcd)\\.com|youtube\\.(?:com|ca)|youtu\\.be)[^ ]*)" );
+            Pattern.compile("((?:http|https)://(?:www.|)(?:(?:abstrusegoose|xkcd)\\.com|youtube\\.(?:com|ca)|youtu\\.be)[^ ]*)");
 
-    private static final Pattern titlePattern = Pattern.compile( "<title>(.*)</title>" );
+    private static final Pattern titlePattern = Pattern.compile("<title>(.*)</title>");
 
     @Handler
-    public void urlAnnouncer( ReceivePrivmsg event )
-    {
-        Matcher urlMatcher = urlPattern.matcher( event.getText() );
+    public void urlAnnouncer(ReceivePrivmsg event) {
+        Matcher urlMatcher = urlPattern.matcher(event.getText());
 
-        if ( urlMatcher.find() )
-        {
-            String title = scrapeURLHTMLTitle( urlMatcher.group( 1 ) );
-            event.reply( "'" + title + "'" );
+        if (urlMatcher.find()) {
+            String title = scrapeURLHTMLTitle(urlMatcher.group(1));
+            event.reply("'" + title + "'");
         }
     }
 
     /**
      * Accesses the source of a HTML page and looks for a title element
-     * 
+     *
      * @param url http URI String
      * @return String of text between the first <title> tag group on the page, empty if error.
      */
-    private String scrapeURLHTMLTitle( String url )
-    {
+    private String scrapeURLHTMLTitle(String url) {
         String title = "";
 
-        try
-        {
-            Document doc = Jsoup.connect( url ).get();
+        try {
+            Document doc = Jsoup.connect(url).get();
             title = doc.title();
-        }
-        catch ( IOException x )
-        {
-            System.err.format( "scrapeURLHTMLTitle BufferedReader error: %s%n", x );
+        } catch (IOException x) {
+            System.err.format("scrapeURLHTMLTitle BufferedReader error: %s%n", x);
         }
 
         return title;

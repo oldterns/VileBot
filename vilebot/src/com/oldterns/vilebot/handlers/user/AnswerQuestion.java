@@ -25,15 +25,14 @@ import java.util.regex.Pattern;
 
 @HandlerContainer
 public class AnswerQuestion {
-
     private static final Pattern questionPattern = Pattern.compile("^!(tellme)\\s(.+)$");
     private static final String API_KEY = Vilebot.getConfig().get("wolframKey");
     private static final int MAX_RESPONSE = 500;
 
     @Handler
-    private void tellMe( ReceivePrivmsg event ) {
+    private void tellMe(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = questionPattern.matcher( text );
+        Matcher matcher = questionPattern.matcher(text);
 
         if (matcher.matches()) {
             String question = matcher.group(2);
@@ -49,15 +48,14 @@ public class AnswerQuestion {
             String response = getContent(url);
             String answer = parseResponse(response);
             return answer;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return "I couldn't find an answer for that";
         }
     }
 
     String makeURL(String searchTerm) throws UnsupportedEncodingException {
         searchTerm = URLEncoder.encode(searchTerm, "UTF-8");
-        String url = "http://api.wolframalpha.com/v2/query?input="+searchTerm+"&appid="+API_KEY+
+        String url = "http://api.wolframalpha.com/v2/query?input=" + searchTerm + "&appid=" + API_KEY +
                 "&podstate=InstantaneousWeather:WeatherData__Show+metric";
         return url;
     }
@@ -66,12 +64,11 @@ public class AnswerQuestion {
         String content = null;
         URLConnection connection;
         try {
-            connection =  new URL(url).openConnection();
+            connection = new URL(url).openConnection();
             Scanner scanner = new Scanner(connection.getInputStream());
             scanner.useDelimiter("\\Z");
             content = scanner.next();
-        }
-        catch ( Exception ex ) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return content;

@@ -8,34 +8,24 @@ package com.oldterns.vilebot.db;
 
 import redis.clients.jedis.Jedis;
 
-public class ExcuseDB
-    extends RedisDB
-{
+public class ExcuseDB extends RedisDB {
     private static final String keyOfExcuseSet = "excuses";
 
-    public static void addExcuse( String excuse )
-    {
+    public static void addExcuse(String excuse) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            jedis.sadd( keyOfExcuseSet, excuse );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            jedis.sadd(keyOfExcuseSet, excuse);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
-    public static String getRandExcuse()
-    {
+    public static String getRandExcuse() {
         Jedis jedis = pool.getResource();
-        try
-        {
-            return jedis.srandmember( keyOfExcuseSet );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            return jedis.srandmember(keyOfExcuseSet);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 }

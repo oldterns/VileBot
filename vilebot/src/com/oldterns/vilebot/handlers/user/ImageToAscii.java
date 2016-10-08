@@ -21,33 +21,34 @@ public class ImageToAscii {
     private static final Pattern questionPattern = Pattern.compile("^!(convert)\\s(.+)$");
 
     @Handler
-    private void tellMe( ReceivePrivmsg event ) {
+    private void tellMe(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = questionPattern.matcher( text );
+        Matcher matcher = questionPattern.matcher(text);
 
         if (matcher.matches()) {
             String URL = matcher.group(2);
             try {
                 String image = convertImage(URL);
                 event.reply(image);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 event.reply("Could not convert image.");
             }
         }
     }
+
     String convertImage(String strURL) throws Exception {
         URL url = new URL(strURL);
         BufferedImage image = ImageIO.read(url);
         image = shrink(image);
         return new ASCII().convert(image);
     }
+
     BufferedImage shrink(BufferedImage image) {
         int MAX_WIDTH = 50;
         int height = image.getHeight();
         int width = image.getWidth();
-        float ratio = (float) height/width;
-        int newHeight = Math.round((MAX_WIDTH*ratio)*0.56f);
+        float ratio = (float) height / width;
+        int newHeight = Math.round((MAX_WIDTH * ratio) * 0.56f);
 
         BufferedImage newImage = new BufferedImage(MAX_WIDTH, newHeight, BufferedImage.TYPE_INT_RGB);
 

@@ -10,9 +10,7 @@ import java.util.Set;
 
 import redis.clients.jedis.Jedis;
 
-public class KarmaDB
-    extends RedisDB
-{
+public class KarmaDB extends RedisDB {
     private static final String keyOfKarmaSortedSet = "noun-karma";
 
     /**
@@ -21,16 +19,12 @@ public class KarmaDB
      * @param noun The noun to change the karma of
      * @param mod The amount to change the karma by, may be negative.
      */
-    public static void modNounKarma( String noun, int mod )
-    {
+    public static void modNounKarma(String noun, int mod) {
         Jedis jedis = pool.getResource();
-        try
-        {
-            jedis.zincrby( keyOfKarmaSortedSet, mod, noun );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            jedis.zincrby(keyOfKarmaSortedSet, mod, noun);
+        } finally {
+            pool.returnResource(jedis);
         }
     }
 
@@ -40,25 +34,20 @@ public class KarmaDB
      * @param noun The noun to query to karma of
      * @return Integer iff the noun has a defined value, else null
      */
-    public static Integer getNounKarma( String noun )
-    {
+    public static Integer getNounKarma(String noun) {
         Jedis jedis = pool.getResource();
         Double karma;
-        try
-        {
-            karma = jedis.zscore( keyOfKarmaSortedSet, noun );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            karma = jedis.zscore(keyOfKarmaSortedSet, noun);
+        } finally {
+            pool.returnResource(jedis);
         }
 
-        if ( karma == null )
-        {
+        if (karma == null) {
             return null;
         }
 
-        return Integer.valueOf( Long.valueOf( Math.round( karma ) ).intValue() );
+        return Integer.valueOf(Long.valueOf(Math.round(karma)).intValue());
     }
 
     /**
@@ -67,25 +56,20 @@ public class KarmaDB
      * @param noun The noun to query the rank of
      * @return Integer iff the noun has a defined value, else null
      */
-    public static Integer getNounRank( String noun )
-    {
+    public static Integer getNounRank(String noun) {
         Jedis jedis = pool.getResource();
         Long rank;
-        try
-        {
-            rank = jedis.zrevrank( keyOfKarmaSortedSet, noun );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            rank = jedis.zrevrank(keyOfKarmaSortedSet, noun);
+        } finally {
+            pool.returnResource(jedis);
         }
 
-        if ( rank == null )
-        {
+        if (rank == null) {
             return null;
         }
 
-        return Integer.valueOf( rank.intValue() + 1 );
+        return Integer.valueOf(rank.intValue() + 1);
     }
 
     /**
@@ -94,25 +78,20 @@ public class KarmaDB
      * @param noun The noun to query the reverse rank of
      * @return Integer iff the noun has a defined value, else null
      */
-    public static Integer getNounRevRank( String noun )
-    {
+    public static Integer getNounRevRank(String noun) {
         Jedis jedis = pool.getResource();
         Long rank;
-        try
-        {
-            rank = jedis.zrank( keyOfKarmaSortedSet, noun );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            rank = jedis.zrank(keyOfKarmaSortedSet, noun);
+        } finally {
+            pool.returnResource(jedis);
         }
 
-        if ( rank == null )
-        {
+        if (rank == null) {
             return null;
         }
 
-        return Integer.valueOf( rank.intValue() + 1 );
+        return Integer.valueOf(rank.intValue() + 1);
     }
 
     /**
@@ -121,12 +100,10 @@ public class KarmaDB
      * @param rank The rank to get the noun of.
      * @return String The noun iff the rank exists, else null.
      */
-    public static String getRankNoun( long rank )
-    {
-        Set<String> nouns = getRankNouns( rank - 1, rank );
+    public static String getRankNoun(long rank) {
+        Set<String> nouns = getRankNouns(rank - 1, rank);
 
-        if ( nouns != null && nouns.iterator().hasNext() )
-        {
+        if (nouns != null && nouns.iterator().hasNext()) {
             return nouns.iterator().next();
         }
         return null;
@@ -139,22 +116,17 @@ public class KarmaDB
      * @param upper The upper rank to get the nouns of.
      * @return String The noun iff the rank exists, else null.
      */
-    public static Set<String> getRankNouns( long lower, long upper )
-    {
+    public static Set<String> getRankNouns(long lower, long upper) {
         Set<String> nouns;
 
         Jedis jedis = pool.getResource();
-        try
-        {
-            nouns = jedis.zrevrange( keyOfKarmaSortedSet, lower, upper );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            nouns = jedis.zrevrange(keyOfKarmaSortedSet, lower, upper);
+        } finally {
+            pool.returnResource(jedis);
         }
 
-        if ( nouns == null || nouns.size() == 0 )
-        {
+        if (nouns == null || nouns.size() == 0) {
             return null;
         }
 
@@ -167,12 +139,10 @@ public class KarmaDB
      * @param rank The reversed rank to get the noun of.
      * @return String The noun iff the rank exists, else null.
      */
-    public static String getRevRankNoun( long rank )
-    {
-        Set<String> nouns = getRevRankNouns( rank - 1, rank );
+    public static String getRevRankNoun(long rank) {
+        Set<String> nouns = getRevRankNouns(rank - 1, rank);
 
-        if ( nouns != null && nouns.iterator().hasNext() )
-        {
+        if (nouns != null && nouns.iterator().hasNext()) {
             return nouns.iterator().next();
         }
         return null;
@@ -185,22 +155,17 @@ public class KarmaDB
      * @param upper The upper rank to get the nouns of.
      * @return String The noun iff the rank exists, else null.
      */
-    public static Set<String> getRevRankNouns( long lower, long upper )
-    {
+    public static Set<String> getRevRankNouns(long lower, long upper) {
         Set<String> nouns;
 
         Jedis jedis = pool.getResource();
-        try
-        {
-            nouns = jedis.zrange( keyOfKarmaSortedSet, lower, upper );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            nouns = jedis.zrange(keyOfKarmaSortedSet, lower, upper);
+        } finally {
+            pool.returnResource(jedis);
         }
 
-        if ( nouns == null || nouns.size() == 0 )
-        {
+        if (nouns == null || nouns.size() == 0) {
             return null;
         }
 
@@ -213,22 +178,17 @@ public class KarmaDB
      * @param noun The noun to remove, if it exists.
      * @return true iff the noun existed before removing it.
      */
-    public static boolean remNoun( String noun )
-    {
+    public static boolean remNoun(String noun) {
         Long existed;
 
         Jedis jedis = pool.getResource();
-        try
-        {
-            existed = jedis.zrem( keyOfKarmaSortedSet, noun );
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        try {
+            existed = jedis.zrem(keyOfKarmaSortedSet, noun);
+        } finally {
+            pool.returnResource(jedis);
         }
 
-        if ( existed == null || existed != 1 )
-        {
+        if (existed == null || existed != 1) {
             return false;
         }
         return true;
@@ -237,14 +197,11 @@ public class KarmaDB
     public static long getTotalKarma() {
         Jedis jedis = pool.getResource();
         long totalKarma;
-        try
-        {
-             Set<String> members = jedis.zrange(keyOfKarmaSortedSet, 0, -1);
+        try {
+            Set<String> members = jedis.zrange(keyOfKarmaSortedSet, 0, -1);
             totalKarma = sum(members, jedis);
-        }
-        finally
-        {
-            pool.returnResource( jedis );
+        } finally {
+            pool.returnResource(jedis);
         }
         return totalKarma;
     }
@@ -256,5 +213,4 @@ public class KarmaDB
         }
         return sum;
     }
-
 }

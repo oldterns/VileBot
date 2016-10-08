@@ -21,33 +21,27 @@ import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import net.engio.mbassy.listener.Handler;
 
 @HandlerContainer
-public class Auth
-{
-    private static final Pattern authPattern = Pattern.compile( "!admin auth (\\S+) (\\S+)" );
+public class Auth {
+    private static final Pattern authPattern = Pattern.compile("!admin auth (\\S+) (\\S+)");
 
-    private static final long sessionLength = TimeUnit.MINUTES.toMillis( 5 );
+    private static final long sessionLength = TimeUnit.MINUTES.toMillis(5);
 
     @Handler
-    private void auth( ReceivePrivmsg event )
-    {
+    private void auth(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher matcher = authPattern.matcher( text );
+        Matcher matcher = authPattern.matcher(text);
         String sender = event.getSender();
 
-        if ( matcher.matches() )
-        {
-            String username = BaseNick.toBaseNick( matcher.group( 1 ) );
-            String password = matcher.group( 2 );
+        if (matcher.matches()) {
+            String username = BaseNick.toBaseNick(matcher.group(1));
+            String password = matcher.group(2);
 
-            if ( GroupDB.isAdmin( username ) && PasswordDB.isValidPassword( username, password ) )
-            {
-                Sessions.addSession( sender, username, sessionLength );
-                event.reply( "Authentication successful. Session active for "
-                    + TimeUnit.MILLISECONDS.toMinutes( sessionLength ) + " minutes." );
-            }
-            else
-            {
-                event.reply( "Authentication failed" );
+            if (GroupDB.isAdmin(username) && PasswordDB.isValidPassword(username, password)) {
+                Sessions.addSession(sender, username, sessionLength);
+                event.reply("Authentication successful. Session active for "
+                        + TimeUnit.MILLISECONDS.toMinutes(sessionLength) + " minutes.");
+            } else {
+                event.reply("Authentication failed");
             }
         }
     }

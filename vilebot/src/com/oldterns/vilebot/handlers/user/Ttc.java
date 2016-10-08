@@ -35,11 +35,10 @@ public class Ttc {
 
     private void printAlerts(ReceivePrivmsg event) {
         try {
-            for(Element element : parseContent(getContent())) {
+            for (Element element : parseContent(getContent())) {
                 event.reply(element.text());
             }
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             event.reply("Unable to retrieve alerts.");
         }
     }
@@ -48,8 +47,8 @@ public class Ttc {
         Elements alerts = new Elements();
         Document doc = Jsoup.parse(content);
         Elements alertDivs = doc.select("div[class=alert-content]");
-        for(Element element : alertDivs) {
-            if(!element.text().toLowerCase().contains("elevator")) {
+        for (Element element : alertDivs) {
+            if (!element.text().toLowerCase().contains("elevator")) {
                 alerts.addAll(element.select("p[class=veh-replace]"));
             }
         }

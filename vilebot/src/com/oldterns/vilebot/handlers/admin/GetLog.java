@@ -27,7 +27,7 @@ public class GetLog {
         boolean showLogMatches = showLog.matcher(text).matches();
         boolean deleteLogMatches = deleteLog.matcher(text).matches();
 
-        if(GroupDB.isAdmin(username)) {
+        if (GroupDB.isAdmin(username)) {
             if (showLogMatches) {
                 event.reply("Getting log...");
                 event.reply(LogDB.getLog());
