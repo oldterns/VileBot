@@ -90,10 +90,11 @@ public class Help
         sb.append( " { !speak }" );
         sb.append( "\n" );
         sb.append( "Church:" );
-        sb.append( " { !donate <karma amount> }" );
         sb.append( " { !churchtotal }" );
-        sb.append( " { !topdonors }" );
+        sb.append( " { !donate <karma amount> }" );
+        sb.append( " { !gospel }" );
         sb.append( " { !settitle <noun> }" );
+        sb.append( " { !topdonors }" );
         return sb.toString();
     }
 }

@@ -5,6 +5,8 @@ import ca.szc.keratin.bot.annotation.AssignedBot;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.db.LogDB;
+import com.oldterns.vilebot.util.Zalgo;
+
 import net.engio.mbassy.listener.Handler;
 
 import java.util.*;
@@ -19,6 +21,7 @@ public class Markov {
 
     Map<String, List<String>> markovMap = new HashMap<String, List<String>>();
     private static final Pattern cmd = Pattern.compile("^!speak$");
+    private static final Pattern gospelPattern = Pattern.compile( "^!gospel$" );
 
     @AssignedBot
     private KeratinBot bot;
@@ -28,11 +31,16 @@ public class Markov {
 
         String text = message.getText();
         boolean markovMap = cmd.matcher(text).matches();
+        boolean isGospel = gospelPattern.matcher( text ).matches();
 
-        if(markovMap) {
+        if( markovMap || isGospel ) {
             train();
             String phrase = generatePhrase();
             phrase = mangleNicks(phrase, message);
+            if ( isGospel )
+            {
+                phrase = Zalgo.generate(phrase);
+            }
             message.reply(phrase);
         }
     }
