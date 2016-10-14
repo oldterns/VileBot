@@ -106,6 +106,12 @@ public class Church
         if ( matcher.matches() )
         {
            String donor = BaseNick.toBaseNick( event.getSender() );
+           if ( ChurchDB.getDonorRank( donor ) > 4 )
+           {
+               event.reply ( "You must be a top donor to set your title." );
+               return;
+           }
+
            String newTitle = matcher.group( 1 );
            if ( newTitle.length() > 40 )
            {
