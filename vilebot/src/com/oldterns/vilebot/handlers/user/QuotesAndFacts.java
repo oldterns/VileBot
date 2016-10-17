@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import com.oldterns.vilebot.db.ChurchDB;
 import com.oldterns.vilebot.db.QuoteFactDB;
 import com.oldterns.vilebot.util.BaseNick;
 import com.oldterns.vilebot.util.Ignore;
@@ -206,6 +207,14 @@ public class QuotesAndFacts
         String text = QuoteFactDB.getRandFact( noun );
         if ( text != null )
         {
+            if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
+            {
+                String title = ChurchDB.getDonorTitle( noun );
+                if ( title.trim().length() > 0 )
+                {
+                    noun = title;
+                }
+            }
             event.reply( formatFactReply( noun, text ) );
             return true;
         }
@@ -222,6 +231,14 @@ public class QuotesAndFacts
         String text = QuoteFactDB.getRandQuote( noun );
         if ( text != null )
         {
+            if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
+            {
+            String title = ChurchDB.getDonorTitle( noun );
+                if ( title.trim().length() > 0 )
+                {
+                    noun = title;
+                }
+            }
             event.reply( formatQuoteReply( noun, text ) );
             return true;
         }

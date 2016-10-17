@@ -31,14 +31,13 @@ public class Markov {
 
         String text = message.getText();
         boolean markovMap = cmd.matcher(text).matches();
-        boolean isGospel = gospelPattern.matcher( text ).matches();
+        boolean isGospel = gospelPattern.matcher(text).matches();
 
-        if( markovMap || isGospel ) {
+        if(markovMap || isGospel) {
             train();
             String phrase = generatePhrase();
             phrase = mangleNicks(phrase, message);
-            if ( isGospel )
-            {
+            if (isGospel) {
                 phrase = Zalgo.generate(phrase);
             }
             message.reply(phrase);

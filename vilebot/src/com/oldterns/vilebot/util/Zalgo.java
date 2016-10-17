@@ -2,6 +2,10 @@ package com.oldterns.vilebot.util;
 
 import java.util.Random;
 
+/*
+ * A modified version of the Zalgo generator found at:
+ * https://github.com/tomauty/ZalgoTextGenerator
+ */
 public class Zalgo {
 
     // Unicode chars that go up
@@ -14,13 +18,13 @@ public class Zalgo {
             '\u0351', /*     ͑     */        '\u0307', /*     ̇     */
             '\u0308', /*     ̈     */        '\u030a', /*     ̊     */
             '\u0342', /*     ͂     */        '\u0343', /*     ̓     */
-            '\u0344', /*     ̈  ́     */    '\u034a', /*     ͊     */
+            '\u0344', /*     ̈  ́   */        '\u034a', /*     ͊     */
             '\u034b', /*     ͋     */        '\u034c', /*     ͌     */
             '\u0303', /*     ̃     */        '\u0302', /*     ̂     */
             '\u030c', /*     ̌     */        '\u0350', /*     ͐     */
             '\u0300', /*     ̀     */        '\u0301', /*     ́     */
             '\u030b', /*     ̋     */        '\u030f', /*     ̏     */
-            '\u0312', /*     ̒   */            '\u0313', /*     ̓     */
+            '\u0312', /*     ̒     */        '\u0313', /*     ̓     */
             '\u0314', /*     ̔     */        '\u033d', /*     ̽     */
             '\u0309', /*     ̉     */        '\u0363', /*     ͣ     */
             '\u0364', /*     ͤ     */        '\u0365', /*     ͥ     */
@@ -70,7 +74,7 @@ public class Zalgo {
             '\u035f', /*     ͟     */        '\u0360', /*     ͠     */
             '\u0362', /*     ͢     */        '\u0338', /*     ̸     */
             '\u0337', /*     ̷     */        '\u0361', /*     ͡     */
-            '\u0489' /*     ҉_     */
+            '\u0489'  /*     ҉_    */
     };
 
     /*
@@ -78,46 +82,35 @@ public class Zalgo {
      * Arbitrarily adds 1-3 up/down/middle Zalgo characters or
      * 1 of each Zalgo character to each character in the source string
      */
-    public static String generate( String source )
-    {
+    public static String generate(String source) {
         StringBuilder result = new StringBuilder();
-        Random rand = new Random( System.currentTimeMillis() );
+        Random rand = new Random(System.currentTimeMillis());
+        for (int i = 0; i < source.length(); i++) {
+            result.append(source.charAt(i));
 
-        for ( int i = 0; i < source.length(); i++ )
-        {
-            result.append( source.charAt( i ) );
+            int nextCharDirection = rand.nextInt(4);
+            int charCount = rand.nextInt(3) + 1;
 
-            int nextCharDirection = rand.nextInt( 4 );
-            int charCount = rand.nextInt( 3 ) + 1;
-
-            if ( nextCharDirection == 0 )
-            {
-                for ( int j = 0; j < charCount; j++ )
-                {
-                    result.append( UP_CHARS[rand.nextInt( UP_CHARS.length )] );
+            if (nextCharDirection == 0) {
+                for (int j = 0; j < charCount; j++) {
+                    result.append(UP_CHARS[rand.nextInt(UP_CHARS.length)]);
                 }
-            }
-            else if ( nextCharDirection == 1 )
-            {
-                for( int j = 0; j < charCount; j++ )
-                {
-                    result.append( DOWN_CHARS[rand.nextInt( DOWN_CHARS.length )] );
+            } else if (nextCharDirection == 1) {
+                for (int j = 0; j < charCount; j++) {
+                    result.append(DOWN_CHARS[rand.nextInt(DOWN_CHARS.length)]);
                 }
             }
 
-            else if ( nextCharDirection == 2 )
-            {
-                for( int j = 0; j < charCount; j++ )
-                {
-                    result.append( MID_CHARS[rand.nextInt( MID_CHARS.length )] );
+            else if (nextCharDirection == 2) {
+                for (int j = 0; j < charCount; j++) {
+                    result.append(MID_CHARS[rand.nextInt(MID_CHARS.length)]);
                 }
             }
 
-            else if ( nextCharDirection == 3 )
-            {
-                result.append( UP_CHARS[rand.nextInt( UP_CHARS.length )] );
-                result.append( MID_CHARS[rand.nextInt( MID_CHARS.length )] );
-                result.append( DOWN_CHARS[rand.nextInt( DOWN_CHARS.length )] );
+            else if (nextCharDirection == 3) {
+                result.append(UP_CHARS[rand.nextInt(UP_CHARS.length)]);
+                result.append(MID_CHARS[rand.nextInt(MID_CHARS.length)]);
+                result.append(DOWN_CHARS[rand.nextInt(DOWN_CHARS.length)]);
             }
         }
 

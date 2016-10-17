@@ -4,16 +4,15 @@ import java.util.Set;
 
 import redis.clients.jedis.Jedis;
 
+/**
+ * This class is effectively a duplicate of KarmaDB, used for church related karma
+ */
 public class ChurchDB
     extends RedisDB
 {
-	/**
-	 * This class is effectively a duplicate of KarmaDB, used for church related karma
-	 */
-
-	private static final String keyOfChurchDonorSortedSet = "church-donor-karma";
-	private static final String keyOfChurchSortedSet = "church-karma";
-	private static final String keyOfChurchDonorTitleSortedSet = "church-title-";
+    private static final String keyOfChurchDonorSortedSet = "church-donor-karma";
+    private static final String keyOfChurchSortedSet = "church-karma";
+    private static final String keyOfChurchDonorTitleSortedSet = "church-title-";
 
     /**
      * Change the karma of a noun by an integer.
@@ -33,6 +32,7 @@ public class ChurchDB
             pool.returnResource( jedis );
         }
     }
+
     /**
      * Change the karma not affiliated with a donor
      *
@@ -92,7 +92,6 @@ public class ChurchDB
         {
             pool.returnResource( jedis );
         }
-
         if ( karma == null )
         {
             return null;
@@ -119,7 +118,6 @@ public class ChurchDB
         {
             pool.returnResource( jedis );
         }
-
         if ( rank == null )
         {
             return null;
@@ -157,7 +155,6 @@ public class ChurchDB
     public static Set<String> getDonorsByRanks( long lower, long upper )
     {
         Set<String> nouns;
-
         Jedis jedis = pool.getResource();
         try
         {
@@ -167,7 +164,6 @@ public class ChurchDB
         {
             pool.returnResource( jedis );
         }
-
         if ( nouns == null || nouns.size() == 0 )
         {
             return null;
@@ -179,7 +175,6 @@ public class ChurchDB
     public static boolean removeDonor( String noun )
     {
         Long existed;
-
         Jedis jedis = pool.getResource();
         try
         {
@@ -189,21 +184,22 @@ public class ChurchDB
         {
             pool.returnResource( jedis );
         }
-
         if ( existed == null || existed != 1 )
         {
             return false;
         }
+
         return true;
     }
 
-    public static long getTotalDonations() {
+    public static long getTotalDonations()
+    {
         Jedis jedis = pool.getResource();
         long totalKarma;
         try
         {
-            Set<String> members = jedis.zrange(keyOfChurchDonorSortedSet, 0, -1);
-            totalKarma = sum(members, jedis);
+            Set<String> members = jedis.zrange( keyOfChurchDonorSortedSet, 0, -1 );
+            totalKarma = sum( members, jedis );
         }
         finally
         {
@@ -212,13 +208,14 @@ public class ChurchDB
         return totalKarma;
     }
 
-    public static long getTotalNonDonations() {
+    public static long getTotalNonDonations()
+    {
          Jedis jedis = pool.getResource();
          long totalKarma;
          try
          {
-             Set<String> members = jedis.zrange(keyOfChurchSortedSet, 0, -1);
-             totalKarma = sum(members, jedis);
+             Set<String> members = jedis.zrange( keyOfChurchSortedSet, 0, -1 );
+             totalKarma = sum( members, jedis );
          }
          finally
          {
@@ -227,10 +224,11 @@ public class ChurchDB
          return totalKarma;
     }
 
-    private static long sum(Set<String> members, Jedis jedis) {
+    private static long sum( Set<String> members, Jedis jedis )
+    {
         long sum = 0;
-        for (String member : members) {
-            sum += jedis.zscore(keyOfChurchDonorSortedSet, member);
+        for ( String member : members ) {
+            sum += jedis.zscore( keyOfChurchDonorSortedSet, member );
         }
         return sum;
     }
