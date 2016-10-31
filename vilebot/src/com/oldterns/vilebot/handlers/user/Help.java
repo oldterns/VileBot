@@ -88,6 +88,13 @@ public class Help
         sb.append( " { !chuck }" );
         sb.append( " { !dance }" );
         sb.append( " { !speak }" );
+        sb.append( "\n" );
+        sb.append( "Church:" );
+        sb.append( " { !churchtotal }" );
+        sb.append( " { !donate <karma amount> }" );
+        sb.append( " { !gospel }" );
+        sb.append( " { !settitle <noun> }" );
+        sb.append( " { !topdonors }" );
         return sb.toString();
     }
 }

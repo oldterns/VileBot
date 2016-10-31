@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.oldterns.vilebot.db.ChurchDB;
 import com.oldterns.vilebot.db.GroupDB;
 import com.oldterns.vilebot.db.KarmaDB;
 import com.oldterns.vilebot.util.BaseNick;
@@ -64,7 +65,7 @@ public class Karma
         String noun = BaseNick.toBaseNick( event.getJoiner() );
 
         if ( !Ignore.getOnJoin().contains( noun ) )
-            replyWithRankAndKarma( noun, event );
+            replyWithRankAndKarma( noun, event, false, false, true);
     }
 
     @Handler
@@ -294,7 +295,12 @@ public class Karma
     }
 
     private static boolean replyWithRankAndKarma( String noun, Replyable event, boolean reverseOrder,
-                                                  boolean obfuscateNick )
+            boolean obfuscateNick )
+    {
+        return replyWithRankAndKarma( noun, event, reverseOrder, obfuscateNick, false );
+    }
+    private static boolean replyWithRankAndKarma( String noun, Replyable event, boolean reverseOrder,
+                                                  boolean obfuscateNick, boolean useTitle )
     {
         Integer nounRank;
         if ( reverseOrder )
@@ -303,6 +309,15 @@ public class Karma
             nounRank = KarmaDB.getNounRank( noun );
 
         Integer nounKarma = KarmaDB.getNounKarma( noun );
+
+        if ( useTitle && ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
+        {
+            String title = ChurchDB.getDonorTitle( noun );
+            if ( title.trim().length() > 0 )
+            {
+                noun = title;
+            }
+        }
 
         if ( nounKarma != null )
         {
