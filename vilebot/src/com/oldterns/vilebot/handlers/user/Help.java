@@ -63,6 +63,8 @@ public class Help
         sb.append( "  Facts/Quotes:" );
         sb.append( " { !fact <noun> }" );
         sb.append( " { !quote <noun> }" );
+        sb.append( " { !factdump <noun> }" );
+        sb.append( " { !quotedump <noun> }" );
         sb.append( " { !factadd <noun> <quote> }" );
         sb.append( " { !quoteadd <noun> <quote> }" );
         sb.append( "\n" );

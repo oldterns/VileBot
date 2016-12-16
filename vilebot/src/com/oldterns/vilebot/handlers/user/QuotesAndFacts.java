@@ -34,6 +34,8 @@ public class QuotesAndFacts
 
     private static final Pattern addPattern = Pattern.compile( "^!(fact|quote)add (" + nounPattern + ") (.+)$" );
 
+    private static final Pattern dumpPattern = Pattern.compile( "^!(fact|quote)dump (" + nounPattern + ")\\s*$" );
+
     private static final Pattern queryPattern = Pattern.compile( "^!(fact|quote) (" + nounPattern + ")\\s*$" );
 
     private static final Pattern searchPattern = Pattern.compile( "^!(fact|quote)search (" + nounPattern + ") (.*)$" );
@@ -62,6 +64,43 @@ public class QuotesAndFacts
             {
                 QuoteFactDB.addQuote( noun, text );
                 event.reply( formatQuoteReply( noun, text ) );
+            }
+        }
+    }
+
+    @Handler
+    private void factQuoteDump( ReceivePrivmsg event )
+    {
+        Matcher matcher = dumpPattern.matcher( event.getText() );
+
+        if ( matcher.matches() )
+        {
+            String mode = matcher.group( 1 );
+            String queried = BaseNick.toBaseNick( matcher.group( 2 ) );
+
+            if ( "fact".equals( mode ) )
+            {
+                Set<String> allFacts = QuoteFactDB.getFacts( queried );
+                if ( allFacts.isEmpty() )
+                {
+                    event.replyPrivately( queried + " has no facts." );
+                }
+                for ( String fact : allFacts )
+                {
+                    event.replyPrivately( formatFactReply( queried, fact ) );
+                }
+            }
+            else
+            {
+                Set<String> allQuotes = QuoteFactDB.getQuotes( queried );
+                if ( allQuotes.isEmpty() )
+                {
+                    event.replyPrivately( queried + " has no quotes." );
+                }
+                for ( String quote : allQuotes )
+                {
+                    event.replyPrivately( formatFactReply( queried, quote ) );
+                }
             }
         }
     }
