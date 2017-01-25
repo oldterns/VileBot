@@ -6,10 +6,13 @@ import java.util.Random;
  * A modified version of the Zalgo generator found at:
  * https://github.com/tomauty/ZalgoTextGenerator
  */
+
 public class Zalgo {
 
-    // Unicode chars that go up
-    private static final char[] UP_CHARS = {
+    private static final float Z_RATE = 0.9f;
+    private static final Random rand = new Random();
+
+    private static final char[] DIAS = {
             '\u030d', /*     ̍     */        '\u030e', /*     ̎     */
             '\u0304', /*     ̄     */        '\u0305', /*     ̅     */
             '\u033f', /*     ̿     */        '\u0311', /*     ̑     */
@@ -34,11 +37,7 @@ public class Zalgo {
             '\u036c', /*     ͬ     */        '\u036d', /*     ͭ     */
             '\u036e', /*     ͮ     */        '\u036f', /*     ͯ     */
             '\u033e', /*     ̾     */        '\u035b', /*     ͛     */
-            '\u0346', /*     ͆     */        '\u031a'  /*     ̚     */
-    };
-
-    // Unicode chars that go down
-    private static final char[] DOWN_CHARS = {
+            '\u0346', /*     ͆     */        '\u031a',  /*     ̚     */
             '\u0316', /*     ̖     */        '\u0317', /*     ̗     */
             '\u0318', /*     ̘     */        '\u0319', /*     ̙     */
             '\u031c', /*     ̜     */        '\u031d', /*     ̝     */
@@ -58,11 +57,7 @@ public class Zalgo {
             '\u034e', /*     ͎     */        '\u0353', /*     ͓     */
             '\u0354', /*     ͔     */        '\u0355', /*     ͕     */
             '\u0356', /*     ͖     */        '\u0359', /*     ͙     */
-            '\u035a', /*     ͚     */        '\u0323'  /*     ̣     */
-    };
-
-    // Unicode chars that stay in the middle
-    private static final char[] MID_CHARS = {
+            '\u035a', /*     ͚     */        '\u0323',  /*     ̣     */
             '\u0315', /*     ̕     */        '\u031b', /*     ̛     */
             '\u0340', /*     ̀     */        '\u0341', /*     ́     */
             '\u0358', /*     ͘     */        '\u0321', /*     ̡     */
@@ -77,44 +72,26 @@ public class Zalgo {
             '\u0489'  /*     ҉_    */
     };
 
-    /*
-     * Generate a Zalgo string
-     * Arbitrarily adds 1-3 up/down/middle Zalgo characters or
-     * 1 of each Zalgo character to each character in the source string
-     */
     public static String generate(String source) {
         StringBuilder result = new StringBuilder();
-        Random rand = new Random(System.currentTimeMillis());
         for (int i = 0; i < source.length(); i++) {
-            result.append(source.charAt(i));
-
-            int nextCharDirection = rand.nextInt(4);
-            int charCount = rand.nextInt(3) + 1;
-
-            if (nextCharDirection == 0) {
-                for (int j = 0; j < charCount; j++) {
-                    result.append(UP_CHARS[rand.nextInt(UP_CHARS.length)]);
-                }
-            } else if (nextCharDirection == 1) {
-                for (int j = 0; j < charCount; j++) {
-                    result.append(DOWN_CHARS[rand.nextInt(DOWN_CHARS.length)]);
-                }
-            }
-
-            else if (nextCharDirection == 2) {
-                for (int j = 0; j < charCount; j++) {
-                    result.append(MID_CHARS[rand.nextInt(MID_CHARS.length)]);
-                }
-            }
-
-            else if (nextCharDirection == 3) {
-                result.append(UP_CHARS[rand.nextInt(UP_CHARS.length)]);
-                result.append(MID_CHARS[rand.nextInt(MID_CHARS.length)]);
-                result.append(DOWN_CHARS[rand.nextInt(DOWN_CHARS.length)]);
-            }
+            char character = source.charAt(i);
+            result.append(getZalgo(character));
         }
 
         return result.toString();
+    }
+
+    private static String getZalgo(char c) {
+        if (rand.nextFloat() < Z_RATE) {
+            return c + randomDia();
+        }
+        return "" + c;
+    }
+
+    private static String randomDia() {
+        int index = rand.nextInt(DIAS.length);
+        return "" + DIAS[index];
     }
 
 }
