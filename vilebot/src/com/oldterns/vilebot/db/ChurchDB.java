@@ -199,7 +199,7 @@ public class ChurchDB
         try
         {
             Set<String> members = jedis.zrange( keyOfChurchDonorSortedSet, 0, -1 );
-            totalKarma = sum( members, jedis );
+            totalKarma = sum( keyOfChurchDonorSortedSet, members, jedis );
         }
         finally
         {
@@ -215,7 +215,7 @@ public class ChurchDB
          try
          {
              Set<String> members = jedis.zrange( keyOfChurchSortedSet, 0, -1 );
-             totalKarma = sum( members, jedis );
+             totalKarma = sum( keyOfChurchSortedSet, members, jedis );
          }
          finally
          {
@@ -224,11 +224,11 @@ public class ChurchDB
          return totalKarma;
     }
 
-    private static long sum( Set<String> members, Jedis jedis )
+    private static long sum( String set, Set<String> members, Jedis jedis )
     {
         long sum = 0;
         for ( String member : members ) {
-            sum += jedis.zscore( keyOfChurchDonorSortedSet, member );
+            sum += jedis.zscore( set, member );
         }
         return sum;
     }

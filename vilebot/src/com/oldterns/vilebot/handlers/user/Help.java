@@ -95,6 +95,7 @@ public class Help
         sb.append( " { !churchtotal }" );
         sb.append( " { !donate <karma amount> }" );
         sb.append( " { !gospel }" );
+        sb.append( " { !inquisit <noun> }" );
         sb.append( " { !settitle <noun> }" );
         sb.append( " { !topdonors }" );
         return sb.toString();
