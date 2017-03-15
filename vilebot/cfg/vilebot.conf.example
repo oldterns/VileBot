@@ -13,3 +13,5 @@ ircPort1=6697
 ircSslMode1=ON_NOHOST
 ircChannel1=#examplebot
 ircChannelAutoOp1=false
+OmgwordList=/path/to/word/list
+OmgwordChannel=#exampleGameChannel
