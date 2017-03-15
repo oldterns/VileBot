@@ -57,6 +57,7 @@ public class Help
         sb.append( " { !rollcancel }" );
         sb.append( "  Fun:" );
         sb.append( "  { !omgword }" );
+        sb.append( "  { !answer <answer to omgword>}" );
         sb.append( "  { !jeopardy }" );
         sb.append( "  { !whatis <answer to jeopardy question>}" );
         sb.append( "  { !whois <answer to jeopardy question>}" );
