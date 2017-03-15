@@ -44,7 +44,6 @@ public class Omgword {
                 finishGame(event, answer);
             }
         } catch(Exception e) {
-            event.reply("SPAGHETTI CODE!");
             e.printStackTrace();
             System.exit(1);
         }
@@ -108,7 +107,7 @@ public class Omgword {
     private ArrayList<String> loadWords() {
         try {
             ArrayList<String> words = new ArrayList<>();
-            List<String> lines = Files.readAllLines(Paths.get("/home/Jmatsuok/Workspace/VileBot/VileBot/vilebot/res/wordlist.txt"));
+            List<String> lines = Files.readAllLines(Paths.get(wordListPath));
             for (String line : lines) {
                 words.addAll(Arrays.asList(line.split(" ")));
             }
