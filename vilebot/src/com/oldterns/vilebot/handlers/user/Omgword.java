@@ -17,12 +17,16 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Based off of the omgword game from CasinoBot: http://casinobot.codeplex.com/
+ */
 @HandlerContainer
 public class Omgword {
 
-    private static final Pattern questionPattern = Pattern.compile( "!omgword" );
-    private static final Pattern answerPattern = Pattern.compile( "!answer (.*)" );
-    private static final String wordListPath = Vilebot.getConfig().get("OmgwordList");
+    private static final Pattern QUESTION_PATTERN = Pattern.compile( "!omgword" );
+    private static final Pattern ANSWER_PATTERN = Pattern.compile( "!answer (.*)" );
+    private static final String WORD_LIST_PATH = Vilebot.getConfig().get("OmgwordList");
+    private static final String OMGWORD_CHANNEL = Vilebot.getConfig().get("OmgwordChannel");
     private ArrayList<String> words = loadWords();
     private OmgwordGame currentGame;
     private String word;
@@ -34,12 +38,12 @@ public class Omgword {
     @Handler
     public void omgword(ReceivePrivmsg event) {
         String text = event.getText();
-        Matcher questionMatcher = questionPattern.matcher(text);
-        Matcher answerMatcher = answerPattern.matcher(text);
+        Matcher questionMatcher = QUESTION_PATTERN.matcher(text);
+        Matcher answerMatcher = ANSWER_PATTERN.matcher(text);
         try {
-            if (questionMatcher.matches()) {
+            if (questionMatcher.matches() && shouldStartGame(event)) {
                 startGame(event);
-            } else if (answerMatcher.matches()) {
+            } else if (answerMatcher.matches() && shouldStartGame(event)) {
                 String answer = answerMatcher.group(1);
                 finishGame(event, answer);
             }
@@ -47,6 +51,16 @@ public class Omgword {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    private boolean shouldStartGame(ReceivePrivmsg event) {
+        String actualChannel = event.getChannel();
+
+        if (OMGWORD_CHANNEL.equals(actualChannel)) {
+            return true;
+        }
+        event.reply("To play jeopardy join: " + OMGWORD_CHANNEL);
+        return false;
     }
 
     private synchronized void startGame(ReceivePrivmsg event) throws Exception {
@@ -107,7 +121,7 @@ public class Omgword {
     private ArrayList<String> loadWords() {
         try {
             ArrayList<String> words = new ArrayList<>();
-            List<String> lines = Files.readAllLines(Paths.get(wordListPath));
+            List<String> lines = Files.readAllLines(Paths.get(WORD_LIST_PATH));
             for (String line : lines) {
                 words.addAll(Arrays.asList(line.split(" ")));
             }
