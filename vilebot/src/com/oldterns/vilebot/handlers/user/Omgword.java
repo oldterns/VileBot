@@ -1,3 +1,5 @@
+package com.oldterns.vilebot.handlers.user;
+
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
