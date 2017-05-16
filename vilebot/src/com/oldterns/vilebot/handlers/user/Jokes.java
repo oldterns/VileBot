@@ -24,6 +24,8 @@ public class Jokes
     private static final Pattern listJokePattern = Pattern.compile( "!(randommeme|dance|chuck)" );
 
     private static final Pattern redditPattern = Pattern.compile( "(?i)reddit" );
+    
+    private static final Pattern containerPattern = Pattern.compile( "(?i)container" );
 
     private static final Random random = new Random();
 
@@ -32,14 +34,25 @@ public class Jokes
     private static final List<String> dances = generateDances();
 
     private static final List<String> chucks = generateChucks();
+    
+    private static final List<String> jokes = generateJokes();
+    
+    @Handler
+    private void containersIsLinux ( ReceivePrivmsg event) {
+    	String text = event.getText();
+    	Matcher matcher = containerPattern.matcher( text );
+    	if ( matcher.find() ) {
+    		event.reply( jokes.get( random.nextInt( jokes.size() ) ) );
+    	}
+    }
 
     @Handler
     private void redditLOD( ReceivePrivmsg event )
     {
         String text = event.getText();
-        Matcher matcher = redditPattern.matcher( text );
+        Matcher containerMatcher = redditPattern.matcher( text );
 
-        if ( matcher.find() )
+        if ( containerMatcher.matches() )
         {
             if ( random.nextInt( 10 ) > 6 )
             {
@@ -146,6 +159,36 @@ public class Jokes
         easter.add( "Buck, buck, buck." );
 
         return easter;
+    }
+    
+    private static List<String> generateJokes()
+    {
+        List<String> jokes = new ArrayList<String>();
+        jokes.add( "C O N T A I N E D");
+        jokes.add("H Y B R I D  C L O U D");
+        jokes.add("\"Linux is Containers and Containers is RHEL\"");
+        jokes.add("It can contain anything, even monster apps!");
+        jokes.add("I sell Container and Container accessories");
+        jokes.add("Do U Even Small VM bro?");
+        jokes.add("Y SO CONTAINED?");
+        jokes.add("Containers give me lyfe.");
+        jokes.add("Containers pay the bills.");
+        jokes.add("My name is yzhang and I'm a containerholic.");
+        jokes.add("\"Containers\"");
+        jokes.add("Keep your containers to yourself!");
+        jokes.add("*insert bad container joke here*");
+        jokes.add("AM I BEING CONTAINED?");
+        jokes.add("friggin' containers, how do they work?");
+        jokes.add("I put the \"I\" in contaIners");
+        jokes.add("DON'T CONTAZE ME BRO");
+        jokes.add("P A U L  C O R M I E R ");
+        jokes.add("Every day we stray farther from gods light.");
+        jokes.add("Please, contain yourself.");
+        jokes.add("PRESS Z TO DO A CONTAINER ROLL");
+        jokes.add("STOP. CONTAINER TIME");
+        jokes.add("Dat feel when you can only contain monster apps and not your feelings");
+
+        return jokes;
     }
 
 }

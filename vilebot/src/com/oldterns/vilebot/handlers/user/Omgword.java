@@ -61,7 +61,7 @@ public class Omgword {
         if (OMGWORD_CHANNEL.equals(actualChannel)) {
             return true;
         }
-        event.reply("To play jeopardy join: " + OMGWORD_CHANNEL);
+        event.reply("To play Omgword join: " + OMGWORD_CHANNEL);
         return false;
     }
 
