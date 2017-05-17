@@ -181,13 +181,13 @@ public class Jokes
         jokes.add("friggin' containers, how do they work?");
         jokes.add("I put the \"I\" in contaIners");
         jokes.add("DON'T CONTAZE ME BRO");
-        jokes.add("P A U L  C O R M I E R ");
         jokes.add("Every day we stray farther from gods light.");
         jokes.add("Please, contain yourself.");
         jokes.add("PRESS Z TO DO A CONTAINER ROLL");
         jokes.add("STOP. CONTAINER TIME");
         jokes.add("Dat feel when you can only contain monster apps and not your feelings");
-
+        jokes.add("- Refer to the Container Coloring Book");
+        
         return jokes;
     }
 
