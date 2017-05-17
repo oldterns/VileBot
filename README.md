@@ -84,3 +84,9 @@ Create a new application at https://apps.twitter.com
 Under the API Keys tab, create a new set of access tokens.
 
 Once generated, copy the API key, API secret, Access Token, and Access Token Secret into the appropriate variables in the UrlTweetAnnouncer class. Do not, at any point in time, commit these values.
+
+### External Files
+
+All external files should be placed inside the "files" folder. 
+
+For example, our "wordlist.txt" file used by our Omgword feature is stored there.
