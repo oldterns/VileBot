@@ -58,7 +58,7 @@ public class Omgword {
     private boolean shouldStartGame(ReceivePrivmsg event) {
         String actualChannel = event.getChannel();
 
-        if (OMGWORD_CHANNEL.equals(actualChannel)) {
+        if (OMGWORD_CHANNEL.equalsIgnoreCase(actualChannel)) {
             return true;
         }
         event.reply("To play Omgword join: " + OMGWORD_CHANNEL);

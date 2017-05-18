@@ -15,3 +15,5 @@ ircChannel1=#examplebot
 ircChannelAutoOp1=false
 OmgwordList=/path/to/word/list
 OmgwordChannel=#exampleGameChannel
+FortuneList=/path/to/fortune/list
+FortuneIndex=/path/to/fortune/index
