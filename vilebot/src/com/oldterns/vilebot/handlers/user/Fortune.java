@@ -22,9 +22,8 @@ import net.engio.mbassy.listener.Handler;
 public class Fortune {
     private static final Pattern FORTUNE_PATTERN = Pattern.compile( "^!fortune(.*)" );
     private static final String FORTUNE_LIST_PATH = Vilebot.getConfig().get("FortuneList");
-    private static final String FORTUNE_INDEX_PATH = Vilebot.getConfig().get("FortuneIndex");
     private ArrayList<String> fortune = loadFortunes();
-    private List<String> fortuneIndex = loadFortuneIndex();
+    private static final String DIRTY_ARG = "dirty";
     @Handler
     public void fortune(ReceivePrivmsg event) {
     	String text = event.getText();
@@ -34,8 +33,10 @@ public class Fortune {
                 String dirty = fortuneMatcher.group(1);
                 if ( dirty == null || dirty.isEmpty() ) {
                 	fortuneReply(event);
-                }
-
+                } 
+                if (dirty.equals(DIRTY_ARG)) {
+                	event.reply("oooo you dirty");
+                } 
     		}
     	} catch(Exception e) {
     		e.printStackTrace();
@@ -45,12 +46,8 @@ public class Fortune {
     
     
     private void fortuneReply(ReceivePrivmsg event) {
-    	int index = Integer.parseInt(fortuneIndex.get(new Random().nextInt(fortuneIndex.size()-1)));
-    	String line = fortune.get(index);
-    	while (!line.matches("%")) {
-	    	event.reply(line);
-	    	line = fortune.get(++index);
-    	}
+    	String randomFortune = fortune.get(new Random().nextInt(fortune.size()));
+    	event.reply(randomFortune);
     }
     
     
@@ -68,17 +65,5 @@ public class Fortune {
     	}
     	return null;
     }
-    
-    private List<String> loadFortuneIndex() {
-    	try {
-            String lines = new String(Files.readAllBytes(Paths.get(FORTUNE_INDEX_PATH)));
-    		return Arrays.asList(lines.split("\n"));
-    	} catch (Exception e) {
-            e.printStackTrace();
-    		System.exit(1);
-    	}
-    	return null;
-    }
-	
 }
 
