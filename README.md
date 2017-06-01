@@ -1,4 +1,5 @@
 # Vilebot
+[![Build Status](https://travis-ci.org/aptmac/VileBot.svg?branch=travis-ci)](https://travis-ci.org/aptmac/VileBot)
 
 ## Setup
 
