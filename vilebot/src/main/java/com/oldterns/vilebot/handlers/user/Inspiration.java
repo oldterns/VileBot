@@ -19,21 +19,21 @@ import net.engio.mbassy.listener.Handler;
  * Created by ipun on 15/05/16.
  */
 @HandlerContainer
-public class Fortune {
-    private static final Pattern FORTUNE_PATTERN = Pattern.compile( "^!fortune(.*)" );
-    private static final String FORTUNE_LIST_PATH = Vilebot.getConfig().get("FortuneList");
-    private static final String FORTUNE_INDEX_PATH = Vilebot.getConfig().get("FortuneIndex");
-    private ArrayList<String> fortune = loadFortunes();
-    private List<String> fortuneIndex = loadFortuneIndex();
+public class Inspiration {
+    private static final Pattern FORTUNE_PATTERN = Pattern.compile( "^!inspiration(.*)" );
+    private static final String FORTUNE_LIST_PATH = Vilebot.getConfig().get("InspirationList");
+    private static final String FORTUNE_INDEX_PATH = Vilebot.getConfig().get("InspirationIndex");
+    private ArrayList<String> inspiration = loadInspirations();
+    private List<String> inspirationIndex = loadInspirationIndex();
     @Handler
-    public void fortune(ReceivePrivmsg event) {
+    public void inspiration(ReceivePrivmsg event) {
     	String text = event.getText();
-    	Matcher fortuneMatcher = FORTUNE_PATTERN.matcher(text);
+    	Matcher inspirationMatcher = FORTUNE_PATTERN.matcher(text);
     	try {
-    		if (fortuneMatcher.matches()) {
-                String dirty = fortuneMatcher.group(1);
+    		if (inspirationMatcher.matches()) {
+                String dirty = inspirationMatcher.group(1);
                 if ( dirty == null || dirty.isEmpty() ) {
-                	fortuneReply(event);
+                	inspirationReply(event);
                 }
 
     		}
@@ -44,24 +44,24 @@ public class Fortune {
     }
     
     
-    private void fortuneReply(ReceivePrivmsg event) {
-    	int index = Integer.parseInt(fortuneIndex.get(new Random().nextInt(fortuneIndex.size()-1)));
-    	String line = fortune.get(index);
+    private void inspirationReply(ReceivePrivmsg event) {
+    	int index = Integer.parseInt(inspirationIndex.get(new Random().nextInt(inspirationIndex.size()-1)));
+    	String line = inspiration.get(index);
     	while (!line.matches("%")) {
 	    	event.reply(line);
-	    	line = fortune.get(++index);
+	    	line = inspiration.get(++index);
     	}
     }
     
     
-    private ArrayList<String> loadFortunes() {
+    private ArrayList<String> loadInspirations() {
     	try {
-    		ArrayList<String> fortunes = new ArrayList<>();
+    		ArrayList<String> inspirations = new ArrayList<>();
             List<String> lines = Files.readAllLines(Paths.get(FORTUNE_LIST_PATH));
     		for (String line : lines) {
-    			fortunes.add(line);
+    			inspirations.add(line);
     		}
-    		return fortunes;
+    		return inspirations;
     	} catch (Exception e) {
             e.printStackTrace();
     		System.exit(1);
@@ -69,7 +69,7 @@ public class Fortune {
     	return null;
     }
     
-    private List<String> loadFortuneIndex() {
+    private List<String> loadInspirationIndex() {
     	try {
             String lines = new String(Files.readAllBytes(Paths.get(FORTUNE_INDEX_PATH)));
     		return Arrays.asList(lines.split("\n"));

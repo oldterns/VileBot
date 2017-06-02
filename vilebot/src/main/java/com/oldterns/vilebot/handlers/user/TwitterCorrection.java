@@ -31,7 +31,7 @@ public class TwitterCorrection
             StringBuilder sb = new StringBuilder();
 
             sb.append( "You seem to be using twitter addressing syntax. On IRC you would say this instead: " );
-            sb.append( word );
+            sb.append( word.replaceAll( "[^A-Za-z0-9]$", "" ) );
             sb.append( ": message" );
 
             event.replyDirectly( sb.toString() );
