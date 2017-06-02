@@ -1,0 +1,8 @@
+language: java
+dist: trusty
+jdk: openjdk8
+before_install:
+    - git clone https://github.com/ASzc/keratin-irc.git
+install: true
+script: mvn package
+
