@@ -19,7 +19,7 @@ public class TwitterCorrection
     private static final Pattern twitterSyntaxUsePattern = Pattern.compile( "(?:^|\\s+)[@](\\S+)(?:\\s|:|)" );
 
     @Handler
-    private void twitterBeGone( ReceivePrivmsg event )
+    public void twitterBeGone( ReceivePrivmsg event )
     {
         String text = event.getText();
         Matcher matcher = twitterSyntaxUsePattern.matcher( text );
