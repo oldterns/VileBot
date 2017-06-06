@@ -246,7 +246,7 @@ public class QuotesAndFacts
         String text = QuoteFactDB.getRandFact( noun );
         if ( text != null )
         {
-            if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
+            if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) <= 4 )
             {
                 String title = ChurchDB.getDonorTitle( noun );
                 if ( title.trim().length() > 0 )
@@ -270,7 +270,7 @@ public class QuotesAndFacts
         String text = QuoteFactDB.getRandQuote( noun );
         if ( text != null )
         {
-            if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
+            if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) <= 4 )
             {
             String title = ChurchDB.getDonorTitle( noun );
                 if ( title.trim().length() > 0 )
