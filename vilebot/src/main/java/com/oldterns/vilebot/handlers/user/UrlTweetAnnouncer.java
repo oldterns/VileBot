@@ -63,16 +63,16 @@ public class UrlTweetAnnouncer
     @Handler
     public void urlAnnouncer( ReceivePrivmsg event )
     {
-        if ( consumerKey == null || consumerSecret == null || accessToken == null || accessTokenSecret == null )
-        {
-            event.reply("Sorry, I can't read that tweet because my maintainer is a moron. And I wouldn't want to read it, anyway.");
-            return;
-        }
-
         Matcher urlMatcher = urlPattern.matcher( event.getText() );
 
         if ( urlMatcher.find() )
         {
+            if ( consumerKey == null || consumerSecret == null || accessToken == null || accessTokenSecret == null )
+            {
+                event.reply("Sorry, I can't read that tweet because my maintainer is a moron. And I wouldn't want to read it, anyway.");
+                return;
+            }
+
             String title = scrapeURLHTMLTitle( urlMatcher.group( 1 ) );
             event.reply("' " + title + " '");
         }
