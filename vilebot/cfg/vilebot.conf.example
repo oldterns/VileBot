@@ -14,20 +14,20 @@ ircSslMode1=ON_NOHOST
 ircChannel1=#examplebot
 ircChannelAutoOp1=false
 
-# Retrieve these sections from https://apps.twitter.com 
-# for twitter integration. 
+# Retrieve these sections from https://apps.twitter.com
+# for twitter integration.
 consumerKey=
 consumerSecret=
 accessToken=
 accessTokenSecret=
 
-# Retrieve from https://words.bighugelabs.com/getkey.php 
+# Retrieve from https://words.bighugelabs.com/getkey.php
 # for jaziz intergration.
 thesaurusKey=
 
-# Retrieve from https://developer.wolframalpha.com/portal/apisignup.html 
+# Retrieve from https://developer.wolframalpha.com/portal/apisignup.html
 # for answerQuestion intergration.
-thesaurusKey=
+wolframKey=
 
 jeopardyChannel=#exampleGameChannel
 OmgwordList=/path/to/word/list
