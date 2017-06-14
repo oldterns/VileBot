@@ -130,6 +130,7 @@ public class Trivia {
         private String question;
         private String answer;
         private String category;
+        private int invalidFlag;
 
         private static final String API_URL = "http://jservice.io/api/random";
 
@@ -216,7 +217,8 @@ public class Trivia {
             String triviaContent = getQuestionContent();
             JSONObject triviaJSON = new JSONArray(triviaContent).getJSONObject(0);
             String question = triviaJSON.getString("question").trim();
-            if (question.equals("") || question.contains("seen here")) {
+            boolean invalidFlag = !(triviaJSON.getString("invalid_count") == null);
+            if (question.equals("") || question.contains("seen here") || invalidFlag) {
                 return getQuestionJSON();
             }
             return triviaJSON;
