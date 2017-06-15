@@ -24,7 +24,7 @@ import net.engio.mbassy.listener.Handler;
 public class Countdown {
 
     private static final String COUNTDOWN_CHANNEL = Vilebot.getConfig().get("countdownChannel");
-	private static final long TIMEOUT  = 100000L;
+	private static final long TIMEOUT  = 30000L;
 	
 	
 	private static final Pattern countdownPattern = Pattern.compile("^!countdown");
@@ -73,7 +73,7 @@ public class Countdown {
 		}
 		
 		private String getCountdownIntro() {
-			return "Welcome to Countdown!\n"+getQuestion()+"\n Good luck! You have one minute.";
+			return "Welcome to Countdown!\n"+getQuestion()+"\n Good luck! You have 30 seconds.";
 		}
 		
 		private String getQuestion() {
@@ -88,12 +88,19 @@ public class Countdown {
 		// TODO: try finding a possible answer
 		
 		private boolean isCorrect(String answer) {
-			if (hasCorrectNumbers(answer)) {
+			if (hasCorrectNumbers(answer) && noSpecialCharacters(answer)) {
+				
+				
+				
 				return true;
-			}
+			} else {
 			return false;
+			}
 		}
 		
+		private boolean noSpecialCharacters(String answer) {
+			return answer.matches("^[0-9*+\\-\\/()\\W]+$");
+		}
 		
 		private boolean hasCorrectNumbers(String answer) {
 		// get all integers and confirm they are the same as the valid choices
@@ -111,7 +118,7 @@ public class Countdown {
 		}
 		
 		private String getTimeoutString() {
-            return "Your one minute is up! A possible answer would've been:\n PLACEHOLDER";
+            return "Your 30 seconds is up! A possible answer would've been:\n PLACEHOLDER";
 		}
 		
 		private String alreadyPlaying() {
