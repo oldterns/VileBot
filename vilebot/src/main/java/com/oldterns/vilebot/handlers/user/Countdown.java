@@ -14,6 +14,7 @@ import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.db.KarmaDB;
 import com.oldterns.vilebot.util.BaseNick;
 
+import bsh.EvalError;
 import bsh.Interpreter;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
@@ -103,6 +104,10 @@ public class Countdown {
 			}
 			Collections.sort(contestantSolution);
 			return (contestantSolution.equals(getQuestionNumbers()));
+		}
+		
+		private int interpretedAnswer(String answer) {	
+			return 0;
 		}
 		
 		private String getTimeoutString() {
