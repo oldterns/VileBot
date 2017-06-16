@@ -3,8 +3,10 @@ package com.oldterns.vilebot.handlers.user;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -55,10 +57,17 @@ public class Countdown {
 			// target number should be between 100-999.
 			targetNumber = rand.nextInt(899) + 100;
 			// have karma stakes random from 1-10 for now. Not working yet.
-			stakes = rand.nextInt(10);
+			stakes = rand.nextInt(11);
 			interpreter = new Interpreter();
 		}
+		
+		private int getLargeNumberCount() {
+			return largeNumberCount;
+		}
 
+		private int getSmallNumberCount() {
+			return smallNumberCount;
+		}
 		
 		private int getTargetNumber() {
 			return targetNumber;
@@ -85,14 +94,19 @@ public class Countdown {
 			Collections.shuffle(SMALL_NUMBERS);
 		}
 		
-		// TODO: try finding a possible answer
 		
 		private boolean isCorrect(String answer) {
-			if (hasCorrectNumbers(answer) && noSpecialCharacters(answer)) {
-				
-				
-				
-				return true;
+			if (noSpecialCharacters(answer) && hasCorrectNumbers(answer)) {
+				interpreter = new Interpreter();
+				try {
+					interpreter.eval("result = "+answer);
+					System.out.println("result = "+interpreter.get("result"));
+					return true;
+					
+				} catch (EvalError e) {
+					e.printStackTrace();
+					return false;
+				}				
 			} else {
 			return false;
 			}
@@ -103,16 +117,20 @@ public class Countdown {
 		}
 		
 		private boolean hasCorrectNumbers(String answer) {
-		// get all integers and confirm they are the same as the valid choices
 			List <String> numList = Arrays.asList(answer.replaceAll("[^-?0-9]+", " ").trim().split(" "));
-			List <Integer> contestantSolution = new ArrayList<>();
+			List <Integer> questionNums = new ArrayList<Integer>(getQuestionNumbers());
 			for (String num : numList) {
-				contestantSolution.add(Integer.valueOf(num));
+				int number = Integer.valueOf(num);
+				if (questionNums.contains(number)) {
+					questionNums.remove((Integer)number);
+				} else {
+					return false;
+				}
 			}
-			Collections.sort(contestantSolution);
-			return (contestantSolution.equals(getQuestionNumbers()));
-		}
+			return true;
+			}
 		
+		// TODO: try finding a possible answer
 		private int interpretedAnswer(String answer) {	
 			return 0;
 		}
@@ -153,6 +171,7 @@ public class Countdown {
 	private synchronized void startCountdownGame(ReceivePrivmsg event) {
 		if (currGame == null) {
 			currGame = new CountdownGame();
+			currGame.interpretedAnswer("hello");
 			event.reply(currGame.getCountdownIntro());
 			startTimer(event);
 		} else {
