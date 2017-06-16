@@ -97,18 +97,21 @@ public class Countdown {
 		
 		private boolean isCorrect(String answer) {
 			if (noSpecialCharacters(answer) && hasCorrectNumbers(answer)) {
-				interpreter = new Interpreter();
-				try {
-					interpreter.eval("result = "+answer);
-					System.out.println("result = "+interpreter.get("result"));
-					return true;
-					
-				} catch (EvalError e) {
-					e.printStackTrace();
-					return false;
-				}				
+				int result = interpretedAnswer(answer);
+				return ((targetNumber-10) <= result && result <= (targetNumber+10));
 			} else {
-			return false;
+				return false;
+			}
+		}
+		
+		private int interpretedAnswer(String answer) {
+			interpreter = new Interpreter();
+			try {
+				interpreter.eval("result = "+answer);
+				return ((int) interpreter.get("result"));
+			} catch (EvalError e) {
+				e.printStackTrace();
+				return 0;
 			}
 		}
 		
@@ -129,11 +132,6 @@ public class Countdown {
 			}
 			return true;
 			}
-		
-		// TODO: try finding a possible answer
-		private int interpretedAnswer(String answer) {	
-			return 0;
-		}
 		
 		private String getTimeoutString() {
             return "Your 30 seconds is up! A possible answer would've been:\n PLACEHOLDER";
