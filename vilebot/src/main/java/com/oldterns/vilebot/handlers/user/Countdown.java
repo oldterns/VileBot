@@ -53,7 +53,6 @@ public class Countdown {
 			smallNumberCount = VALID_NUMBER_COUNT - largeNumberCount;
 			questionNumbers.addAll(LARGE_NUMBERS.subList(0, largeNumberCount));
 			questionNumbers.addAll(SMALL_NUMBERS.subList(0, smallNumberCount));
-			Collections.sort(questionNumbers);
 			// target number should be between 100-999.
 			targetNumber = rand.nextInt(899) + 100;
 			// have karma stakes random from 1-10 for now. Not working yet.
