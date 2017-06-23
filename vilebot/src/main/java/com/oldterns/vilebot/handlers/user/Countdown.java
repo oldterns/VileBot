@@ -62,7 +62,7 @@ public class Countdown {
 			questionNumbers.addAll(LARGE_NUMBERS.subList(0, largeNumberCount));
 			questionNumbers.addAll(SMALL_NUMBERS.subList(0, smallNumberCount));
 			// target number should be between 100-999.
-			targetNumber = rand.nextInt(899) + 100;
+			targetNumber = rand.nextInt(901) + 100;
 			// have karma stakes random from 1-10 for now. Not working yet.
 			stakes = rand.nextInt(11);
 		}
@@ -101,27 +101,31 @@ public class Countdown {
 		}
 		
 		private int interpretedAnswer(String answer) throws Exception {
-			if (noSpecialCharacters(answer) && hasCorrectNumbers(answer)) {
-				interpreter = new Interpreter();
-				try {
-					interpreter.eval("result = "+answer);
-					return ((int) interpreter.get("result"));
-				} catch (EvalError e) {
-					e.printStackTrace();
-					throw e;
+			if (noSpecialCharacters(answer)) {
+				if (hasCorrectNumbers(answer)) {
+					interpreter = new Interpreter();
+					try {
+						interpreter.eval("result = "+answer);
+						return ((int) interpreter.get("result"));
+					} catch (EvalError e) {
+						e.printStackTrace();
+						throw e;
+					}
+				} else {
+					throw new Exception("wrong numbers are included in solution");
 				}
 			} else {
-				throw new ArithmeticException("invalid answer string");
+				throw new Exception("special characters are included in solution");
 			}
 		}
 		
 		private boolean noSpecialCharacters(String answer) {
-			return answer.matches("^[0-9*+\\-\\/()\\W]+$");
+			return answer.matches("^[-*+/()\\s\\d]+$");
 		}
 		
 		private boolean hasCorrectNumbers(String answer) {
-			List <String> numList = Arrays.asList(answer.replaceAll("[^-?0-9]+", " ").trim().split(" "));
-			List <Integer> questionNums = new ArrayList<Integer>(getQuestionNumbers());
+			String [] numList = answer.replaceAll("[^\\d]+", " ").trim().split(" ");
+			List <Integer> questionNums = new ArrayList	<Integer>(getQuestionNumbers());
 			for (String num : numList) {
 				int number = Integer.valueOf(num);
 				if (questionNums.contains(number)) {
@@ -225,6 +229,7 @@ public class Countdown {
 				}			
 			} catch (Exception e) {
 				e.printStackTrace();
+				event.reply(e.getMessage());
                 event.reply(String.format("Sorry %s! You have put an invalid answer, you lose %d karma.",
                 		contestant, currGame.getStakes()));
                 KarmaDB.modNounKarma(contestant, -1 * currGame.getStakes());
