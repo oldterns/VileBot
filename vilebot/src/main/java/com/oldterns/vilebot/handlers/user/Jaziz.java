@@ -45,21 +45,20 @@ public class Jaziz {
     }
 
     private String jazizify(String message) throws Exception {
-        String[] words = getWords(message);
+        String[] words = splitWords(message);
         for (int i = 0; i < words.length; i++) {
-            String replacement = words[i].length() > 3 ? randomChoice(getSynonyms(words[i])) : words[i];
-            if (!replacement.isEmpty()) {
-                words[i] = replacement;
-            }
+        	if (!words[i].contains(" ")) {
+	            String replacement = words[i].length() > 3 ? randomChoice(getSynonyms(words[i])) : words[i];
+	            if (!replacement.isEmpty()) {
+	                words[i] = replacement;
+	            }
+        	}
         }
         return stringify(words);
     }
 
-    private String[] getWords(String message) {
-        return message
-                .toLowerCase()
-                .replaceAll("[^A-Za-z\\s]", "")
-                .split(" ");
+    private String[] splitWords(String message) {
+    	return message.split("\\b");
     }
 
     private List<String> getSynonyms(String word) throws Exception {
@@ -91,7 +90,7 @@ public class Jaziz {
     private String stringify(String[] list) {
         StringBuilder builder = new StringBuilder();
         for (String word : list) {
-            builder.append(word).append(" ");
+    		builder.append(word);
         }
         return builder.toString().trim();
     }
