@@ -33,7 +33,6 @@ public class Countdown {
 	private static int ANSWER_THRESHOLD = 200;
 	private static int INVALID_STAKE = 10;
 
-
 	private static final Pattern countdownPattern = Pattern.compile("^!countdown");
 	private static final Pattern answerPattern = Pattern.compile("^!solution (.*)");
 	private static CountdownGame currGame = null;
@@ -256,7 +255,7 @@ public class Countdown {
 			            event.reply(String.format("Sorry %s, you've already submitted for this game.", contestant));
 					}
 				} else {
-					event.reply(String.format("You have put an answer that breaks the threshold of +-%d, you lose %d karma.", 
+					event.reply(String.format("You have put an answer that breaks the threshold of +-%d, you lose %d karma.",
 							ANSWER_THRESHOLD,INVALID_STAKE));
 	                KarmaDB.modNounKarma(contestant, -1 * INVALID_STAKE);
 				}
@@ -317,7 +316,7 @@ public class Countdown {
        timer.shutdownNow();
        timer = Executors.newFixedThreadPool(1);
    }
-   
+
    private boolean answerBreaksThreshold(int targetNumber, int contestantAnswer) {
 	   return (Math.abs(targetNumber - contestantAnswer) >= ANSWER_THRESHOLD);
    }
