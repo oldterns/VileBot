@@ -30,6 +30,8 @@ public class Countdown {
 
     private static final String COUNTDOWN_CHANNEL = Vilebot.getConfig().get("countdownChannel");
 	private static final long TIMEOUT  = 45000L;
+	private static int ANSWER_THRESHOLD = 200;
+	private static int INVALID_STAKE = 10;
 
 
 	private static final Pattern countdownPattern = Pattern.compile("^!countdown");
@@ -51,7 +53,6 @@ public class Countdown {
 		private int largeNumberCount;
 		private int smallNumberCount;
 		private int targetNumber;
-		private int stakes;
 		Interpreter interpreter;
 
 
@@ -64,8 +65,6 @@ public class Countdown {
 			questionNumbers.addAll(LARGE_NUMBERS.subList(0, largeNumberCount));
 			questionNumbers.addAll(SMALL_NUMBERS.subList(0, smallNumberCount));
 			targetNumber = gnereateTargetNumber();
-			// have karma stakes random from 1-10 for now. Not working yet.
-			stakes = rand.nextInt(11);
 		}
 
 		// target number should be between 100-999.
@@ -117,10 +116,6 @@ public class Countdown {
 
 		private List<Integer> getQuestionNumbers() {
 			return questionNumbers;
-		}
-
-		private int getStakes() {
-			return stakes;
 		}
 
 		private String getCountdownIntro() {
@@ -249,21 +244,27 @@ public class Countdown {
 		if (currGame != null) {
 			try {
 				int contestantAnswer = currGame.interpretedAnswer(submission);
-				if (!currGame.submissions.containsKey(contestant)) {
-					currGame.setSubmission(contestant, submission, contestantAnswer);
-					if (isPrivate(event)) {
-						event.reply(String.format("Your submission of %s has been recieved!", submission));
+				if (!answerBreaksThreshold(currGame.getTargetNumber(), contestantAnswer)) {
+					if (!currGame.submissions.containsKey(contestant)) {
+						currGame.setSubmission(contestant, submission, contestantAnswer);
+						if (isPrivate(event)) {
+							event.reply(String.format("Your submission of %s has been recieved!", submission));
+						} else {
+							event.reply(String.format("%s's submission recieved!", contestant));
+						}
 					} else {
-						event.reply(String.format("%s's submission recieved!", contestant));
+			            event.reply(String.format("Sorry %s, you've already submitted for this game.", contestant));
 					}
 				} else {
-		            event.reply(String.format("Sorry %s, you've already submitted for this game.", contestant));
+					event.reply(String.format("You have put an answer that breaks the threshold of +-%d, you lose %d karma.", 
+							ANSWER_THRESHOLD,INVALID_STAKE));
+	                KarmaDB.modNounKarma(contestant, -1 * INVALID_STAKE);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
                 event.reply(String.format("Sorry %s! You have put an invalid answer, you lose %d karma.",
-                		contestant, currGame.getStakes()));
-                KarmaDB.modNounKarma(contestant, -1 * currGame.getStakes());
+                		contestant, INVALID_STAKE));
+                KarmaDB.modNounKarma(contestant, -1 * INVALID_STAKE);
 			}
 		} else {
 			event.reply("No active game. Start a new one with !countdown");
@@ -286,6 +287,7 @@ public class Countdown {
     }
 
    private void timeoutTimer(ReceivePrivmsg event) {
+	   stopTimer();
 	   Set<String> keys = currGame.submissions.keySet();
 	   event.reply(String.format("Your time is up! The target number was %s \n",currGame.getTargetNumber()));
 	   if (!keys.isEmpty()) {
@@ -299,7 +301,7 @@ public class Countdown {
 			   event.reply("The winners are : \n");
 			   for (String winner : winners) {
 				   karmaAwarded = currGame.karmaAwarded(winner);
-				   event.reply(winner+" awarded "+karmaAwarded+" karma");
+				   event.reply(winner+" awarded "+karmaAwarded+" karma \n");
 				   KarmaDB.modNounKarma(winner, karmaAwarded);
 			   }
 		   } else {
@@ -314,5 +316,9 @@ public class Countdown {
    private void stopTimer() {
        timer.shutdownNow();
        timer = Executors.newFixedThreadPool(1);
+   }
+   
+   private boolean answerBreaksThreshold(int targetNumber, int contestantAnswer) {
+	   return (Math.abs(targetNumber - contestantAnswer) >= ANSWER_THRESHOLD);
    }
 }
