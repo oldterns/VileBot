@@ -30,13 +30,14 @@ public class Countdown {
 
     private static final String COUNTDOWN_CHANNEL = Vilebot.getConfig().get("countdownChannel");
 	private static final long TIMEOUT  = 45000L;
-	
-	
+	private static int ANSWER_THRESHOLD = 200;
+	private static int INVALID_STAKE = 10;
+
 	private static final Pattern countdownPattern = Pattern.compile("^!countdown");
 	private static final Pattern answerPattern = Pattern.compile("^!solution (.*)");
 	private static CountdownGame currGame = null;
     private static ExecutorService timer = Executors.newScheduledThreadPool(1);
-    
+
     @AssignedBot
     private KeratinBot bot;
 
@@ -45,28 +46,61 @@ public class Countdown {
 		private final List <Integer> LARGE_NUMBERS = new ArrayList<>(Arrays.asList(25, 50, 75, 100));
 		private final List <Integer> SMALL_NUMBERS = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 		private List <Integer> questionNumbers = new ArrayList<>();
-		private Hashtable <String, String> submissions = new Hashtable<>(); 
+		private Hashtable <String, String> submissions = new Hashtable<>();
+		private Hashtable <String, Integer> answers = new Hashtable<>();
+		private Hashtable <String, Integer> winners = new Hashtable<>();
 		private int largeNumberCount;
 		private int smallNumberCount;
 		private int targetNumber;
-		private int stakes;
 		Interpreter interpreter;
-		
+
 
 		Random rand = new Random();
-		
+
 		public CountdownGame() {
 			shuffleNumbers();
 			largeNumberCount = rand.nextInt(LARGE_NUMBERS.size()+1);
 			smallNumberCount = VALID_NUMBER_COUNT - largeNumberCount;
 			questionNumbers.addAll(LARGE_NUMBERS.subList(0, largeNumberCount));
 			questionNumbers.addAll(SMALL_NUMBERS.subList(0, smallNumberCount));
-			// target number should be between 100-999.
-			targetNumber = rand.nextInt(899) + 100;
-			// have karma stakes random from 1-10 for now. Not working yet.
-			stakes = rand.nextInt(11);
+			targetNumber = gnereateTargetNumber();
 		}
-		
+
+		// target number should be between 100-999.
+		private int gnereateTargetNumber() {
+			return rand.nextInt(900) + 100;
+		}
+
+		private String getSubmissionAndAnswer(String contestant) {
+			return String.format("%s = %d", getSubmission(contestant), getAnswer(contestant));
+		}
+
+		private int getAnswer(String contestant) {
+			return answers.get(contestant);
+		}
+
+		private String getSubmission(String contestant) {
+			return submissions.get(contestant);
+		}
+
+		private void setSubmission(String contestant, String submission, int interpretedAnswer) {
+			submissions.put(contestant, submission);
+			answers.put(contestant, interpretedAnswer);
+			int karma = karmaAwarded(contestant);
+			if (karma > 0) {
+				winners.put(contestant, karma);
+			}
+		}
+
+
+		private int karmaAwarded(String contestant) {
+			if (answers.containsKey(contestant)) {
+				return 10 - (Math.abs(targetNumber - answers.get(contestant)));
+			} else {
+				return 0;
+			}
+		}
+
 		private int getLargeNumberCount() {
 			return largeNumberCount;
 		}
@@ -74,54 +108,54 @@ public class Countdown {
 		private int getSmallNumberCount() {
 			return smallNumberCount;
 		}
-		
+
 		private int getTargetNumber() {
 			return targetNumber;
 		}
-		
+
 		private List<Integer> getQuestionNumbers() {
 			return questionNumbers;
 		}
-		
-		private int getStakes() {
-			return stakes;
-		}
-		
+
 		private String getCountdownIntro() {
 			return "Welcome to Countdown!\n"+getQuestion()+"\n Good luck! You have 45 seconds.";
 		}
-		
+
 		private String getQuestion() {
 			return "Your numbers are: \n"+getQuestionNumbers()+"\nYour target is: \n"+getTargetNumber();
 		}
-		
+
 		private void shuffleNumbers() {
 			Collections.shuffle(LARGE_NUMBERS);
 			Collections.shuffle(SMALL_NUMBERS);
 		}
-		
+
 		private int interpretedAnswer(String answer) throws Exception {
-			if (noSpecialCharacters(answer) && hasCorrectNumbers(answer)) {
-				interpreter = new Interpreter();
-				try {
-					interpreter.eval("result = "+answer);
-					return ((int) interpreter.get("result"));
-				} catch (EvalError e) {
-					e.printStackTrace();
-					throw e;
+			if (noSpecialCharacters(answer)) {
+				if (hasCorrectNumbers(answer)) {
+					interpreter = new Interpreter();
+					try {
+						interpreter.eval("result = "+answer);
+						return ((int) interpreter.get("result"));
+					} catch (EvalError e) {
+						e.printStackTrace();
+						throw e;
+					}
+				} else {
+					throw new Exception("wrong numbers are included in solution");
 				}
 			} else {
-				throw new ArithmeticException("invalid answer string");
+				throw new Exception("special characters are included in solution");
 			}
 		}
-		
+
 		private boolean noSpecialCharacters(String answer) {
-			return answer.matches("^[0-9*+\\-\\/()\\W]+$");
+			return answer.matches("^[-*+/()\\s\\d]+$");
 		}
-		
+
 		private boolean hasCorrectNumbers(String answer) {
-			List <String> numList = Arrays.asList(answer.replaceAll("[^-?0-9]+", " ").trim().split(" "));
-			List <Integer> questionNums = new ArrayList<Integer>(getQuestionNumbers());
+			String [] numList = answer.replaceAll("[^\\d]+", " ").trim().split(" ");
+			List <Integer> questionNums = new ArrayList	<Integer>(getQuestionNumbers());
 			for (String num : numList) {
 				int number = Integer.valueOf(num);
 				if (questionNums.contains(number)) {
@@ -132,16 +166,12 @@ public class Countdown {
 			}
 			return true;
 			}
-		
-		private String getTimeoutString() {
-            return "Your 30 seconds is up! A possible answer would've been:\n PLACEHOLDER";
-		}
-		
+
 		private String alreadyPlaying() {
 			return "A current game is already in progress.\n"+getQuestion();
 		}
 	}
-	
+
 	@Handler
 	public void countdown(ReceivePrivmsg event) {
 		String text = event.getText();
@@ -154,17 +184,17 @@ public class Countdown {
 			checkAnswer(event, answer);
 		}
 	}
-	
+
 	private boolean correctChannel(ReceivePrivmsg event) {
 		String currChannel = event.getChannel();
-		if (COUNTDOWN_CHANNEL.equals(currChannel)) {			
+		if (COUNTDOWN_CHANNEL.equals(currChannel)) {
 			return true;
 		} else {
 			event.reply("To play Countdown join : " + COUNTDOWN_CHANNEL);
 			return false;
 		}
 	}
-	  
+
    private boolean isPrivate(ReceivePrivmsg event) {
        try {
            bot.getChannel(event.getChannel()).getNicks();
@@ -174,7 +204,7 @@ public class Countdown {
        }
        return false;
    }
-   
+
    private boolean inGameChannel(ReceivePrivmsg event) {
 	   String currChannel = event.getChannel();
 	   if (COUNTDOWN_CHANNEL.equals(currChannel)) {
@@ -187,17 +217,17 @@ public class Countdown {
 	   }
        return true;
    }
-	
+
 	private boolean correctSolutionChannel(ReceivePrivmsg event) {
 		String currChannel = event.getChannel();
-		if (COUNTDOWN_CHANNEL.equals(currChannel) || (isPrivate(event) && inGameChannel(event))) {		
+		if (COUNTDOWN_CHANNEL.equals(currChannel) || (isPrivate(event) && inGameChannel(event))) {
 			return true;
 		} else {
 			event.reply("To play Countdown join : " + COUNTDOWN_CHANNEL);
 			return false;
 		}
 	}
-	
+
 	private synchronized void startCountdownGame(ReceivePrivmsg event) {
 		if (currGame == null) {
 			currGame = new CountdownGame();
@@ -207,34 +237,40 @@ public class Countdown {
 			event.reply(currGame.alreadyPlaying());
 		}
 	}
-	
+
 	private synchronized void checkAnswer(ReceivePrivmsg event, String submission) {
 		String contestant = BaseNick.toBaseNick(event.getSender());
 		if (currGame != null) {
 			try {
 				int contestantAnswer = currGame.interpretedAnswer(submission);
-				if (!currGame.submissions.containsKey(contestant)) {
-					currGame.submissions.put(contestant, submission+" = "+contestantAnswer);
-					if (isPrivate(event)) {
-						event.reply(String.format("Your submission of %s has been recieved!", submission));
+				if (!answerBreaksThreshold(currGame.getTargetNumber(), contestantAnswer)) {
+					if (!currGame.submissions.containsKey(contestant)) {
+						currGame.setSubmission(contestant, submission, contestantAnswer);
+						if (isPrivate(event)) {
+							event.reply(String.format("Your submission of %s has been recieved!", submission));
+						} else {
+							event.reply(String.format("%s's submission recieved!", contestant));
+						}
 					} else {
-						event.reply(String.format("%s's submission recieved!", contestant));
+			            event.reply(String.format("Sorry %s, you've already submitted for this game.", contestant));
 					}
 				} else {
-		            event.reply(String.format("Sorry %s, you've already submitted for this game.", contestant));
-				}			
+					event.reply(String.format("You have put an answer that breaks the threshold of +-%d, you lose %d karma.",
+							ANSWER_THRESHOLD,INVALID_STAKE));
+	                KarmaDB.modNounKarma(contestant, -1 * INVALID_STAKE);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
                 event.reply(String.format("Sorry %s! You have put an invalid answer, you lose %d karma.",
-                		contestant, currGame.getStakes()));
-                KarmaDB.modNounKarma(contestant, -1 * currGame.getStakes());
+                		contestant, INVALID_STAKE));
+                KarmaDB.modNounKarma(contestant, -1 * INVALID_STAKE);
 			}
 		} else {
 			event.reply("No active game. Start a new one with !countdown");
 		}
-	
+
 	}
-	
+
    private void startTimer(final ReceivePrivmsg event) {
         timer.submit(new Runnable() {
             @Override
@@ -248,16 +284,28 @@ public class Countdown {
             }
         });
     }
-   
+
    private void timeoutTimer(ReceivePrivmsg event) {
+	   stopTimer();
 	   Set<String> keys = currGame.submissions.keySet();
 	   event.reply(String.format("Your time is up! The target number was %s \n",currGame.getTargetNumber()));
 	   if (!keys.isEmpty()) {
 		   event.reply("The final submissions are: \n");
 		   for (String key : keys) {
-			   event.reply(key+", with "+ currGame.submissions.get(key)+"\n");
+			   event.reply(key+", with "+ currGame.getSubmissionAndAnswer(key)+"\n");
 		   }
-		   
+		   Set<String> winners = currGame.winners.keySet();
+		   if (!winners.isEmpty()) {
+			   int karmaAwarded;
+			   event.reply("The winners are : \n");
+			   for (String winner : winners) {
+				   karmaAwarded = currGame.karmaAwarded(winner);
+				   event.reply(winner+" awarded "+karmaAwarded+" karma \n");
+				   KarmaDB.modNounKarma(winner, karmaAwarded);
+			   }
+		   } else {
+			   event.reply("There are no winners for this game. Better luck next time!");
+		   }
 	   } else {
 		   event.reply("There were no submissions for this game. Better luck next time!");
 	   }
@@ -267,5 +315,9 @@ public class Countdown {
    private void stopTimer() {
        timer.shutdownNow();
        timer = Executors.newFixedThreadPool(1);
+   }
+
+   private boolean answerBreaksThreshold(int targetNumber, int contestantAnswer) {
+	   return (Math.abs(targetNumber - contestantAnswer) >= ANSWER_THRESHOLD);
    }
 }
