@@ -63,7 +63,11 @@ public class Help
         sb.append( "  { !whois <answer to jeopardy question>}" );
         sb.append( " { !countdown } ");
         sb.append( " { !solution < numbered answer using symbols +-/*() > } " );
+<<<<<<< Upstream, based on branch 'master' of https://github.com/itpun/VileBot.git
         sb.append( " { !countdownRules } ");
+=======
+        sb.append( " { !countdownrules } ");
+>>>>>>> 497a1ac Added colors and rules for Countdown
         sb.append( "  Karma:" );
         sb.append( "  Facts/Quotes:" );
         sb.append( " { !fact <noun> }" );
