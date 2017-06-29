@@ -68,7 +68,7 @@ public class QuotesAndFacts
                     event.reply( formatQuoteReply( noun, text ) );
                 }
             } else {
-                event.reply( "Your " + mode + " is as terrible as it is uninteresting." );
+                event.reply( mode + "s from yourself are both terrible and uninteresting." );
             }
         }
     }
