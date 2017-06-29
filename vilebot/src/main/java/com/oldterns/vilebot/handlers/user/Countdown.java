@@ -27,7 +27,7 @@ import net.engio.mbassy.listener.Handler;
 
 /**
  * Created by ipun on 29/06/17.
- * Simple Jeopardy implementation.
+ * Countdown implementation based off of Trivia.java
  */
 @HandlerContainer
 public class Countdown {
