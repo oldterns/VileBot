@@ -6,6 +6,7 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -86,7 +87,7 @@ public class Karma
             String wordBlob = incMatcher.group( 0 );
             String sender = BaseNick.toBaseNick( event.getSender() );
 
-            List<String> nicks = new LinkedList<String>();
+            Set<String> nicks = new HashSet<String>();
             Matcher nickMatcher = incBlobPattern.matcher( wordBlob );
             while ( nickMatcher.find() )
             {
