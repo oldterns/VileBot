@@ -128,8 +128,9 @@ public class Countdown {
 		}
 
 		private String getCountdownIntro() {
-			return GREEN+"Welcome to Countdown!\n"+RESET+getQuestion()+"\n Good luck! You have 45 seconds.";
+			return GREEN+"Welcome to Countdown!\n"+RESET+getQuestion()+"\nGood luck! You have 45 seconds.\n";
 		}
+		
 
 		private String getQuestion() {
 			return "Your numbers are: \n"+RED+getQuestionNumbers()+RESET+"\nYour target is: \n"+RED+getTargetNumber()+RESET;
@@ -233,8 +234,11 @@ public class Countdown {
 
 	private boolean correctSolutionChannel(ReceivePrivmsg event) {
 		String currChannel = event.getChannel();
-		if (COUNTDOWN_CHANNEL.equals(currChannel) || (isPrivate(event) && inGameChannel(event))) {
+		if ((isPrivate(event) && inGameChannel(event))) {
 			return true;
+		} else if (currChannel.equals(COUNTDOWN_CHANNEL)) {	
+			event.reply(getSubmissionRuleString());
+			return false;
 		} else {
 			event.reply("To play Countdown join : " + COUNTDOWN_CHANNEL);
 			return false;
@@ -244,7 +248,7 @@ public class Countdown {
 	private synchronized void startCountdownGame(ReceivePrivmsg event) {
 		if (currGame == null) {
 			currGame = new CountdownGame();
-			event.reply(currGame.getCountdownIntro());
+			event.reply(currGame.getCountdownIntro()+getSubmissionRuleString());
 			startTimer(event);
 		} else {
 			event.reply(currGame.alreadyPlaying());
@@ -334,7 +338,7 @@ public class Countdown {
 	   return (Math.abs(targetNumber - contestantAnswer) >= ANSWER_THRESHOLD);
    }
    
-	private String getRules() { 
+   private String getRules() { 
 		return  RED +"COUNTDOWN RULES: \n" + RESET
 				+ "1) Get as close as you can to the target number using only the numbers given. \n"
 				+ RED + "TIP: You do not have to use all the numbers. \n" + RESET
@@ -343,6 +347,10 @@ public class Countdown {
 				+ "Breaking Rule 2 will subject you to a loss of " + INVALID_STAKE + " karma. \n"
 				+ "3) The closer you are to the target number, the more karma you will get (max. 10). \n"
 				+ RED + "TIP: If you are over/under " + ANSWER_THRESHOLD + "you will be penalized " + INVALID_STAKE + " karma. \n" + RESET
-				+ "4) Use /msg Countdownb0t !solution <your answer> to keep your answers safe. ";
+				+ "4) Use /msg Countdownb0t !solution <your answer> for your answers. ";
+	}
+   
+	private String getSubmissionRuleString() {
+		return RED+"Use \" /msg "+ RESET + bot.getNick() + RED + " !solution < answer > \" to submit."+RESET;
 	}
 }
