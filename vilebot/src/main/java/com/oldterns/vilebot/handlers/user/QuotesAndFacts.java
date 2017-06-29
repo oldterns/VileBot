@@ -67,6 +67,8 @@ public class QuotesAndFacts
                     QuoteFactDB.addQuote( noun, text );
                     event.reply( formatQuoteReply( noun, text ) );
                 }
+            } else {
+                event.reply( "Your " + mode + " is as terrible as it is uninteresting." );
             }
         }
     }
