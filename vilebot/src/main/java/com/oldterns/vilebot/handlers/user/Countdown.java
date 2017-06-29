@@ -25,16 +25,26 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import net.engio.mbassy.listener.Handler;
 
+/**
+ * Created by ipun on 29/06/17.
+ * Countdown implementation based off of Trivia.java
+ */
 @HandlerContainer
 public class Countdown {
 
     private static final String COUNTDOWN_CHANNEL = Vilebot.getConfig().get("countdownChannel");
 	private static final long TIMEOUT  = 45000L;
-	private static int ANSWER_THRESHOLD = 200;
-	private static int INVALID_STAKE = 10;
+	private static final int ANSWER_THRESHOLD = 200;
+	private static final int INVALID_STAKE = 10;
+	
+    public static final String RED = "\u000304";
+    public static final String RESET = "\u000f";
+    public static final String BLUE = "\u000302";
+    public static final String GREEN = "\u000303";
 
 	private static final Pattern countdownPattern = Pattern.compile("^!countdown");
 	private static final Pattern answerPattern = Pattern.compile("^!solution (.*)");
+	private static final Pattern rulesPattern = Pattern.compile("!countdownrules");
 	private static CountdownGame currGame = null;
     private static ExecutorService timer = Executors.newScheduledThreadPool(1);
 
@@ -118,11 +128,11 @@ public class Countdown {
 		}
 
 		private String getCountdownIntro() {
-			return "Welcome to Countdown!\n"+getQuestion()+"\n Good luck! You have 45 seconds.";
+			return GREEN+"Welcome to Countdown!\n"+RESET+getQuestion()+"\n Good luck! You have 45 seconds.";
 		}
 
 		private String getQuestion() {
-			return "Your numbers are: \n"+getQuestionNumbers()+"\nYour target is: \n"+getTargetNumber();
+			return "Your numbers are: \n"+RED+getQuestionNumbers()+RESET+"\nYour target is: \n"+RED+getTargetNumber()+RESET;
 		}
 
 		private void shuffleNumbers() {
@@ -177,11 +187,14 @@ public class Countdown {
 		String text = event.getText();
 		Matcher countdownMatcher= countdownPattern.matcher(text);
 		Matcher answerMatcher= answerPattern.matcher(text);
+		Matcher rulesMatcher = rulesPattern.matcher(text);
 		if (countdownMatcher.matches() && correctChannel(event)) {
 			startCountdownGame(event);
 		} else if (answerMatcher.matches() && correctSolutionChannel(event)) {
 			String answer = answerMatcher.group(1);
 			checkAnswer(event, answer);
+		} else if (rulesMatcher.matches()) {
+			event.replyPrivately(getRules());
 		}
 	}
 
@@ -288,7 +301,7 @@ public class Countdown {
    private void timeoutTimer(ReceivePrivmsg event) {
 	   stopTimer();
 	   Set<String> keys = currGame.submissions.keySet();
-	   event.reply(String.format("Your time is up! The target number was %s \n",currGame.getTargetNumber()));
+	   event.reply(String.format("Your time is up! The target number was %s \n",RED+currGame.getTargetNumber()+RESET));
 	   if (!keys.isEmpty()) {
 		   event.reply("The final submissions are: \n");
 		   for (String key : keys) {
@@ -300,7 +313,7 @@ public class Countdown {
 			   event.reply("The winners are : \n");
 			   for (String winner : winners) {
 				   karmaAwarded = currGame.karmaAwarded(winner);
-				   event.reply(winner+" awarded "+karmaAwarded+" karma \n");
+				   event.reply(winner+" awarded "+GREEN+karmaAwarded+RESET+" karma \n");
 				   KarmaDB.modNounKarma(winner, karmaAwarded);
 			   }
 		   } else {
@@ -320,4 +333,16 @@ public class Countdown {
    private boolean answerBreaksThreshold(int targetNumber, int contestantAnswer) {
 	   return (Math.abs(targetNumber - contestantAnswer) >= ANSWER_THRESHOLD);
    }
+   
+	private String getRules() { 
+		return  RED +"COUNTDOWN RULES: \n" + RESET
+				+ "1) Get as close as you can to the target number using only the numbers given. \n"
+				+ RED + "TIP: You do not have to use all the numbers. \n" + RESET
+				+ "2) Answer with !solution <your answer> . Make sure to only use valid characters, "
+				+ "such as numbers and + - * / ( ) . \n"
+				+ "Breaking Rule 2 will subject you to a loss of " + INVALID_STAKE + " karma. \n"
+				+ "3) The closer you are to the target number, the more karma you will get (max. 10). \n"
+				+ RED + "TIP: If you are over/under " + ANSWER_THRESHOLD + "you will be penalized " + INVALID_STAKE + " karma. \n" + RESET
+				+ "4) Use /msg Countdownb0t !solution <your answer> to keep your answers safe. ";
+	}
 }
