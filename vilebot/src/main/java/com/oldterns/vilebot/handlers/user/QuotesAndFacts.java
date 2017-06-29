@@ -52,18 +52,21 @@ public class QuotesAndFacts
             String mode = matcher.group( 1 );
             String noun = BaseNick.toBaseNick( matcher.group( 2 ) );
             String text = matcher.group( 3 );
+            String sender = BaseNick.toBaseNick( event.getSender() );
 
-            text = trimChars( text, " '\"" );
+            if ( !sender.equals( noun ) ) {
+                text = trimChars( text, " '\"" );
 
-            if ( "fact".equals( mode ) )
-            {
-                QuoteFactDB.addFact( noun, text );
-                event.reply( formatFactReply( noun, text ) );
-            }
-            else
-            {
-                QuoteFactDB.addQuote( noun, text );
-                event.reply( formatQuoteReply( noun, text ) );
+                if ( "fact".equals( mode ) )
+                {
+                    QuoteFactDB.addFact( noun, text );
+                    event.reply( formatFactReply( noun, text ) );
+                }
+                else
+                {
+                    QuoteFactDB.addQuote( noun, text );
+                    event.reply( formatQuoteReply( noun, text ) );
+                }
             }
         }
     }
