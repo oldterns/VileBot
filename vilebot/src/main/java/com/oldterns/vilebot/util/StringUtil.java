@@ -1,4 +1,4 @@
-package main.java.com.oldterns.vilebot.util;
+package com.oldterns.vilebot.util;
 
 public class StringUtil {
     

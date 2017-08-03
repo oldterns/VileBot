@@ -1,10 +1,10 @@
-package test.java.vilebot.util;
+package vilebot.util;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import main.java.com.oldterns.vilebot.util.StringUtil;
+import com.oldterns.vilebot.util.StringUtil;
 
 public class StringUtilTest {
 

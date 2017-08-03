@@ -26,7 +26,7 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.interfaces.Replyable;
 import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import main.java.com.oldterns.vilebot.util.StringUtil;
+import com.oldterns.vilebot.util.StringUtil;
 
 @HandlerContainer
 public class QuotesAndFacts
