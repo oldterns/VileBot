@@ -29,6 +29,7 @@ thesaurusKey=
 # for answerQuestion intergration.
 wolframKey=
 
+rpsChannel=#exampleGameChannel
 jeopardyChannel=#exampleGameChannel
 OmgwordList=/path/to/word/list
 OmgwordChannel=#exampleGameChannel
