@@ -124,9 +124,9 @@ echo_and_run xz -z --keep -C sha256 -F xz --stdout "$DB_FILE" "> \"$DB_BACKUP_FI
 msg "Testing compressed backup"
 echo_and_run xz -t "$DB_BACKUP_FILE"
 
-msg "Verifying with redis-check-dump"
+msg "Verifying with redis-check-rdb"
 echo_and_run xz -d --keep --stdout "$DB_BACKUP_FILE" "> \"$DB_VERIFY_FILE\""
-echo_and_run redis-check-dump "$DB_VERIFY_FILE"
+echo_and_run redis-check-rdb "$DB_VERIFY_FILE"
 echo_and_run rm "$DB_VERIFY_FILE"
 
 msg "Backup complete: $DB_BACKUP_FILE"
