@@ -26,6 +26,7 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.interfaces.Replyable;
 import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import com.oldterns.vilebot.util.StringUtil;
 
 @HandlerContainer
 public class QuotesAndFacts
@@ -52,18 +53,23 @@ public class QuotesAndFacts
             String mode = matcher.group( 1 );
             String noun = BaseNick.toBaseNick( matcher.group( 2 ) );
             String text = matcher.group( 3 );
+            String sender = BaseNick.toBaseNick( event.getSender() );
 
-            text = trimChars( text, " '\"" );
+            if ( !sender.equals( noun ) ) {
+                text = trimChars( text, " '\"" );
 
-            if ( "fact".equals( mode ) )
-            {
-                QuoteFactDB.addFact( noun, text );
-                event.reply( formatFactReply( noun, text ) );
-            }
-            else
-            {
-                QuoteFactDB.addQuote( noun, text );
-                event.reply( formatQuoteReply( noun, text ) );
+                if ( "fact".equals( mode ) )
+                {
+                    QuoteFactDB.addFact( noun, text );
+                    event.reply( formatFactReply( noun, text ) );
+                }
+                else
+                {
+                    QuoteFactDB.addQuote( noun, text );
+                    event.reply( formatQuoteReply( noun, text ) );
+                }
+            } else {
+                event.reply( StringUtil.capitalizeFirstLetter( mode ) + "s from yourself are both terrible and uninteresting." );
             }
         }
     }

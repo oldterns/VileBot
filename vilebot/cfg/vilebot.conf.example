@@ -13,7 +13,26 @@ ircPort1=6697
 ircSslMode1=ON_NOHOST
 ircChannel1=#examplebot
 ircChannelAutoOp1=false
+
+# Retrieve these sections from https://apps.twitter.com
+# for twitter integration.
+consumerKey=
+consumerSecret=
+accessToken=
+accessTokenSecret=
+
+# Retrieve from https://words.bighugelabs.com/getkey.php
+# for jaziz intergration.
+thesaurusKey=
+
+# Retrieve from https://developer.wolframalpha.com/portal/apisignup.html
+# for answerQuestion intergration.
+wolframKey=
+
+rpsChannel=#exampleGameChannel
+jeopardyChannel=#exampleGameChannel
 OmgwordList=/path/to/word/list
 OmgwordChannel=#exampleGameChannel
 FortuneList=/path/to/fortune/list
-FortuneIndex=/path/to/fortune/index
+InspirationList=/path/to/inspirations/list
+InspirationIndex=/path/to/inspirations/index

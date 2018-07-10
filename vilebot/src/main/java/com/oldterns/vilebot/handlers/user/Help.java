@@ -56,11 +56,18 @@ public class Help
         sb.append( " { !roll [for] [<karma wager>] }" );
         sb.append( " { !rollcancel }" );
         sb.append( "  Fun:" );
+        sb.append( "  { !rps <noun> [<dared thing>]}" );
+        sb.append( "  { !rpsrules }" );
+        sb.append( "  { !rpscancel }" );
+        sb.append( "  { !(rock|paper|scissors) }" );
         sb.append( "  { !omgword }" );
         sb.append( "  { !answer <answer to omgword>}" );
         sb.append( "  { !jeopardy }" );
         sb.append( "  { !whatis <answer to jeopardy question>}" );
         sb.append( "  { !whois <answer to jeopardy question>}" );
+        sb.append( " { !countdown } ");
+        sb.append( " { !solution < numbered answer using symbols +-/*() > } " );
+        sb.append( " { !countdownrules } ");
         sb.append( "  Karma:" );
         sb.append( "  Facts/Quotes:" );
         sb.append( " { !fact <noun> }" );
