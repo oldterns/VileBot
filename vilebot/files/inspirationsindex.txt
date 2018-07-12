@@ -103,7 +103,7 @@
 373
 376
 378
-379:$100 invested at 7% interest for 100 years will become $100,000, at
+379
 382
 385
 388
@@ -132,13 +132,13 @@
 500
 504
 508
-509:/earth is 98% full ... please delete anyone you can.
+509
 510
 512
 516
 519
 521
-522:99% of all guys are within one standard deviation of your mom.
+522
 523
 525
 529
@@ -251,7 +251,7 @@
 851
 854
 857
-858:According to the latest official figures, 43% of all statistics are totally
+858
 860
 865
 867
@@ -1755,7 +1755,7 @@
 5653
 5656
 5658
-5659:Programming is 10% science, 25% ingenuity and 65% getting the ingenuity to
+5659
 5661
 5665
 5668
@@ -1772,8 +1772,8 @@
 5702
 5705
 5708
-5711:   Multitasking Incandescent Source System Facility, of which 10% of
-5712:   the pages state only "This page intentionally left blank", and 20%
+5711
+5712
 5715
 5718
 5722
@@ -1990,8 +1990,8 @@
 6419
 6422
 6424
-6425:The first 90% of a project takes 90% of the time. The last 10% of a project
-6426:takes 90% of the time.
+6425
+6426
 6427
 6430
 6433
