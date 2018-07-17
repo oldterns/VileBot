@@ -28,6 +28,7 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.interfaces.Replyable;
 import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import com.oldterns.vilebot.Vilebot;
 
 @HandlerContainer
 public class Karma
@@ -81,6 +82,11 @@ public class Karma
                 KarmaDB.modNounKarma(event.getSender(), -1);
                 return;
             }
+            //Prevent users from increasing karma outside of #TheFoobar
+            if ( !event.getChannel().matches(Vilebot.getConfig().get( "ircChannel1" ) ) ) {
+                event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" ) + " to give or receive karma." );
+                return;
+            }
 
             // If one match is found, take the entire text of the message (group(0)) and check each word
             // This is needed in the case that only part of the message is karma events (ie "wow anestico++")
@@ -120,6 +126,11 @@ public class Karma
         {
             if (isPrivate(event)) {
                 KarmaDB.modNounKarma(event.getSender(), -1);
+                return;
+            }
+            //Prevent users from decreasing karma outside of #TheFoobar
+            if ( !event.getChannel().matches(Vilebot.getConfig().get( "ircChannel1" ) ) ) {
+                event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" ) + " to give or receive karma." );
                 return;
             }
             // If one match is found, take the entire text of the message (group(0)) and check each word
