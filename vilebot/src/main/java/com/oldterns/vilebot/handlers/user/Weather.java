@@ -49,35 +49,35 @@ public class Weather
     {
         try
         {
-            weatherFeedsByIataCode.put( "yxu", new URL( "http://weatheroffice.gc.ca/rss/city/on-137_e.xml" ) );
-            weatherFeedsByIataCode.put( "yyz", new URL( "http://weatheroffice.gc.ca/rss/city/on-143_e.xml" ) );
-            weatherFeedsByIataCode.put( "ygk", new URL( "http://weatheroffice.gc.ca/rss/city/on-69_e.xml" ) );
-            weatherFeedsByIataCode.put( "yeg", new URL( "http://weatheroffice.gc.ca/rss/city/ab-50_e.xml" ) );
-            weatherFeedsByIataCode.put( "yyc", new URL( "http://weatheroffice.gc.ca/rss/city/ab-52_e.xml" ) );
-            weatherFeedsByIataCode.put( "yul", new URL( "http://weatheroffice.gc.ca/rss/city/qc-147_e.xml" ) );
-            weatherFeedsByIataCode.put( "yvr", new URL( "http://weatheroffice.gc.ca/rss/city/bc-74_e.xml" ) );
-            weatherFeedsByIataCode.put( "yhm", new URL( "http://weatheroffice.gc.ca/rss/city/on-77_e.xml" ) );
-            weatherFeedsByIataCode.put( "ytz", new URL( "http://weatheroffice.gc.ca/rss/city/on-128_e.xml" ) );
-            weatherFeedsByIataCode.put( "ykz", new URL( "http://weatheroffice.gc.ca/rss/city/on-85_e.xml" ) );
-            weatherFeedsByIataCode.put( "ykf", new URL( "http://weatheroffice.gc.ca/rss/city/on-82_e.xml" ) );
-            weatherFeedsByIataCode.put( "yhz", new URL( "http://weatheroffice.gc.ca/rss/city/ns-19_e.xml" ) );
-            weatherFeedsByIataCode.put( "yfc", new URL( "http://weatheroffice.gc.ca/rss/city/nb-29_e.xml" ) );
-            weatherFeedsByIataCode.put( "yyt", new URL( "http://weatheroffice.gc.ca/rss/city/nl-24_e.xml" ) );
-            weatherFeedsByIataCode.put( "yyg", new URL( "http://weatheroffice.gc.ca/rss/city/pe-5_e.xml" ) );
-            weatherFeedsByIataCode.put( "yqt", new URL( "http://weatheroffice.gc.ca/rss/city/on-100_e.xml" ) );
-            weatherFeedsByIataCode.put( "ywg", new URL( "http://weatheroffice.gc.ca/rss/city/mb-38_e.xml" ) );
-            weatherFeedsByIataCode.put( "yqr", new URL( "http://weatheroffice.gc.ca/rss/city/sk-32_e.xml" ) );
-            weatherFeedsByIataCode.put( "yxe", new URL( "http://weatheroffice.gc.ca/rss/city/sk-40_e.xml" ) );
-            weatherFeedsByIataCode.put( "ymm", new URL( "http://weatheroffice.gc.ca/rss/city/ab-20_e.xml" ) );
-            weatherFeedsByIataCode.put( "yxs", new URL( "http://weatheroffice.gc.ca/rss/city/bc-79_e.xml" ) );
-            weatherFeedsByIataCode.put( "yyj", new URL( "http://weatheroffice.gc.ca/rss/city/bc-85_e.xml" ) );
-            weatherFeedsByIataCode.put( "ylw", new URL( "http://weatheroffice.gc.ca/rss/city/bc-48_e.xml" ) );
-            weatherFeedsByIataCode.put( "yka", new URL( "http://weatheroffice.gc.ca/rss/city/bc-45_e.xml" ) );
-            weatherFeedsByIataCode.put( "yow", new URL( "http://weatheroffice.gc.ca/rss/city/on-118_e.xml" ) );
-            weatherFeedsByIataCode.put( "yxy", new URL( "http://weatheroffice.gc.ca/rss/city/yt-16_e.xml" ) );
-            weatherFeedsByIataCode.put( "yzf", new URL( "http://weatheroffice.gc.ca/rss/city/nt-24_e.xml" ) );
-            weatherFeedsByIataCode.put( "yfb", new URL( "http://weatheroffice.gc.ca/rss/city/nu-21_e.xml" ) );
-            weatherFeedsByIataCode.put( "ylt", new URL( "http://weatheroffice.gc.ca/rss/city/nu-22_e.xml" ) );
+            weatherFeedsByIataCode.put( "yxu", new URL( "https://weather.gc.ca/rss/city/on-137_e.xml" ) );
+            weatherFeedsByIataCode.put( "yyz", new URL( "https://weather.gc.ca/rss/city/on-143_e.xml" ) );
+            weatherFeedsByIataCode.put( "ygk", new URL( "https://weather.gc.ca/rss/city/on-69_e.xml" ) );
+            weatherFeedsByIataCode.put( "yeg", new URL( "https://weather.gc.ca/rss/city/ab-50_e.xml" ) );
+            weatherFeedsByIataCode.put( "yyc", new URL( "https://weather.gc.ca/rss/city/ab-52_e.xml" ) );
+            weatherFeedsByIataCode.put( "yul", new URL( "https://weather.gc.ca/rss/city/qc-147_e.xml" ) );
+            weatherFeedsByIataCode.put( "yvr", new URL( "https://weather.gc.ca/rss/city/bc-74_e.xml" ) );
+            weatherFeedsByIataCode.put( "yhm", new URL( "https://weather.gc.ca/rss/city/on-77_e.xml" ) );
+            weatherFeedsByIataCode.put( "ytz", new URL( "https://weather.gc.ca/rss/city/on-128_e.xml" ) );
+            weatherFeedsByIataCode.put( "ykz", new URL( "https://weather.gc.ca/rss/city/on-85_e.xml" ) );
+            weatherFeedsByIataCode.put( "ykf", new URL( "https://weather.gc.ca/rss/city/on-82_e.xml" ) );
+            weatherFeedsByIataCode.put( "yhz", new URL( "https://weather.gc.ca/rss/city/ns-19_e.xml" ) );
+            weatherFeedsByIataCode.put( "yfc", new URL( "https://weather.gc.ca/rss/city/nb-29_e.xml" ) );
+            weatherFeedsByIataCode.put( "yyt", new URL( "https://weather.gc.ca/rss/city/nl-24_e.xml" ) );
+            weatherFeedsByIataCode.put( "yyg", new URL( "https://weather.gc.ca/rss/city/pe-5_e.xml" ) );
+            weatherFeedsByIataCode.put( "yqt", new URL( "https://weather.gc.ca/rss/city/on-100_e.xml" ) );
+            weatherFeedsByIataCode.put( "ywg", new URL( "https://weather.gc.ca/rss/city/mb-38_e.xml" ) );
+            weatherFeedsByIataCode.put( "yqr", new URL( "https://weather.gc.ca/rss/city/sk-32_e.xml" ) );
+            weatherFeedsByIataCode.put( "yxe", new URL( "https://weather.gc.ca/rss/city/sk-40_e.xml" ) );
+            weatherFeedsByIataCode.put( "ymm", new URL( "https://weather.gc.ca/rss/city/ab-20_e.xml" ) );
+            weatherFeedsByIataCode.put( "yxs", new URL( "https://weather.gc.ca/rss/city/bc-79_e.xml" ) );
+            weatherFeedsByIataCode.put( "yyj", new URL( "https://weather.gc.ca/rss/city/bc-85_e.xml" ) );
+            weatherFeedsByIataCode.put( "ylw", new URL( "https://weather.gc.ca/rss/city/bc-48_e.xml" ) );
+            weatherFeedsByIataCode.put( "yka", new URL( "https://weather.gc.ca/rss/city/bc-45_e.xml" ) );
+            weatherFeedsByIataCode.put( "yow", new URL( "https://weather.gc.ca/rss/city/on-118_e.xml" ) );
+            weatherFeedsByIataCode.put( "yxy", new URL( "https://weather.gc.ca/rss/city/yt-16_e.xml" ) );
+            weatherFeedsByIataCode.put( "yzf", new URL( "https://weather.gc.ca/rss/city/nt-24_e.xml" ) );
+            weatherFeedsByIataCode.put( "yfb", new URL( "https://weather.gc.ca/rss/city/nu-21_e.xml" ) );
+            weatherFeedsByIataCode.put( "ylt", new URL( "https://weather.gc.ca/rss/city/nu-22_e.xml" ) );
         }
         catch ( MalformedURLException e )
         {
