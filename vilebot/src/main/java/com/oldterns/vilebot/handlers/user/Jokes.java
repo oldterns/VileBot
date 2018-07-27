@@ -127,7 +127,7 @@ public class Jokes
 
         memes.add( CharactersThatBreakEclipse.LODEMOT );
         memes.add( "Derp." );
-        memes.add( "looks like his string was, *puts on glasses*\nnull terminated.\nYEEEEEEEEEEEEEEEEEEEEEEAAAAAAHHHHHHHHH" );
+        memes.add( "looks like this string was, *puts on glasses*\nnull terminated.\nYEEEEEEEEEEEEEEEEEEEEEEAAAAAAHHHHHHHHH" );
         memes.add( "Yo Dawg" );
         memes.add( "Imma gunna cut you so bad, you gunna wish I dun cut you so bad" );
         memes.add( "So i herd u liek mudkipz" );
@@ -165,11 +165,13 @@ public class Jokes
     {
         List<String> jokes = new ArrayList<String>();
         jokes.add( "C O N T A I N E D");
+        jokes.add( "Containing containers containingly.");
+        jokes.add( "Containers carry a vast amount of stuff.");
         jokes.add("H Y B R I D  C L O U D");
         jokes.add("\"Linux is Containers and Containers is RHEL\"");
         jokes.add("It can contain anything, even monster apps!");
         jokes.add("I sell Container and Container accessories");
-        jokes.add("Do U Even Small VM bro?");
+        jokes.add("Do U Even Small VM brah?");
         jokes.add("Y SO CONTAINED?");
         jokes.add("Containers give me lyfe.");
         jokes.add("Containers pay the bills.");
@@ -180,7 +182,7 @@ public class Jokes
         jokes.add("AM I BEING CONTAINED?");
         jokes.add("friggin' containers, how do they work?");
         jokes.add("I put the \"I\" in contaIners");
-        jokes.add("DON'T CONTAZE ME BRO");
+        jokes.add("DON'T CONTAZE ME");
         jokes.add("Every day we stray farther from gods light.");
         jokes.add("Please, contain yourself.");
         jokes.add("PRESS Z TO DO A CONTAINER ROLL");
