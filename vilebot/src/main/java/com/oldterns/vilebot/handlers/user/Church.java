@@ -212,7 +212,7 @@ public class Church
     private void timeoutTimer(ReceivePrivmsg event) {
         String message = "Voting is now finished\n";
         if(currentVote.isDecisionYes()) {
-            message += "The vote to inquisit " + currentVote.getDecsionTarget() + " has passed. He will be stripped of his karma.";
+            message += "The vote to inquisit " + currentVote.getDecsionTarget() + " has passed. " + currentVote.getDecsionTarget() + " will be stripped of their karma.";
             ChurchDB.modNonDonorKarma(ChurchDB.getDonorKarma(currentVote.getDecsionTarget()));
             ChurchDB.removeDonor(currentVote.getDecsionTarget());
         }
