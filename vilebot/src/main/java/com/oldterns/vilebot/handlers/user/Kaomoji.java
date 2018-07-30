@@ -52,8 +52,12 @@ public class Kaomoji {
             if (words[0].equals("wat")){
                 words[0] = "confused";
             }
-            else if (words[0].equals("nsfw") | words[0].equals("wtf")){
+            else if (words[0].equals("nsfw") || words[0].equals("wtf")){
                 kaomoji = "ⓃⒶⓃⒾ(☉൧ ಠ ꐦ)";
+            }
+            else if (words[0].equals("vilebot")){
+                kaomoji = "( ͡° ͜ʖ ͡° )";
+
             }
             else {
                 kaomoji = getKaomoji(words[0]);
