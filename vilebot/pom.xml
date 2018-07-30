@@ -54,6 +54,20 @@
           </includes>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>net.revelc.code.formatter</groupId>
+        <artifactId>formatter-maven-plugin</artifactId>
+        <configuration>
+          <configFile>${project.basedir}/maven-eclipse-codestyle.xml</configFile>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>validate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 

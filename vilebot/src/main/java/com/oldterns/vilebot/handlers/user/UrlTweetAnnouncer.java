@@ -34,13 +34,8 @@ import net.engio.mbassy.listener.Handler;
 
 /**
  * Will grab the text from a tweet given the static tweet URL. To enable, add the following entries to vilebot.conf:
- *
- * consumerKey
- * consumerSecret
- * accessToken
- * accessTokenSecret
- *
- * Where all of the above are created at https://apps.twitter.com
+ * consumerKey consumerSecret accessToken accessTokenSecret Where all of the above are created at
+ * https://apps.twitter.com
  */
 @HandlerContainer
 public class UrlTweetAnnouncer
@@ -52,10 +47,14 @@ public class UrlTweetAnnouncer
     private static final Pattern titlePattern = Pattern.compile( "<title>(.*)</title>" );
 
     private final Map<String, String> cfg = Vilebot.getConfig();
-    private final String consumerKey = cfg.get("consumerKey");  //may be known as 'API key'
-    private final String consumerSecret = cfg.get("consumerSecret"); //may be known as 'API secret'
-    private final String accessToken = cfg.get("accessToken"); //may be known as 'Access token'
-    private final String accessTokenSecret = cfg.get("accessTokenSecret"); //may be known as 'Access token secret'
+
+    private final String consumerKey = cfg.get( "consumerKey" ); // may be known as 'API key'
+
+    private final String consumerSecret = cfg.get( "consumerSecret" ); // may be known as 'API secret'
+
+    private final String accessToken = cfg.get( "accessToken" ); // may be known as 'Access token'
+
+    private final String accessTokenSecret = cfg.get( "accessTokenSecret" ); // may be known as 'Access token secret'
 
     @AssignedBot
     private KeratinBot bot;
@@ -69,12 +68,12 @@ public class UrlTweetAnnouncer
         {
             if ( consumerKey == null || consumerSecret == null || accessToken == null || accessTokenSecret == null )
             {
-                event.reply("Sorry, I can't read that tweet because my maintainer is a moron. And I wouldn't want to read it, anyway.");
+                event.reply( "Sorry, I can't read that tweet because my maintainer is a moron. And I wouldn't want to read it, anyway." );
                 return;
             }
 
             String title = scrapeURLHTMLTitle( urlMatcher.group( 1 ) );
-            event.reply("' " + title + " '");
+            event.reply( "' " + title + " '" );
         }
     }
 
@@ -82,7 +81,7 @@ public class UrlTweetAnnouncer
      * Accesses the source of a HTML page and looks for a title element
      * 
      * @param url http tweet String
-     * @return String of text which represents the tweet.  Empty if error.
+     * @return String of text which represents the tweet. Empty if error.
      */
     private String scrapeURLHTMLTitle( String url )
     {
@@ -98,50 +97,48 @@ public class UrlTweetAnnouncer
             return text;
         }
 
-        //split the url into pieces, change the request based on what we have
-        String parts[] = url.split("/");
+        // split the url into pieces, change the request based on what we have
+        String parts[] = url.split( "/" );
         int userPosition = 0;
         long tweetID = 0;
-        for (int i = 0; i < parts.length; i++)
+        for ( int i = 0; i < parts.length; i++ )
         {
 
-            if (parts[i].toString().equals("twitter.com"))
-                userPosition = i+1;
-            if (parts[i].toString().equals( "status" ) || parts[i].toString().equals( "statuses" ))
-                tweetID = Long.valueOf(parts[i+1].toString()).longValue();
+            if ( parts[i].toString().equals( "twitter.com" ) )
+                userPosition = i + 1;
+            if ( parts[i].toString().equals( "status" ) || parts[i].toString().equals( "statuses" ) )
+                tweetID = Long.valueOf( parts[i + 1].toString() ).longValue();
         }
-        if (userPosition == 0)
+        if ( userPosition == 0 )
             return text;
         else
         {
             try
             {
                 ConfigurationBuilder cb = new ConfigurationBuilder();
-                cb.setDebugEnabled(true)
-                  .setOAuthConsumerKey(consumerKey)
-                  .setOAuthConsumerSecret(consumerSecret)
-                  .setOAuthAccessToken(accessToken)
-                  .setOAuthAccessTokenSecret(accessTokenSecret);
-                TwitterFactory tf = new TwitterFactory(cb.build());
+                cb.setDebugEnabled( true ).setOAuthConsumerKey( consumerKey ).setOAuthConsumerSecret( consumerSecret ).setOAuthAccessToken( accessToken ).setOAuthAccessTokenSecret( accessTokenSecret );
+                TwitterFactory tf = new TwitterFactory( cb.build() );
                 Twitter twitter = tf.getInstance();
-                if(tweetID != 0) //tweet of the twitter.com/USERID/status/TWEETID variety
+                if ( tweetID != 0 ) // tweet of the twitter.com/USERID/status/TWEETID variety
                 {
-                    Status status = twitter.showStatus(tweetID);
-                    return (status.getUser().getName() + ": " + status.getText());
+                    Status status = twitter.showStatus( tweetID );
+                    return ( status.getUser().getName() + ": " + status.getText() );
                 }
-                else //just the user is given, ie, twitter.com/USERID 
+                else // just the user is given, ie, twitter.com/USERID
                 {
                     User user = twitter.showUser( parts[userPosition].toString() );
-                    if(!user.getDescription().isEmpty()) //the user has a description
-                        return ("Name: " + user.getName() + " | " + user.getDescription() + "\'\nLast Tweet: \'" + user.getStatus().getText());
-                    else //the user doesn't have a description, don't print it
-                        return ("Name: " + user.getName() + "\'\nLast Tweet: \'" + user.getStatus().getText());
-                    
+                    if ( !user.getDescription().isEmpty() ) // the user has a description
+                        return ( "Name: " + user.getName() + " | " + user.getDescription() + "\'\nLast Tweet: \'"
+                            + user.getStatus().getText() );
+                    else // the user doesn't have a description, don't print it
+                        return ( "Name: " + user.getName() + "\'\nLast Tweet: \'" + user.getStatus().getText() );
+
                 }
             }
-            catch (TwitterException x)
+            catch ( TwitterException x )
             {
-                return bot.getNick() + ": Until my maintainer fixes the API Key, this is the only tweet you're gonna see. U mad, bro?";
+                return bot.getNick()
+                    + ": Until my maintainer fixes the API Key, this is the only tweet you're gonna see. U mad, bro?";
             }
         }
     }

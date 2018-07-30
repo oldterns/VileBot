@@ -55,7 +55,8 @@ public class QuotesAndFacts
             String text = matcher.group( 3 );
             String sender = BaseNick.toBaseNick( event.getSender() );
 
-            if ( !sender.equals( noun ) ) {
+            if ( !sender.equals( noun ) )
+            {
                 text = trimChars( text, " '\"" );
 
                 if ( "fact".equals( mode ) )
@@ -68,8 +69,11 @@ public class QuotesAndFacts
                     QuoteFactDB.addQuote( noun, text );
                     event.reply( formatQuoteReply( noun, text ) );
                 }
-            } else {
-                event.reply( StringUtil.capitalizeFirstLetter( mode ) + "s from yourself are both terrible and uninteresting." );
+            }
+            else
+            {
+                event.reply( StringUtil.capitalizeFirstLetter( mode )
+                    + "s from yourself are both terrible and uninteresting." );
             }
         }
     }
@@ -278,7 +282,7 @@ public class QuotesAndFacts
         {
             if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
             {
-            String title = ChurchDB.getDonorTitle( noun );
+                String title = ChurchDB.getDonorTitle( noun );
                 if ( title.trim().length() > 0 )
                 {
                     noun = title;

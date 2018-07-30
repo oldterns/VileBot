@@ -5,34 +5,48 @@ import redis.clients.jedis.Jedis;
 /**
  * Created by eunderhi on 18/08/15.
  */
-public class LogDB extends RedisDB {
+public class LogDB
+    extends RedisDB
+{
 
     private static final String logKey = "chat-log";
 
-    public static void addItem(String chatMessage) {
+    public static void addItem( String chatMessage )
+    {
         Jedis jedis = pool.getResource();
-        try {
-            jedis.append(logKey, chatMessage);
-        } finally {
-            pool.returnResource(jedis);
+        try
+        {
+            jedis.append( logKey, chatMessage );
+        }
+        finally
+        {
+            pool.returnResource( jedis );
         }
     }
 
-    public static String getLog() {
+    public static String getLog()
+    {
         Jedis jedis = pool.getResource();
-        try {
-            return jedis.get(logKey);
-        } finally {
-            pool.returnResource(jedis);
+        try
+        {
+            return jedis.get( logKey );
+        }
+        finally
+        {
+            pool.returnResource( jedis );
         }
     }
 
-    public static void deleteLog() {
+    public static void deleteLog()
+    {
         Jedis jedis = pool.getResource();
-        try {
-            jedis.del(logKey);
-        } finally {
-            pool.returnResource(jedis);
+        try
+        {
+            jedis.del( logKey );
+        }
+        finally
+        {
+            pool.returnResource( jedis );
         }
     }
 }

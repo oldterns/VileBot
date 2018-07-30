@@ -23,155 +23,207 @@ import java.util.regex.Pattern;
  * Based off of the omgword game from CasinoBot: http://casinobot.codeplex.com/
  */
 @HandlerContainer
-public class Omgword {
+public class Omgword
+{
 
     private static final Pattern QUESTION_PATTERN = Pattern.compile( "!omgword" );
+
     private static final Pattern ANSWER_PATTERN = Pattern.compile( "!answer (.*)" );
-    private static final String WORD_LIST_PATH = Vilebot.getConfig().get("OmgwordList");
-    private static final String OMGWORD_CHANNEL = Vilebot.getConfig().get("OmgwordChannel");
+
+    private static final String WORD_LIST_PATH = Vilebot.getConfig().get( "OmgwordList" );
+
+    private static final String OMGWORD_CHANNEL = Vilebot.getConfig().get( "OmgwordChannel" );
+
     private ArrayList<String> words = loadWords();
+
     private OmgwordGame currentGame;
+
     private String word;
+
     private String scrambled;
+
     private static final Random random = new SecureRandom();
-    private static final long TIMEOUT  = 30000L;
-    private static ExecutorService timer = Executors.newScheduledThreadPool(1);
+
+    private static final long TIMEOUT = 30000L;
+
+    private static ExecutorService timer = Executors.newScheduledThreadPool( 1 );
 
     @Handler
-    public void omgword(ReceivePrivmsg event) {
+    public void omgword( ReceivePrivmsg event )
+    {
         String text = event.getText();
-        Matcher questionMatcher = QUESTION_PATTERN.matcher(text);
-        Matcher answerMatcher = ANSWER_PATTERN.matcher(text);
-        try {
-            if (questionMatcher.matches() && shouldStartGame(event)) {
-                startGame(event);
-            } else if (answerMatcher.matches() && shouldStartGame(event)) {
-                String answer = answerMatcher.group(1);
-                finishGame(event, answer);
+        Matcher questionMatcher = QUESTION_PATTERN.matcher( text );
+        Matcher answerMatcher = ANSWER_PATTERN.matcher( text );
+        try
+        {
+            if ( questionMatcher.matches() && shouldStartGame( event ) )
+            {
+                startGame( event );
             }
-        } catch(Exception e) {
+            else if ( answerMatcher.matches() && shouldStartGame( event ) )
+            {
+                String answer = answerMatcher.group( 1 );
+                finishGame( event, answer );
+            }
+        }
+        catch ( Exception e )
+        {
             e.printStackTrace();
-            System.exit(1);
+            System.exit( 1 );
         }
     }
 
-    private boolean shouldStartGame(ReceivePrivmsg event) {
+    private boolean shouldStartGame( ReceivePrivmsg event )
+    {
         String actualChannel = event.getChannel();
 
-        if (OMGWORD_CHANNEL.equalsIgnoreCase(actualChannel)) {
+        if ( OMGWORD_CHANNEL.equalsIgnoreCase( actualChannel ) )
+        {
             return true;
         }
-        event.reply("To play Omgword join: " + OMGWORD_CHANNEL);
+        event.reply( "To play Omgword join: " + OMGWORD_CHANNEL );
         return false;
     }
 
-    private synchronized void startGame(ReceivePrivmsg event) throws Exception {
-        if (currentGame != null) {
-            event.reply(currentGame.getAlreadyPlayingString());
+    private synchronized void startGame( ReceivePrivmsg event )
+        throws Exception
+    {
+        if ( currentGame != null )
+        {
+            event.reply( currentGame.getAlreadyPlayingString() );
         }
-        else {
+        else
+        {
             currentGame = new OmgwordGame();
-            event.reply(currentGame.getIntroString());
-            startTimer(event);
+            event.reply( currentGame.getIntroString() );
+            startTimer( event );
         }
     }
 
-    private void startTimer(final ReceivePrivmsg event) {
-        timer.submit(new Runnable() {
+    private void startTimer( final ReceivePrivmsg event )
+    {
+        timer.submit( new Runnable()
+        {
             @Override
-            public void run() {
-                try {
-                    Thread.sleep(TIMEOUT);
-                    timeoutTimer(event);
-                } catch (InterruptedException e) {
+            public void run()
+            {
+                try
+                {
+                    Thread.sleep( TIMEOUT );
+                    timeoutTimer( event );
+                }
+                catch ( InterruptedException e )
+                {
                     e.printStackTrace();
                 }
             }
-        });
+        } );
     }
 
-    private void timeoutTimer(ReceivePrivmsg event) {
+    private void timeoutTimer( ReceivePrivmsg event )
+    {
         String message = currentGame.getTimeoutString();
-        event.reply(message);
+        event.reply( message );
         currentGame = null;
     }
 
-    private void stopTimer() {
+    private void stopTimer()
+    {
         timer.shutdownNow();
-        timer = Executors.newFixedThreadPool(1);
+        timer = Executors.newFixedThreadPool( 1 );
     }
 
-    private synchronized void finishGame(ReceivePrivmsg event, String answer) {
-        String answerer = BaseNick.toBaseNick(event.getSender());
-        if (currentGame != null) {
-            if (currentGame.isCorrect(answer)) {
+    private synchronized void finishGame( ReceivePrivmsg event, String answer )
+    {
+        String answerer = BaseNick.toBaseNick( event.getSender() );
+        if ( currentGame != null )
+        {
+            if ( currentGame.isCorrect( answer ) )
+            {
                 stopTimer();
-                event.reply(String.format("Congrats %s, you win %d karma!", answerer, currentGame.getStakes()));
-                KarmaDB.modNounKarma(answerer, currentGame.getStakes());
+                event.reply( String.format( "Congrats %s, you win %d karma!", answerer, currentGame.getStakes() ) );
+                KarmaDB.modNounKarma( answerer, currentGame.getStakes() );
                 currentGame = null;
-            } else {
-                event.reply(String.format("Sorry %s! That is incorrect, you lose %d karma.",
-                        answerer, currentGame.getStakes()));
-                KarmaDB.modNounKarma(answerer, -1 * currentGame.getStakes());
+            }
+            else
+            {
+                event.reply( String.format( "Sorry %s! That is incorrect, you lose %d karma.", answerer,
+                                            currentGame.getStakes() ) );
+                KarmaDB.modNounKarma( answerer, -1 * currentGame.getStakes() );
             }
         }
-        else {
-            event.reply("No active game. Start a new one with !omgword");
+        else
+        {
+            event.reply( "No active game. Start a new one with !omgword" );
         }
     }
 
-    private ArrayList<String> loadWords() {
-        try {
+    private ArrayList<String> loadWords()
+    {
+        try
+        {
             ArrayList<String> words = new ArrayList<>();
-            List<String> lines = Files.readAllLines(Paths.get(WORD_LIST_PATH));
-            for (String line : lines) {
-                words.addAll(Arrays.asList(line.split(" ")));
+            List<String> lines = Files.readAllLines( Paths.get( WORD_LIST_PATH ) );
+            for ( String line : lines )
+            {
+                words.addAll( Arrays.asList( line.split( " " ) ) );
             }
             return words;
-        } catch (Exception e) {
-            System.exit(1);
+        }
+        catch ( Exception e )
+        {
+            System.exit( 1 );
         }
         return null;
     }
 
-    private class OmgwordGame {
+    private class OmgwordGame
+    {
 
-        public String getAlreadyPlayingString() {
+        public String getAlreadyPlayingString()
+        {
             return "A game is already in progress! Your word is: " + scrambled;
         }
 
-        public String getIntroString() {
+        public String getIntroString()
+        {
             word = "";
-            int index = random.nextInt(words.size() - 1);
-            word = words.get(index);
+            int index = random.nextInt( words.size() - 1 );
+            word = words.get( index );
             scrambled = word;
-            char[] chars = words.get(index).toCharArray();
-            while (scrambled.equals(word)) {
-                shuffleArray(chars);
-                scrambled = new String(chars);
+            char[] chars = words.get( index ).toCharArray();
+            while ( scrambled.equals( word ) )
+            {
+                shuffleArray( chars );
+                scrambled = new String( chars );
             }
-            return "Welcome to omgword!\nFor " + getStakes() + " karma:\n" + scrambled +"\n30 seconds on the clock.";
+            return "Welcome to omgword!\nFor " + getStakes() + " karma:\n" + scrambled + "\n30 seconds on the clock.";
         }
 
-        public boolean isCorrect(String answer) {
-            return answer.equals(word);
+        public boolean isCorrect( String answer )
+        {
+            return answer.equals( word );
         }
 
-        public String getTimeoutString() {
+        public String getTimeoutString()
+        {
             return "Game over! The correct answer was: " + word;
         }
 
-        public int getStakes() {
-            return (int) Math.ceil(word.length()/2);
+        public int getStakes()
+        {
+            return (int) Math.ceil( word.length() / 2 );
         }
     }
 
-    private static void shuffleArray(char[] array) {
+    private static void shuffleArray( char[] array )
+    {
         char temp;
         int index;
         Random random = new Random();
-        for (int i = array.length - 1; i > 0; i--) {
-            index = random.nextInt(i + 1);
+        for ( int i = array.length - 1; i > 0; i-- )
+        {
+            index = random.nextInt( i + 1 );
             temp = array[index];
             array[index] = array[i];
             array[i] = temp;
@@ -179,4 +231,3 @@ public class Omgword {
     }
 
 }
-

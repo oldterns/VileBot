@@ -11,7 +11,9 @@ public class ChurchDB
     extends RedisDB
 {
     private static final String keyOfChurchDonorSortedSet = "church-donor-karma";
+
     private static final String keyOfChurchSortedSet = "church-karma";
+
     private static final String keyOfChurchDonorTitleSortedSet = "church-title-";
 
     /**
@@ -35,7 +37,6 @@ public class ChurchDB
 
     /**
      * Change the karma not affiliated with a donor
-     *
      */
     public static void modNonDonorKarma( int mod )
     {
@@ -53,24 +54,24 @@ public class ChurchDB
     /**
      * Change the title of noun to a string.
      *
-     *  @param noun The noun to change the karma of
-     *  @param newTitle The string to change the title to
+     * @param noun The noun to change the karma of
+     * @param newTitle The string to change the title to
      */
     public static void modDonorTitle( String noun, String newTitle )
     {
         Jedis jedis = pool.getResource();
-        Long titleCount = jedis.scard(keyOfChurchDonorTitleSortedSet + noun);
+        Long titleCount = jedis.scard( keyOfChurchDonorTitleSortedSet + noun );
         try
         {
-           for ( Long i = 0L; i < titleCount; i++ )
-           {
+            for ( Long i = 0L; i < titleCount; i++ )
+            {
                 jedis.spop( keyOfChurchDonorTitleSortedSet + noun );
-           }
-           jedis.sadd ( keyOfChurchDonorTitleSortedSet + noun, newTitle );
+            }
+            jedis.sadd( keyOfChurchDonorTitleSortedSet + noun, newTitle );
         }
         finally
         {
-          pool.returnResource( jedis );
+            pool.returnResource( jedis );
         }
     }
 
@@ -145,7 +146,7 @@ public class ChurchDB
         }
     }
 
-     /**
+    /**
      * Get nouns from karma ranks.
      *
      * @param lower The lower rank to get the nouns of.
@@ -210,24 +211,25 @@ public class ChurchDB
 
     public static long getTotalNonDonations()
     {
-         Jedis jedis = pool.getResource();
-         long totalKarma;
-         try
-         {
-             Set<String> members = jedis.zrange( keyOfChurchSortedSet, 0, -1 );
-             totalKarma = sum( keyOfChurchSortedSet, members, jedis );
-         }
-         finally
-         {
-             pool.returnResource( jedis );
-         }
-         return totalKarma;
+        Jedis jedis = pool.getResource();
+        long totalKarma;
+        try
+        {
+            Set<String> members = jedis.zrange( keyOfChurchSortedSet, 0, -1 );
+            totalKarma = sum( keyOfChurchSortedSet, members, jedis );
+        }
+        finally
+        {
+            pool.returnResource( jedis );
+        }
+        return totalKarma;
     }
 
     private static long sum( String set, Set<String> members, Jedis jedis )
     {
         long sum = 0;
-        for ( String member : members ) {
+        for ( String member : members )
+        {
             sum += jedis.zscore( set, member );
         }
         return sum;

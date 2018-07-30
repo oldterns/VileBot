@@ -185,8 +185,8 @@ public class Weather
                     }
                     else if ( "less".equals( modifier ) )
                     {
-                        bot.sendPrivmsgAs( LESS_NICK, event.getChannel(), "IT'S "
-                            + currentConditions.get( "Condition" ).toUpperCase() );
+                        bot.sendPrivmsgAs( LESS_NICK, event.getChannel(),
+                                           "IT'S " + currentConditions.get( "Condition" ).toUpperCase() );
                     }
                     else if ( "more".equals( modifier ) )
                     {
@@ -265,7 +265,7 @@ public class Weather
             currentConditions = new LinkedHashMap<String, String>();
             creationTime = new Date();
 
-            try (XmlReader reader = new XmlReader( feedSource ))
+            try ( XmlReader reader = new XmlReader( feedSource ) )
             {
                 SyndFeedInput input = new SyndFeedInput();
                 SyndFeed feed = input.build( reader );
@@ -294,7 +294,8 @@ public class Weather
                             for ( String line : desc.split( "\n" ) )
                             {
                                 int sepPos = line.indexOf( ':' );
-                                currentConditions.put( line.substring( 0, sepPos ), line.substring( sepPos + 1 ).trim() );
+                                currentConditions.put( line.substring( 0, sepPos ),
+                                                       line.substring( sepPos + 1 ).trim() );
                             }
                         }
                         else if ( forecastIDPattern.matcher( entry.getUri() ).matches() )

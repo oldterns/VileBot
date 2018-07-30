@@ -67,7 +67,7 @@ public class Karma
         String noun = BaseNick.toBaseNick( event.getJoiner() );
 
         if ( !Ignore.getOnJoin().contains( noun ) )
-            replyWithRankAndKarma( noun, event, false, false, true);
+            replyWithRankAndKarma( noun, event, false, false, true );
     }
 
     @Handler
@@ -78,13 +78,16 @@ public class Karma
 
         if ( incMatcher.matches() )
         {
-            if (isPrivate(event)) {
-                KarmaDB.modNounKarma(event.getSender(), -1);
+            if ( isPrivate( event ) )
+            {
+                KarmaDB.modNounKarma( event.getSender(), -1 );
                 return;
             }
-            //Prevent users from increasing karma outside of #TheFoobar
-            if ( !event.getChannel().matches(Vilebot.getConfig().get( "ircChannel1" ) ) ) {
-                event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" ) + " to give or receive karma." );
+            // Prevent users from increasing karma outside of #TheFoobar
+            if ( !event.getChannel().matches( Vilebot.getConfig().get( "ircChannel1" ) ) )
+            {
+                event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
+                    + " to give or receive karma." );
                 return;
             }
 
@@ -124,13 +127,16 @@ public class Karma
 
         if ( decMatcher.matches() )
         {
-            if (isPrivate(event)) {
-                KarmaDB.modNounKarma(event.getSender(), -1);
+            if ( isPrivate( event ) )
+            {
+                KarmaDB.modNounKarma( event.getSender(), -1 );
                 return;
             }
-            //Prevent users from decreasing karma outside of #TheFoobar
-            if ( !event.getChannel().matches(Vilebot.getConfig().get( "ircChannel1" ) ) ) {
-                event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" ) + " to give or receive karma." );
+            // Prevent users from decreasing karma outside of #TheFoobar
+            if ( !event.getChannel().matches( Vilebot.getConfig().get( "ircChannel1" ) ) )
+            {
+                event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
+                    + " to give or receive karma." );
                 return;
             }
             // If one match is found, take the entire text of the message (group(0)) and check each word
@@ -159,11 +165,14 @@ public class Karma
         }
     }
 
-    private boolean isPrivate(ReceivePrivmsg event) {
-        try {
-            bot.getChannel(event.getChannel()).getNicks();
+    private boolean isPrivate( ReceivePrivmsg event )
+    {
+        try
+        {
+            bot.getChannel( event.getChannel() ).getNicks();
         }
-        catch (Exception e) {
+        catch ( Exception e )
+        {
             return true;
         }
         return false;
@@ -191,8 +200,8 @@ public class Karma
 
             for ( String nick : nicks )
             {
-                if (!replyWithRankAndKarma(nick, event, reverse))
-                    event.reply(nick + " has no karma.");
+                if ( !replyWithRankAndKarma( nick, event, reverse ) )
+                    event.reply( nick + " has no karma." );
             }
         }
         else if ( selfMatcher.matches() )
@@ -235,8 +244,9 @@ public class Karma
     private void totalKarma( ReceivePrivmsg event )
     {
         Matcher matcher = totalPattern.matcher( event.getText() );
-        if (matcher.matches()) {
-            event.reply("" + KarmaDB.getTotalKarma());
+        if ( matcher.matches() )
+        {
+            event.reply( "" + KarmaDB.getTotalKarma() );
         }
     }
 
@@ -280,7 +290,7 @@ public class Karma
         Matcher matcher = removePattern.matcher( event.getText() );
         String username = Sessions.getSession( event.getSender() );
 
-        if ( matcher.matches() && GroupDB.isAdmin(username) )
+        if ( matcher.matches() && GroupDB.isAdmin( username ) )
         {
             String noun = BaseNick.toBaseNick( matcher.group( 1 ) );
 
@@ -307,10 +317,11 @@ public class Karma
     }
 
     private static boolean replyWithRankAndKarma( String noun, Replyable event, boolean reverseOrder,
-            boolean obfuscateNick )
+                                                  boolean obfuscateNick )
     {
         return replyWithRankAndKarma( noun, event, reverseOrder, obfuscateNick, false );
     }
+
     private static boolean replyWithRankAndKarma( String noun, Replyable event, boolean reverseOrder,
                                                   boolean obfuscateNick, boolean useTitle )
     {

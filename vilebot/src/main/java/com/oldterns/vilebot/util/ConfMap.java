@@ -53,8 +53,8 @@ public class ConfMap
     {
         private static final String SEP = "=";
 
-        private static final Pattern linePattern = Pattern.compile( "\\s*([^" + SEP + "\\s]+)\\s*" + SEP
-            + "\\s*(.*?)\\s*" );
+        private static final Pattern linePattern =
+            Pattern.compile( "\\s*([^" + SEP + "\\s]+)\\s*" + SEP + "\\s*(.*?)\\s*" );
 
         @Override
         public Set<Entry<String, String>> parse( BufferedReader reader )
@@ -125,7 +125,7 @@ public class ConfMap
                 + "but this target is not a regular file." );
 
         // Create a BufferedReader from the Path and Charset, then pass to the ConfParser
-        try (BufferedReader reader = Files.newBufferedReader( confFile, charset ))
+        try ( BufferedReader reader = Files.newBufferedReader( confFile, charset ) )
         {
             this.entries = parser.parse( reader );
         }

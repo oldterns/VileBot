@@ -14,4 +14,16 @@
     <module>keratin-irc</module>
     <module>vilebot</module>
   </modules>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>net.revelc.code.formatter</groupId>
+          <artifactId>formatter-maven-plugin</artifactId>
+          <version>2.7.4</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>

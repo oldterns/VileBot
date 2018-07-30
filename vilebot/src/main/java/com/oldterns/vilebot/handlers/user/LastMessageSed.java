@@ -40,7 +40,8 @@ public class LastMessageSed
      * punctuation character. The given separator character cannot be used elsewhere. Optionally, following the last
      * slash, a user can write another user's name in order to modify that user's message.
      */
-    private static final Pattern replacePattern = Pattern.compile( "^s(\\p{Punct})((?!\\1).+?)\\1((?!\\1).+?)(?:\\1(g|)(?:\\s+(\\S+)\\s*|)|)$" );
+    private static final Pattern replacePattern =
+        Pattern.compile( "^s(\\p{Punct})((?!\\1).+?)\\1((?!\\1).+?)(?:\\1(g|)(?:\\s+(\\S+)\\s*|)|)$" );
 
     /**
      * Say the last thing the person said, replaced as specified. Otherwise just record the line as the last thing the
