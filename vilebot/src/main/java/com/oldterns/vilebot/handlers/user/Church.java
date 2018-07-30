@@ -118,7 +118,7 @@ public class Church
         Matcher matcher = inquisitPattern.matcher(event.getText());
         if (matcher.matches()) {
             if(currentVote != null) {
-                event.reply("There is an ongoing inquisition against " + currentVote.getDecisionTarget() + ". Please use !aye or !nay to decide their fate");
+                event.reply("There is an ongoing inquisition against " + currentVote.getDecsionTarget() + ". Please use !aye or !nay to decide their fate");
                 return;
             }
 
@@ -212,12 +212,12 @@ public class Church
     private void timeoutTimer(ReceivePrivmsg event) {
         String message = "Voting is now finished\n";
         if(currentVote.isDecisionYes()) {
-            message += "The vote to inquisit " + currentVote.getDecisionTarget() + " has passed. " + currentVote.getDecisionTarget() + " will be stripped of their karma.";
-            ChurchDB.modNonDonorKarma(ChurchDB.getDonorKarma(currentVote.getDecisionTarget()));
-            ChurchDB.removeDonor(currentVote.getDecisionTarget());
+            message += "The vote to inquisit " + currentVote.getDecsionTarget() + " has passed. " + currentVote.getDecsionTarget() + " will be stripped of their karma.";
+            ChurchDB.modNonDonorKarma(ChurchDB.getDonorKarma(currentVote.getDecsionTarget()));
+            ChurchDB.removeDonor(currentVote.getDecsionTarget());
         }
         else {
-            message += "The vote to inquisit " + currentVote.getDecisionTarget() + " has failed. Nothing will happen.";
+            message += "The vote to inquisit " + currentVote.getDecsionTarget() + " has failed. Nothing will happen.";
         }
 
         event.reply(message);
@@ -292,7 +292,7 @@ public class Church
             decisionTarget = target;
         }
 
-        public String getDecisionTarget() {
+        public String getDecsionTarget() {
             return decisionTarget;
         }
     }
