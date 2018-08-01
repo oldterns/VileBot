@@ -68,9 +68,9 @@ public class Help
         sb.append( " { !jeopardy }" );
         sb.append( " { !whatis <answer to jeopardy question>}" );
         sb.append( " { !whois <answer to jeopardy question>}" );
-        sb.append( " { !countdown } ");
+        sb.append( " { !countdown } " );
         sb.append( " { !solution < numbered answer using symbols +-/*() > } " );
-        sb.append( " { !countdownrules } ");
+        sb.append( " { !countdownrules } " );
         sb.append( "\n" );
         sb.append( "  Fun:" );
         sb.append( " { !kaomoji <emotion> }" );

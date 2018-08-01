@@ -43,10 +43,12 @@ public class KarmaRoll
         if ( matcher.matches() )
         {
             // Infers ircChannel1 in JSON is #thefoobar for production Vilebot
-	    if ( !event.getChannel().matches(Vilebot.getConfig().get( "ircChannel1" ) ) ) {
-		event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" ) + " to make or accept wagers." );
-	       return;
-	    }
+            if ( !event.getChannel().matches( Vilebot.getConfig().get( "ircChannel1" ) ) )
+            {
+                event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
+                    + " to make or accept wagers." );
+                return;
+            }
 
             String rawWager = matcher.group( 1 );
 
@@ -64,12 +66,13 @@ public class KarmaRoll
 
                     // Check the wager value is in the acceptable range.
                     Integer wager = Integer.parseInt( rawWager );
-                    Integer senderKarma = KarmaDB.getNounKarma(sender);
+                    Integer senderKarma = KarmaDB.getNounKarma( sender );
                     senderKarma = senderKarma == null ? 0 : senderKarma;
 
-                    if ( !validWager(wager, senderKarma) )
+                    if ( !validWager( wager, senderKarma ) )
                     {
-                        event.reply( wager + " isn't a valid wager. Must be greater than 0. If you wager is larger than " + UPPER_WAGER
+                        event.reply( wager
+                            + " isn't a valid wager. Must be greater than 0. If you wager is larger than " + UPPER_WAGER
                             + " you must have at least as much karma as your wager." );
                     }
                     else
@@ -160,20 +163,18 @@ public class KarmaRoll
     }
 
     /**
-     * A valid wager is one that meets the following standards:
-     * 1. Is greater than 0.
-     * 2. If it is greater than 10, then the user's karma is equal to
-     * or greater than the wager.
-     * The reasoning behind this is to have some base amount of karma that user's can
-     * bet with, but also provide a way of betting large amounts of karma. To avoid
-     * destroying the karma economy users cannot bet more than their current amount
-     * of karma.
+     * A valid wager is one that meets the following standards: 1. Is greater than 0. 2. If it is greater than 10, then
+     * the user's karma is equal to or greater than the wager. The reasoning behind this is to have some base amount of
+     * karma that user's can bet with, but also provide a way of betting large amounts of karma. To avoid destroying the
+     * karma economy users cannot bet more than their current amount of karma.
+     * 
      * @param wager the amount wagered
      * @param senderKarma the wagerer's karma
      * @return
      */
-    private boolean validWager(int wager, int senderKarma) {
-        return !(wager > 10) && (wager > 0) || (wager > 10) && (senderKarma >= wager);
+    private boolean validWager( int wager, int senderKarma )
+    {
+        return !( wager > 10 ) && ( wager > 0 ) || ( wager > 10 ) && ( senderKarma >= wager );
     }
 
     @Handler
@@ -184,11 +185,11 @@ public class KarmaRoll
 
         if ( matcher.matches() )
         {
-	    if ( !currentGame.getFirstPlayerNick().equals( event.getSender() ) )
-	    {
-		event.reply( "Only " + currentGame.getFirstPlayerNick() + " may cancel this game." );
-		return;
-	    }
+            if ( !currentGame.getFirstPlayerNick().equals( event.getSender() ) )
+            {
+                event.reply( "Only " + currentGame.getFirstPlayerNick() + " may cancel this game." );
+                return;
+            }
             synchronized ( currentGameMutex )
             {
                 currentGame = null;

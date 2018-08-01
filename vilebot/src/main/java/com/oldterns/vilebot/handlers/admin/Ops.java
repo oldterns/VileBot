@@ -24,8 +24,8 @@ public class Ops
 {
     private static final Pattern nickPattern = Pattern.compile( "(\\S+)" );
 
-    private static final Pattern addRemOpPattern = Pattern.compile( "!admin (un|)op ((?:" + nickPattern
-        + "(?:, +| +|$))+)" );
+    private static final Pattern addRemOpPattern =
+        Pattern.compile( "!admin (un|)op ((?:" + nickPattern + "(?:, +| +|$))+)" );
 
     @Handler
     private void addRemOp( ReceivePrivmsg event )

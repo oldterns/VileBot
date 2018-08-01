@@ -234,13 +234,14 @@ public class KarmaDB
         return true;
     }
 
-    public static long getTotalKarma() {
+    public static long getTotalKarma()
+    {
         Jedis jedis = pool.getResource();
         long totalKarma;
         try
         {
-             Set<String> members = jedis.zrange(keyOfKarmaSortedSet, 0, -1);
-            totalKarma = sum(members, jedis);
+            Set<String> members = jedis.zrange( keyOfKarmaSortedSet, 0, -1 );
+            totalKarma = sum( members, jedis );
         }
         finally
         {
@@ -249,10 +250,12 @@ public class KarmaDB
         return totalKarma;
     }
 
-    private static long sum(Set<String> members, Jedis jedis) {
+    private static long sum( Set<String> members, Jedis jedis )
+    {
         long sum = 0;
-        for (String member : members) {
-            sum += jedis.zscore(keyOfKarmaSortedSet, member);
+        for ( String member : members )
+        {
+            sum += jedis.zscore( keyOfKarmaSortedSet, member );
         }
         return sum;
     }

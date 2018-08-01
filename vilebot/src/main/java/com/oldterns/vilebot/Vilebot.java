@@ -30,6 +30,7 @@ import ca.szc.keratin.core.net.IrcConnection.SslMode;
 public class Vilebot
 {
     private static JedisPool pool;
+
     private static final Map<String, String> cfg = Collections.unmodifiableMap( getConfigMap( "cfg", "vilebot.conf" ) );
 
     public static void main( String[] args )
@@ -100,7 +101,7 @@ public class Vilebot
         }
         catch ( IOException e )
         {
-            Logger.error(e, "Can't load cfgPath " + cfgPath);
+            Logger.error( e, "Can't load cfgPath " + cfgPath );
             throw new RuntimeException( "Can't load cfgPath " + cfgPath, e );
         }
         return Collections.unmodifiableMap( cfg );
@@ -113,6 +114,6 @@ public class Vilebot
 
     public static Map<String, String> getConfig()
     {
-        return new HashMap<> (cfg);
+        return new HashMap<>( cfg );
     }
 }

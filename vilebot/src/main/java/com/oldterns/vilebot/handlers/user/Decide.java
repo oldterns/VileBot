@@ -21,8 +21,8 @@ public class Decide
 {
     private static final Pattern choicePattern = Pattern.compile( "(?:(.+?)(?:\\s*\\|\\s*|\\s*$))" );
 
-    private static final Pattern decidePattern = Pattern.compile( "!decide (\\[.*\\] )?(\\{.*\\} )?(" + choicePattern
-        + "+)" );
+    private static final Pattern decidePattern =
+        Pattern.compile( "!decide (\\[.*\\] )?(\\{.*\\} )?(" + choicePattern + "+)" );
 
     private static final Random random = new Random();
 

@@ -11,18 +11,20 @@ import net.engio.mbassy.listener.Handler;
  */
 
 @HandlerContainer
-public class ChatLogger {
+public class ChatLogger
+{
     @Handler
-    protected void logMessage(ReceivePrivmsg event) {
-        String logChannel = Vilebot.getConfig().get("markovChannel");
+    protected void logMessage( ReceivePrivmsg event )
+    {
+        String logChannel = Vilebot.getConfig().get( "markovChannel" );
         String channel = event.getChannel();
         String text = event.getText();
 
-        boolean shouldLog = channel.equals(logChannel) &&
-                !text.startsWith("!");
+        boolean shouldLog = channel.equals( logChannel ) && !text.startsWith( "!" );
 
-        if(shouldLog) {
-            LogDB.addItem(text + "\n");
+        if ( shouldLog )
+        {
+            LogDB.addItem( text + "\n" );
         }
     }
 }

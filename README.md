@@ -12,6 +12,13 @@
     cp cfg/vilebot.conf.example cfg/vilebot.conf
     $EDITOR cfg/vilebot.conf
 
+### Formatting
+
+Maven checks if VileBot's code follows maven eclipse codestyle and fails the build if it does not.
+To format your code, run the following maven command in vilebot:
+
+    mvn formatter:format
+
 ### Eclipse import
 
 Install m2e
