@@ -20,9 +20,12 @@ public class PasswordDB
 
     private static final String keyOfPassSaltsHash = "password-salts";
 
-    // Note, there is some overlap in terms between the crypto term "Secure Hash" and the Redis structure "Hash". Redis
-    // hashes are maps, though called hashes because of a common method of implementing them via a hash function. Except
-    // for keyOfPassHash and keyOfPassSaltsHash, every use of "hash" in this file refers to the cryptography term.
+    // Note, there is some overlap in terms between the crypto term "Secure Hash"
+    // and the Redis structure "Hash". Redis
+    // hashes are maps, though called hashes because of a common method of
+    // implementing them via a hash function. Except
+    // for keyOfPassHash and keyOfPassSaltsHash, every use of "hash" in this file
+    // refers to the cryptography term.
 
     /**
      * @return A long random string
@@ -114,8 +117,10 @@ public class PasswordDB
             Transaction trans;
             do
             {
-                // Can't use intermediate results of a Redis transaction in that transaction, so watch the keys and do
-                // the query before opening the transaction. The transaction will fail on exec() call if the keys
+                // Can't use intermediate results of a Redis transaction in that transaction, so
+                // watch the keys and do
+                // the query before opening the transaction. The transaction will fail on exec()
+                // call if the keys
                 // changed.
                 jedis.watch( keyOfPassHash, keyOfPassSaltsHash );
                 boolean exists = jedis.hexists( keyOfPassHash, username );

@@ -9,9 +9,9 @@ package com.oldterns.vilebot.handlers.user;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.engio.mbassy.listener.Handler;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import net.engio.mbassy.listener.Handler;
 
 @HandlerContainer
 public class Help
@@ -113,6 +113,11 @@ public class Help
         sb.append( " { !inquisit <noun> }" );
         sb.append( " { !settitle <noun> }" );
         sb.append( " { !topdonors }" );
+        sb.append( " Karmalytics:" );
+
+        sb.append( " { !ka report [nick] [-from date] [-to date] }" );
+        sb.append( " { !ka past number [nick] }" );
+
         return sb.toString();
     }
 }

@@ -30,7 +30,8 @@ public class AdminManagement
             String editedAdminNick = matcher.group( 1 );
             String password = matcher.group( 2 );
 
-            // Note that an empty admin group will allow a setadmin command to succeed (self-bootstrapping)
+            // Note that an empty admin group will allow a setadmin command to succeed
+            // (self-bootstrapping)
 
             String username = Sessions.getSession( sender );
             if ( GroupDB.noAdmins() || GroupDB.isAdmin( username ) )

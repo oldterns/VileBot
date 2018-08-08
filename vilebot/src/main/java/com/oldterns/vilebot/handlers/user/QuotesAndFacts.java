@@ -155,7 +155,8 @@ public class QuotesAndFacts
 
             try
             {
-                // Case insensitive added automatically, use (?-i) in a message to reenable case sensitivity
+                // Case insensitive added automatically, use (?-i) in a message to reenable case
+                // sensitivity
                 Pattern pattern = Pattern.compile( "(?i)" + regex );
 
                 if ( "fact".equals( mode ) )

@@ -1,9 +1,22 @@
 package com.oldterns.vilebot.handlers.user;
 
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
-import com.oldterns.vilebot.db.KarmaDB;
+import com.oldterns.vilebot.db.KarmalyticsDB;
+import com.oldterns.vilebot.karmalytics.HasKarmalytics;
+import com.oldterns.vilebot.karmalytics.KarmalyticsRecord;
 import com.oldterns.vilebot.util.BaseNick;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import net.engio.mbassy.listener.Handler;
@@ -11,19 +24,12 @@ import org.jsoup.Jsoup;
 import twitter4j.JSONArray;
 import twitter4j.JSONObject;
 
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * Created by eunderhi on 25/07/16. Simple Jeopardy implementation.
  */
 @HandlerContainer
 public class Trivia
+    implements HasKarmalytics
 {
 
     private static final Pattern questionPattern = Pattern.compile( "^!jeopardy" );
@@ -45,6 +51,11 @@ public class Trivia
     public static final String GREEN = "\u000303";
 
     private static ExecutorService timer = Executors.newScheduledThreadPool( 1 );
+
+    public Trivia()
+    {
+        KarmalyticsDB.intializeKarmalyticsFor( this );
+    }
 
     @Handler
     public void doTrivia( ReceivePrivmsg event )
@@ -141,14 +152,14 @@ public class Trivia
             {
                 stopTimer();
                 event.reply( String.format( "Congrats %s, you win %d karma!", answerer, currentGame.getStakes() ) );
-                KarmaDB.modNounKarma( answerer, currentGame.getStakes() );
+                modNounKarma( answerer, currentGame.getQuestion(), currentGame.getStakes() );
                 currentGame = null;
             }
             else
             {
                 event.reply( String.format( "Sorry %s! That is incorrect, you lose %d karma.", answerer,
                                             currentGame.getStakes() ) );
-                KarmaDB.modNounKarma( answerer, -1 * currentGame.getStakes() );
+                modNounKarma( answerer, currentGame.getQuestion(), -1 * currentGame.getStakes() );
             }
         }
         else
@@ -275,6 +286,49 @@ public class Trivia
             }
             return triviaJSON;
         }
+    }
+
+    @Override
+    public List<String> getGroups()
+    {
+        return Arrays.asList( "Gaming" );
+    }
+
+    @Override
+    public String getKarmalyticsId()
+    {
+        return "Jeopardy";
+    }
+
+    @Override
+    public Function<KarmalyticsRecord, String> getRecordDescriptorFunction()
+    {
+        return ( r ) -> {
+            StringBuilder out = new StringBuilder();
+            out.append( r.getNick() );
+            out.append( " has " );
+            if ( r.getKarmaModAmount() > 0 )
+            {
+                out.append( "won " );
+            }
+            else
+            {
+                out.append( "lost " );
+            }
+            out.append( Math.abs( r.getKarmaModAmount() ) );
+            out.append( " karma " );
+            if ( r.getKarmaModAmount() > 0 )
+            {
+                out.append( " by correctly answering the question \"" );
+            }
+            else
+            {
+                out.append( "by incorrectly answering the question \"" );
+            }
+            out.append( r.getExtraInfo() );
+            out.append( "\". in Jeopardy." );
+            return out.toString();
+        };
     }
 
 }

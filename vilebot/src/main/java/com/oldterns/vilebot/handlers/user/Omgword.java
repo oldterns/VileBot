@@ -1,12 +1,5 @@
 package com.oldterns.vilebot.handlers.user;
 
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import com.oldterns.vilebot.Vilebot;
-import com.oldterns.vilebot.db.KarmaDB;
-import com.oldterns.vilebot.util.BaseNick;
-import net.engio.mbassy.listener.Handler;
-
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
@@ -16,14 +9,25 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import ca.szc.keratin.bot.annotation.HandlerContainer;
+import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import com.oldterns.vilebot.Vilebot;
+import com.oldterns.vilebot.db.KarmalyticsDB;
+import com.oldterns.vilebot.karmalytics.HasKarmalytics;
+import com.oldterns.vilebot.karmalytics.KarmalyticsRecord;
+import com.oldterns.vilebot.util.BaseNick;
+import net.engio.mbassy.listener.Handler;
 
 /**
  * Based off of the omgword game from CasinoBot: http://casinobot.codeplex.com/
  */
 @HandlerContainer
 public class Omgword
+    implements HasKarmalytics
 {
 
     private static final Pattern QUESTION_PATTERN = Pattern.compile( "!omgword" );
@@ -47,6 +51,11 @@ public class Omgword
     private static final long TIMEOUT = 30000L;
 
     private static ExecutorService timer = Executors.newScheduledThreadPool( 1 );
+
+    public Omgword()
+    {
+        KarmalyticsDB.intializeKarmalyticsFor( this );
+    }
 
     @Handler
     public void omgword( ReceivePrivmsg event )
@@ -142,14 +151,14 @@ public class Omgword
             {
                 stopTimer();
                 event.reply( String.format( "Congrats %s, you win %d karma!", answerer, currentGame.getStakes() ) );
-                KarmaDB.modNounKarma( answerer, currentGame.getStakes() );
+                modNounKarma( answerer, scrambled, currentGame.getStakes() );
                 currentGame = null;
             }
             else
             {
                 event.reply( String.format( "Sorry %s! That is incorrect, you lose %d karma.", answerer,
                                             currentGame.getStakes() ) );
-                KarmaDB.modNounKarma( answerer, -1 * currentGame.getStakes() );
+                modNounKarma( answerer, scrambled, -1 * currentGame.getStakes() );
             }
         }
         else
@@ -228,6 +237,50 @@ public class Omgword
             array[index] = array[i];
             array[i] = temp;
         }
+    }
+
+    @Override
+    public List<String> getGroups()
+    {
+        return Arrays.asList( "Gaming" );
+    }
+
+    @Override
+    public String getKarmalyticsId()
+    {
+        return "Omgword";
+    }
+
+    @Override
+    public Function<KarmalyticsRecord, String> getRecordDescriptorFunction()
+    {
+        return ( r ) -> {
+            StringBuilder out = new StringBuilder();
+            out.append( r.getNick() );
+            out.append( " has " );
+            if ( r.getKarmaModAmount() > 0 )
+            {
+                out.append( "won " );
+            }
+            else
+            {
+                out.append( "lost " );
+            }
+            out.append( Math.abs( r.getKarmaModAmount() ) );
+            out.append( " karma " );
+
+            if ( r.getKarmaModAmount() > 0 )
+            {
+                out.append( "by correctly unscrambling " );
+            }
+            else
+            {
+                out.append( "from incorrectly guessing the unscrumabled version of the anagram " );
+            }
+            out.append( r.getExtraInfo() );
+            out.append( " in Omgword." );
+            return out.toString();
+        };
     }
 
 }

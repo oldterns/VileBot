@@ -6,21 +6,14 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.oldterns.vilebot.db.ChurchDB;
-import com.oldterns.vilebot.db.GroupDB;
-import com.oldterns.vilebot.db.KarmaDB;
-import com.oldterns.vilebot.util.BaseNick;
-import com.oldterns.vilebot.util.Ignore;
-
-import com.oldterns.vilebot.util.Sessions;
-import net.engio.mbassy.listener.Handler;
 
 import ca.szc.keratin.bot.KeratinBot;
 import ca.szc.keratin.bot.annotation.AssignedBot;
@@ -29,9 +22,20 @@ import ca.szc.keratin.core.event.message.interfaces.Replyable;
 import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
+import com.oldterns.vilebot.db.ChurchDB;
+import com.oldterns.vilebot.db.GroupDB;
+import com.oldterns.vilebot.db.KarmaDB;
+import com.oldterns.vilebot.db.KarmalyticsDB;
+import com.oldterns.vilebot.karmalytics.HasKarmalytics;
+import com.oldterns.vilebot.karmalytics.KarmalyticsRecord;
+import com.oldterns.vilebot.util.BaseNick;
+import com.oldterns.vilebot.util.Ignore;
+import com.oldterns.vilebot.util.Sessions;
+import net.engio.mbassy.listener.Handler;
 
 @HandlerContainer
 public class Karma
+    implements HasKarmalytics
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
@@ -44,7 +48,8 @@ public class Karma
     private static final Pattern incrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + incBlobPattern + "+)(?:.*|$)" );
 
     private static final Pattern decrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + decBlobPattern + "+)(?:.*|$)" );
-    // The opening (?:^|^.*\\s+) and closing (?:.*|$) are needed when only part of the message is ++ or -- events
+    // The opening (?:^|^.*\\s+) and closing (?:.*|$) are needed when only part of
+    // the message is ++ or -- events
 
     private static final Pattern selfKarmaQueryPattern = Pattern.compile( "^\\s*!(rev|)rank\\s*$" );
 
@@ -60,6 +65,11 @@ public class Karma
 
     @AssignedBot
     private KeratinBot bot;
+
+    public Karma()
+    {
+        KarmalyticsDB.intializeKarmalyticsFor( this );
+    }
 
     @Handler
     private void announceKarmaOnJoin( ReceiveJoin event )
@@ -80,7 +90,7 @@ public class Karma
         {
             if ( isPrivate( event ) )
             {
-                KarmaDB.modNounKarma( event.getSender(), -1 );
+                modNounKarma( event.getSender(), "!private", -1 );
                 return;
             }
             // Prevent users from increasing karma outside of #TheFoobar
@@ -91,8 +101,10 @@ public class Karma
                 return;
             }
 
-            // If one match is found, take the entire text of the message (group(0)) and check each word
-            // This is needed in the case that only part of the message is karma events (ie "wow anestico++")
+            // If one match is found, take the entire text of the message (group(0)) and
+            // check each word
+            // This is needed in the case that only part of the message is karma events (ie
+            // "wow anestico++")
             String wordBlob = incMatcher.group( 0 );
             String sender = BaseNick.toBaseNick( event.getSender() );
 
@@ -108,7 +120,7 @@ public class Karma
             for ( String nick : nicks )
             {
                 if ( !nick.equals( sender ) )
-                    KarmaDB.modNounKarma( nick, 1 );
+                    modNounKarma( nick, sender, 1 );
                 else
                     insult = true;
             }
@@ -129,7 +141,7 @@ public class Karma
         {
             if ( isPrivate( event ) )
             {
-                KarmaDB.modNounKarma( event.getSender(), -1 );
+                modNounKarma( event.getSender(), "!private", -1 );
                 return;
             }
             // Prevent users from decreasing karma outside of #TheFoobar
@@ -139,7 +151,8 @@ public class Karma
                     + " to give or receive karma." );
                 return;
             }
-            // If one match is found, take the entire text of the message (group(0)) and check each word
+            // If one match is found, take the entire text of the message (group(0)) and
+            // check each word
             String wordBlob = decMatcher.group( 0 );
 
             List<String> nicks = new LinkedList<String>();
@@ -151,10 +164,11 @@ public class Karma
 
             boolean insult = false;
 
+            String sender = BaseNick.toBaseNick( event.getSender() );
             for ( String nick : nicks )
             {
                 if ( !nick.equals( bot.getNick() ) )
-                    KarmaDB.modNounKarma( nick, -1 );
+                    modNounKarma( nick, sender, -1 );
                 else
                     insult = true;
             }
@@ -366,5 +380,46 @@ public class Karma
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<String> getGroups()
+    {
+        return Arrays.asList( "External" );
+    }
+
+    @Override
+    public String getKarmalyticsId()
+    {
+        return "plus-plus/minus-minus";
+    }
+
+    @Override
+    public Function<KarmalyticsRecord, String> getRecordDescriptorFunction()
+    {
+        return ( r ) -> {
+            if ( r.getExtraInfo().equals( "!private" ) )
+            {
+                return r.getNick() + " has tried to award/remove karma from a private chat; SAD.";
+            }
+            else
+            {
+                StringBuilder out = new StringBuilder();
+                out.append( r.getExtraInfo() );
+                out.append( " has " );
+                if ( r.getKarmaModAmount() > 0 )
+                {
+                    out.append( "given karma to " );
+                }
+                else
+                {
+                    out.append( "taken karma from " );
+                }
+                out.append( r.getNick() );
+                out.append( "." );
+                return out.toString();
+
+            }
+        };
     }
 }

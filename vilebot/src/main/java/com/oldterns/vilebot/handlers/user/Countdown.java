@@ -3,19 +3,15 @@ package com.oldterns.vilebot.handlers.user;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.oldterns.vilebot.Vilebot;
-import com.oldterns.vilebot.db.KarmaDB;
-import com.oldterns.vilebot.util.BaseNick;
 
 import bsh.EvalError;
 import bsh.Interpreter;
@@ -23,6 +19,11 @@ import ca.szc.keratin.bot.KeratinBot;
 import ca.szc.keratin.bot.annotation.AssignedBot;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import com.oldterns.vilebot.Vilebot;
+import com.oldterns.vilebot.db.KarmalyticsDB;
+import com.oldterns.vilebot.karmalytics.HasKarmalytics;
+import com.oldterns.vilebot.karmalytics.KarmalyticsRecord;
+import com.oldterns.vilebot.util.BaseNick;
 import net.engio.mbassy.listener.Handler;
 
 /**
@@ -30,6 +31,7 @@ import net.engio.mbassy.listener.Handler;
  */
 @HandlerContainer
 public class Countdown
+    implements HasKarmalytics
 {
 
     private static final String COUNTDOWN_CHANNEL = Vilebot.getConfig().get( "countdownChannel" );
@@ -60,6 +62,11 @@ public class Countdown
 
     @AssignedBot
     private KeratinBot bot;
+
+    public Countdown()
+    {
+        KarmalyticsDB.intializeKarmalyticsFor( this );
+    }
 
     private static class CountdownGame
     {
@@ -369,7 +376,7 @@ public class Countdown
                 {
                     event.reply( String.format( "You have put an answer that breaks the threshold of +-%d, you lose %d karma.",
                                                 ANSWER_THRESHOLD, INVALID_STAKE ) );
-                    KarmaDB.modNounKarma( contestant, -1 * INVALID_STAKE );
+                    modNounKarma( contestant, -1 * INVALID_STAKE );
                 }
             }
             catch ( Exception e )
@@ -377,7 +384,7 @@ public class Countdown
                 e.printStackTrace();
                 event.reply( String.format( "Sorry %s! You have put an invalid answer, you lose %d karma.", contestant,
                                             INVALID_STAKE ) );
-                KarmaDB.modNounKarma( contestant, -1 * INVALID_STAKE );
+                modNounKarma( contestant, -1 * INVALID_STAKE );
             }
         }
         else
@@ -429,7 +436,7 @@ public class Countdown
                 {
                     karmaAwarded = currGame.karmaAwarded( winner );
                     event.reply( winner + " awarded " + GREEN + karmaAwarded + RESET + " karma \n" );
-                    KarmaDB.modNounKarma( winner, karmaAwarded );
+                    modNounKarma( winner, karmaAwarded );
                 }
             }
             else
@@ -470,5 +477,27 @@ public class Countdown
     private String getSubmissionRuleString()
     {
         return RED + "Use \" /msg " + RESET + bot.getNick() + RED + " !solution < answer > \" to submit." + RESET;
+    }
+
+    @Override
+    public List<String> getGroups()
+    {
+        return Arrays.asList( "Gaming" );
+    }
+
+    @Override
+    public String getKarmalyticsId()
+    {
+        return "Countdown";
+    }
+
+    @Override
+    public Function<KarmalyticsRecord, String> getRecordDescriptorFunction()
+    {
+        return r -> ( r.getKarmaModAmount() > 0 )
+                        ? r.getNick() + " has won a game of countdown and got " + r.getKarmaModAmount()
+                            + " for winning."
+                        : r.getNick() + " has lost a game of countdown and lose " + -r.getKarmaModAmount()
+                            + " for losing.";
     }
 }

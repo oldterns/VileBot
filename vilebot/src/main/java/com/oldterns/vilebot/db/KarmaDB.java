@@ -21,7 +21,7 @@ public class KarmaDB
      * @param noun The noun to change the karma of
      * @param mod The amount to change the karma by, may be negative.
      */
-    public static void modNounKarma( String noun, int mod )
+    protected static void modNounKarma( String noun, int mod )
     {
         Jedis jedis = pool.getResource();
         try

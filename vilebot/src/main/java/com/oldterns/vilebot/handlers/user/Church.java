@@ -1,22 +1,28 @@
 package com.oldterns.vilebot.handlers.user;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.oldterns.vilebot.db.KarmaDB;
-import com.oldterns.vilebot.db.ChurchDB;
-import com.oldterns.vilebot.util.BaseNick;
-
-import net.engio.mbassy.listener.Handler;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.interfaces.Replyable;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.oldterns.vilebot.db.ChurchDB;
+import com.oldterns.vilebot.db.KarmaDB;
+import com.oldterns.vilebot.db.KarmalyticsDB;
+import com.oldterns.vilebot.karmalytics.HasKarmalytics;
+import com.oldterns.vilebot.karmalytics.KarmalyticsRecord;
+import com.oldterns.vilebot.util.BaseNick;
+import net.engio.mbassy.listener.Handler;
 
 @HandlerContainer
 public class Church
+    implements HasKarmalytics
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
@@ -39,6 +45,11 @@ public class Church
     private static ExecutorService timer = Executors.newScheduledThreadPool( 1 );
 
     private static VoteEvent currentVote = null;
+
+    public Church()
+    {
+        KarmalyticsDB.intializeKarmalyticsFor( this );
+    }
 
     @Handler
     private void donateToChurch( ReceivePrivmsg event )
@@ -68,7 +79,7 @@ public class Church
             else
             {
                 ChurchDB.modDonorKarma( donor, donationAmount );
-                KarmaDB.modNounKarma( donor, -1 * donationAmount );
+                modNounKarma( donor, -1 * donationAmount );
                 if ( ChurchDB.getDonorKarma( donor ) - donationAmount <= 0 )
                 {
                     ChurchDB.modDonorTitle( donor, " " );
@@ -264,8 +275,8 @@ public class Church
         String message = "Voting is now finished\n";
         if ( currentVote.isDecisionYes() )
         {
-            message += "The vote to inquisit " + currentVote.getDecsionTarget() + " has passed. "
-                + currentVote.getDecsionTarget() + " will be stripped of their karma.";
+            message += "The vote to inquisit " + currentVote.getDecsionTarget()
+                + " has passed. He will be stripped of their karma.";
             ChurchDB.modNonDonorKarma( ChurchDB.getDonorKarma( currentVote.getDecsionTarget() ) );
             ChurchDB.removeDonor( currentVote.getDecsionTarget() );
         }
@@ -370,5 +381,23 @@ public class Church
         {
             return decisionTarget;
         }
+    }
+
+    @Override
+    public List<String> getGroups()
+    {
+        return Arrays.asList( "Karma Drains" );
+    }
+
+    @Override
+    public String getKarmalyticsId()
+    {
+        return "Church";
+    }
+
+    @Override
+    public Function<KarmalyticsRecord, String> getRecordDescriptorFunction()
+    {
+        return ( r ) -> r.getNick() + " has donated " + -r.getKarmaModAmount() + " to the Church.";
     }
 }

@@ -124,7 +124,8 @@ public class ConfMap
             throw new IllegalArgumentException( "confFile ( " + confFile + " ) points to an existing target, "
                 + "but this target is not a regular file." );
 
-        // Create a BufferedReader from the Path and Charset, then pass to the ConfParser
+        // Create a BufferedReader from the Path and Charset, then pass to the
+        // ConfParser
         try ( BufferedReader reader = Files.newBufferedReader( confFile, charset ) )
         {
             this.entries = parser.parse( reader );

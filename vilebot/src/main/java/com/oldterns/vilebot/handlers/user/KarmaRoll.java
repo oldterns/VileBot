@@ -7,21 +7,26 @@
 package com.oldterns.vilebot.handlers.user;
 
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.oldterns.vilebot.db.KarmaDB;
-import com.oldterns.vilebot.util.BaseNick;
-
-import net.engio.mbassy.listener.Handler;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-
 import com.oldterns.vilebot.Vilebot;
+import com.oldterns.vilebot.db.KarmaDB;
+import com.oldterns.vilebot.db.KarmalyticsDB;
+import com.oldterns.vilebot.karmalytics.HasKarmalytics;
+import com.oldterns.vilebot.karmalytics.KarmalyticsRecord;
+import com.oldterns.vilebot.util.BaseNick;
+import net.engio.mbassy.listener.Handler;
 
 @HandlerContainer
 public class KarmaRoll
+    implements HasKarmalytics
 {
     private static final Pattern rollPattern = Pattern.compile( "!roll(?: for|)(?: +([0-9]+)|)" );
 
@@ -32,6 +37,11 @@ public class KarmaRoll
     private RollGame currentGame;
 
     private Object currentGameMutex = new Object();
+
+    public KarmaRoll()
+    {
+        KarmalyticsDB.intializeKarmalyticsFor( this );
+    }
 
     @Handler
     private void userHelp( ReceivePrivmsg event )
@@ -101,7 +111,8 @@ public class KarmaRoll
                     }
                     else
                     {
-                        // A game exists, and no karma value was given. User is accepting the active wager/game.
+                        // A game exists, and no karma value was given. User is accepting the active
+                        // wager/game.
 
                         // The user that started a game cannot accept it
                         if ( currentGame.getFirstPlayerNick().equals( sender ) )
@@ -141,8 +152,8 @@ public class KarmaRoll
                                 sb.append( loser );
                                 sb.append( "!!!" );
 
-                                KarmaDB.modNounKarma( winner, deltaKarma );
-                                KarmaDB.modNounKarma( loser, -1 * deltaKarma );
+                                modNounKarma( winner, loser, deltaKarma );
+                                modNounKarma( loser, winner, -1 * deltaKarma );
                             }
                             else
                             {
@@ -324,5 +335,40 @@ public class KarmaRoll
         {
             super( message );
         }
+    }
+
+    @Override
+    public List<String> getGroups()
+    {
+        return Arrays.asList( "Gambling" );
+    }
+
+    @Override
+    public String getKarmalyticsId()
+    {
+        return "Betting Karma on Rolls";
+    }
+
+    @Override
+    public Function<KarmalyticsRecord, String> getRecordDescriptorFunction()
+    {
+        return ( r ) -> {
+            StringBuilder out = new StringBuilder();
+            out.append( r.getNick() );
+            out.append( " " );
+            if ( r.getKarmaModAmount() > 0 )
+            {
+                out.append( "won a roll bet against " );
+            }
+            else
+            {
+                out.append( "lost a roll bet against " );
+            }
+            out.append( r.getExtraInfo() );
+            out.append( " for " );
+            out.append( Math.abs( r.getKarmaModAmount() ) );
+            out.append( " karma." );
+            return out.toString();
+        };
     }
 }

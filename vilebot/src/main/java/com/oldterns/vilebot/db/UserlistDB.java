@@ -88,9 +88,12 @@ public class UserlistDB
         Jedis jedis = pool.getResource();
         try
         {
-            // KEYS is O(n) operation, so it won't scale propery for large numbers of database keys.
-            // We're going to use it here however, as the number of keys in our database should never get large enough
-            // for this to matter, and the alternative of maintaining a set of userlists has the potential to be buggy.
+            // KEYS is O(n) operation, so it won't scale propery for large numbers of
+            // database keys.
+            // We're going to use it here however, as the number of keys in our database
+            // should never get large enough
+            // for this to matter, and the alternative of maintaining a set of userlists has
+            // the potential to be buggy.
             Set<String> rawlists = jedis.keys( keyOfUserlistSetsPrefix + "*" );
 
             Set<String> lists = new HashSet<String>();

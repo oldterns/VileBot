@@ -3,6 +3,8 @@ logLevel=TRACE
 redisHost=localhost
 redisPort=6300
 
+timezone=America/Toronto
+
 ircBotAmount=1
 
 ircUser1=ExampleBot

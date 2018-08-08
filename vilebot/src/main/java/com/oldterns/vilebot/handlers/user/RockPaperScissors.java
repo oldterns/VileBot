@@ -1,28 +1,15 @@
 package com.oldterns.vilebot.handlers.user;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.oldterns.vilebot.Vilebot;
-import com.oldterns.vilebot.db.KarmaDB;
-import com.oldterns.vilebot.util.BaseNick;
-
-import bsh.EvalError;
-import bsh.Interpreter;
 import ca.szc.keratin.bot.KeratinBot;
 import ca.szc.keratin.bot.annotation.AssignedBot;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import com.oldterns.vilebot.Vilebot;
+import com.oldterns.vilebot.util.BaseNick;
 import net.engio.mbassy.listener.Handler;
 
 /**

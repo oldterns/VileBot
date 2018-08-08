@@ -1,5 +1,15 @@
 package com.oldterns.vilebot.handlers.user;
 
+import java.io.FileNotFoundException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
@@ -7,13 +17,6 @@ import net.engio.mbassy.listener.Handler;
 import twitter4j.JSONArray;
 import twitter4j.JSONException;
 import twitter4j.JSONObject;
-
-import java.io.FileNotFoundException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by eunderhi on 27/07/16.
