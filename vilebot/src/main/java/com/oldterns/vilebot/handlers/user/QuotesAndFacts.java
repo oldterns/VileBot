@@ -90,26 +90,50 @@ public class QuotesAndFacts
 
             if ( "fact".equals( mode ) )
             {
-                Set<String> allFacts = QuoteFactDB.getFacts( queried );
-                if ( allFacts.isEmpty() )
+                Long factsLength = QuoteFactDB.getFactsLength( queried );
+                if ( factsLength == 0 )
                 {
                     event.replyPrivately( queried + " has no facts." );
                 }
-                for ( String fact : allFacts )
+                else if ( factsLength <= 5 )
                 {
-                    event.replyPrivately( formatFactReply( queried, fact ) );
+                    Set<String> allFacts = QuoteFactDB.getFacts( queried );
+                    for ( String fact : allFacts )
+                    {
+                        event.replyPrivately( formatFactReply( queried, fact ) );
+                    }
+                }
+                else
+                {
+                    List<String> randomFacts = QuoteFactDB.getRandFacts( queried );
+                    for ( String fact : randomFacts )
+                    {
+                        event.replyPrivately( formatFactReply( queried, fact ) );
+                    }
                 }
             }
             else
             {
-                Set<String> allQuotes = QuoteFactDB.getQuotes( queried );
-                if ( allQuotes.isEmpty() )
+                Long quotesLength = QuoteFactDB.getQuotesLength( queried );
+                if ( quotesLength == 0 )
                 {
                     event.replyPrivately( queried + " has no quotes." );
                 }
-                for ( String quote : allQuotes )
+                else if ( quotesLength <= 5 )
                 {
-                    event.replyPrivately( formatFactReply( queried, quote ) );
+                    Set<String> allQuotes = QuoteFactDB.getQuotes( queried );
+                    for ( String quote : allQuotes )
+                    {
+                        event.replyPrivately( formatQuoteReply( queried, quote ) );
+                    }
+                }
+                else
+                {
+                    List<String> randomQuote = QuoteFactDB.getRandQuotes( queried );
+                    for ( String quote : randomQuote )
+                    {
+                        event.replyPrivately( formatQuoteReply( queried, quote ) );
+                    }
                 }
             }
         }
@@ -301,7 +325,7 @@ public class QuotesAndFacts
 
     /**
      * Removes all specified leading and trailing characters in the array charsToRemove.
-     * 
+     *
      * @param input The string to process
      * @param charsToRemove All characters to remove, treated as a set
      * @return A copy of the input String with the characters removed
