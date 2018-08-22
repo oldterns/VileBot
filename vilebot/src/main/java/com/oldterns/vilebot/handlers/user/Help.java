@@ -83,12 +83,16 @@ public class Help
         sb.append( "  Facts/Quotes:" );
         sb.append( " { !fact <noun> }" );
         sb.append( " { !quote <noun> }" );
+        sb.append( " { !factrandom5 <noun> }" );
+        sb.append( " { !quoterandom5 <noun> }" );
         sb.append( " { !factdump <noun> }" );
         sb.append( " { !quotedump <noun> }" );
         sb.append( " { !factadd <noun> <quote> }" );
         sb.append( " { !quoteadd <noun> <quote> }" );
         sb.append( " { !factsearch <noun> <regex> }" );
         sb.append( " { !quotesearch <noun> <regex> }" );
+        sb.append( " { !factnumber <noun> }" );
+        sb.append( " { !quotenumber <noun> }" );
         sb.append( "\n" );
         sb.append( "  Utility:" );
         sb.append( " { s/foo/bar[/[g] [<noun>]] }" );

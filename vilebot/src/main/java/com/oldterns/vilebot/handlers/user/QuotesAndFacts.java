@@ -37,6 +37,10 @@ public class QuotesAndFacts
 
     private static final Pattern dumpPattern = Pattern.compile( "^!(fact|quote)dump (" + nounPattern + ")\\s*$" );
 
+    private static final Pattern randomPattern = Pattern.compile( "^!(fact|quote)random5 (" + nounPattern + ")\\s*$" );
+
+    private static final Pattern numPattern = Pattern.compile( "^!(fact|quote)number (" + nounPattern + ")\\s*$" );
+
     private static final Pattern queryPattern = Pattern.compile( "^!(fact|quote) (" + nounPattern + ")\\s*$" );
 
     private static final Pattern searchPattern = Pattern.compile( "^!(fact|quote)search (" + nounPattern + ") (.*)$" );
@@ -90,6 +94,43 @@ public class QuotesAndFacts
 
             if ( "fact".equals( mode ) )
             {
+                Set<String> allFacts = QuoteFactDB.getFacts( queried );
+                if ( allFacts.isEmpty() )
+                {
+                    event.replyPrivately( queried + " has no facts." );
+                }
+                for ( String fact : allFacts )
+                {
+                    event.replyPrivately( formatFactReply( queried, fact ) );
+                }
+            }
+            else
+            {
+                Set<String> allQuotes = QuoteFactDB.getQuotes( queried );
+                if ( allQuotes.isEmpty() )
+                {
+                    event.replyPrivately( queried + " has no quotes." );
+                }
+                for ( String quote : allQuotes )
+                {
+                    event.replyPrivately( formatFactReply( queried, quote ) );
+                }
+            }
+        }
+    }
+
+    @Handler
+    private void factQuoteRandomDump( ReceivePrivmsg event )
+    {
+        Matcher matcher = randomPattern.matcher( event.getText() );
+
+        if ( matcher.matches() )
+        {
+            String mode = matcher.group( 1 );
+            String queried = BaseNick.toBaseNick( matcher.group( 2 ) );
+
+            if ( "fact".equals( mode ) )
+            {
                 Long factsLength = QuoteFactDB.getFactsLength( queried );
                 if ( factsLength == 0 )
                 {
@@ -134,6 +175,42 @@ public class QuotesAndFacts
                     {
                         event.replyPrivately( formatQuoteReply( queried, quote ) );
                     }
+                }
+            }
+        }
+    }
+
+    @Handler
+    private void factQuoteNum( ReceivePrivmsg event )
+    {
+        Matcher matcher = numPattern.matcher( event.getText() );
+
+        if ( matcher.matches() )
+        {
+            String mode = matcher.group( 1 );
+            String queried = BaseNick.toBaseNick( matcher.group( 2 ) );
+            if ( "fact".equals( mode ) )
+            {
+                Long factsLength = QuoteFactDB.getFactsLength( queried );
+                if ( factsLength == 0 )
+                {
+                    event.replyPrivately( queried + " has no facts." );
+                }
+                else
+                {
+                    event.replyPrivately( queried + " has " + factsLength + " facts." );
+                }
+            }
+            else
+            {
+                Long quotesLength = QuoteFactDB.getQuotesLength( queried );
+                if ( quotesLength == 0 )
+                {
+                    event.replyPrivately( queried + " has no quotes." );
+                }
+                else
+                {
+                    event.replyPrivately( queried + " has " + quotesLength + " quotes." );
                 }
             }
         }
