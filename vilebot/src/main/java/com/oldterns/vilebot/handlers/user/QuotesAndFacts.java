@@ -37,6 +37,10 @@ public class QuotesAndFacts
 
     private static final Pattern dumpPattern = Pattern.compile( "^!(fact|quote)dump (" + nounPattern + ")\\s*$" );
 
+    private static final Pattern randomPattern = Pattern.compile( "^!(fact|quote)random5 (" + nounPattern + ")\\s*$" );
+
+    private static final Pattern numPattern = Pattern.compile( "^!(fact|quote)number (" + nounPattern + ")\\s*$" );
+
     private static final Pattern queryPattern = Pattern.compile( "^!(fact|quote) (" + nounPattern + ")\\s*$" );
 
     private static final Pattern searchPattern = Pattern.compile( "^!(fact|quote)search (" + nounPattern + ") (.*)$" );
@@ -110,6 +114,103 @@ public class QuotesAndFacts
                 for ( String quote : allQuotes )
                 {
                     event.replyPrivately( formatFactReply( queried, quote ) );
+                }
+            }
+        }
+    }
+
+    @Handler
+    private void factQuoteRandomDump( ReceivePrivmsg event )
+    {
+        Matcher matcher = randomPattern.matcher( event.getText() );
+
+        if ( matcher.matches() )
+        {
+            String mode = matcher.group( 1 );
+            String queried = BaseNick.toBaseNick( matcher.group( 2 ) );
+
+            if ( "fact".equals( mode ) )
+            {
+                Long factsLength = QuoteFactDB.getFactsLength( queried );
+                if ( factsLength == 0 )
+                {
+                    event.replyPrivately( queried + " has no facts." );
+                }
+                else if ( factsLength <= 5 )
+                {
+                    Set<String> allFacts = QuoteFactDB.getFacts( queried );
+                    for ( String fact : allFacts )
+                    {
+                        event.replyPrivately( formatFactReply( queried, fact ) );
+                    }
+                }
+                else
+                {
+                    List<String> randomFacts = QuoteFactDB.getRandFacts( queried );
+                    for ( String fact : randomFacts )
+                    {
+                        event.replyPrivately( formatFactReply( queried, fact ) );
+                    }
+                }
+            }
+            else
+            {
+                Long quotesLength = QuoteFactDB.getQuotesLength( queried );
+                if ( quotesLength == 0 )
+                {
+                    event.replyPrivately( queried + " has no quotes." );
+                }
+                else if ( quotesLength <= 5 )
+                {
+                    Set<String> allQuotes = QuoteFactDB.getQuotes( queried );
+                    for ( String quote : allQuotes )
+                    {
+                        event.replyPrivately( formatQuoteReply( queried, quote ) );
+                    }
+                }
+                else
+                {
+                    List<String> randomQuote = QuoteFactDB.getRandQuotes( queried );
+                    for ( String quote : randomQuote )
+                    {
+                        event.replyPrivately( formatQuoteReply( queried, quote ) );
+                    }
+                }
+            }
+        }
+    }
+
+    @Handler
+    private void factQuoteNum( ReceivePrivmsg event )
+    {
+        Matcher matcher = numPattern.matcher( event.getText() );
+
+        if ( matcher.matches() )
+        {
+            String mode = matcher.group( 1 );
+            String queried = BaseNick.toBaseNick( matcher.group( 2 ) );
+            if ( "fact".equals( mode ) )
+            {
+                Long factsLength = QuoteFactDB.getFactsLength( queried );
+                if ( factsLength == 0 )
+                {
+                    event.replyPrivately( queried + " has no facts." );
+                }
+                else
+                {
+                    event.replyPrivately( queried + " has " + factsLength + " facts." );
+                }
+            }
+            else
+            {
+                Long quotesLength = QuoteFactDB.getQuotesLength( queried );
+                if ( quotesLength == 0 )
+                {
+                    event.replyPrivately( queried + " has no quotes." );
+                }
+                else
+                {
+                    event.replyPrivately( queried + " has " + quotesLength + " quotes." );
                 }
             }
         }
@@ -301,7 +402,7 @@ public class QuotesAndFacts
 
     /**
      * Removes all specified leading and trailing characters in the array charsToRemove.
-     * 
+     *
      * @param input The string to process
      * @param charsToRemove All characters to remove, treated as a set
      * @return A copy of the input String with the characters removed
