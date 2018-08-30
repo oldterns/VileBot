@@ -6,6 +6,11 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.LineNumberReader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,7 +40,8 @@ public class QuotesAndFacts
 
     private static final Pattern addPattern = Pattern.compile( "^!(fact|quote)add (" + nounPattern + ") (.+)$" );
 
-    private static final Pattern dumpPattern = Pattern.compile( "^!(fact|quote)dump (" + nounPattern + ")\\s*$" );
+    private static final Pattern dumpPattern =
+        Pattern.compile( "^!(fact|quote)dump (" + nounPattern + ")((?: --page)?)((?:\\d*)?)((?: overwrite)?)\\s*$" );
 
     private static final Pattern randomPattern = Pattern.compile( "^!(fact|quote)random5 (" + nounPattern + ")\\s*$" );
 
@@ -46,6 +52,12 @@ public class QuotesAndFacts
     private static final Pattern searchPattern = Pattern.compile( "^!(fact|quote)search (" + nounPattern + ") (.*)$" );
 
     private static final Random random = new Random();
+
+    private static final String DUMP_FOLDER = "dump_folder";
+
+    private static final File DUMP_FOLDER_FILE = new File( DUMP_FOLDER );
+
+    private static final double LINES_PER_PAGE = 5.0;
 
     @Handler
     private void factQuoteAdd( ReceivePrivmsg event )
@@ -91,31 +103,38 @@ public class QuotesAndFacts
         {
             String mode = matcher.group( 1 );
             String queried = BaseNick.toBaseNick( matcher.group( 2 ) );
+            String pageString = matcher.group( 4 );
+            String overWrite = matcher.group( 5 );
+            String sender = BaseNick.toBaseNick( event.getSender() );
+
+            Integer page = 1;
+
+            Set<String> allFactsOrQuotes;
 
             if ( "fact".equals( mode ) )
             {
-                Set<String> allFacts = QuoteFactDB.getFacts( queried );
-                if ( allFacts.isEmpty() )
+                allFactsOrQuotes = QuoteFactDB.getFacts( queried );
+                if ( allFactsOrQuotes.isEmpty() )
                 {
                     event.replyPrivately( queried + " has no facts." );
-                }
-                for ( String fact : allFacts )
-                {
-                    event.replyPrivately( formatFactReply( queried, fact ) );
                 }
             }
             else
             {
-                Set<String> allQuotes = QuoteFactDB.getQuotes( queried );
-                if ( allQuotes.isEmpty() )
+                allFactsOrQuotes = QuoteFactDB.getQuotes( queried );
+                if ( allFactsOrQuotes.isEmpty() )
                 {
                     event.replyPrivately( queried + " has no quotes." );
                 }
-                for ( String quote : allQuotes )
-                {
-                    event.replyPrivately( formatFactReply( queried, quote ) );
-                }
             }
+
+            if ( !pageString.equals( "" ) )
+            {
+                page = Integer.parseInt( pageString );
+            }
+
+            saveToFile( allFactsOrQuotes, queried, sender, mode, event, overWrite );
+            getQuoteFactPage( page, queried, sender, mode, event );
         }
     }
 
@@ -427,5 +446,98 @@ public class QuotesAndFacts
         }
 
         return new String( input.substring( st, len ) );
+    }
+
+    private static void saveToFile( Set<String> data, String queried, String sender, String mode, ReceivePrivmsg event,
+                                    String overWrite )
+    {
+        if ( !DUMP_FOLDER_FILE.exists() )
+        {
+            DUMP_FOLDER_FILE.mkdirs();
+        }
+
+        File dumpFile = new File( DUMP_FOLDER_FILE, mode + "-of-" + queried + "-from-" + sender );
+
+        if ( dumpFile.exists() && !overWrite.equals( "ow" ) )
+        {
+            return;
+        }
+
+        try
+        {
+            FileWriter writer = new FileWriter( dumpFile, false );
+
+            for ( String quoteOrFact : data )
+            {
+                writer.write( quoteOrFact );
+                writer.write( System.getProperty( "line.separator" ) );
+            }
+
+            writer.close();
+        }
+        catch ( Exception e )
+        {
+            event.replyPrivately( "Error writing quote/fact dump to file." );
+        }
+    }
+
+    private static void getQuoteFactPage( Integer page, String queried, String sender, String mode,
+                                          ReceivePrivmsg event )
+    {
+        double startingLine = ( page - 1 ) * LINES_PER_PAGE;
+
+        if ( page < 1 )
+        {
+            event.replyPrivately( "That page number is invalid" );
+            return;
+        }
+
+        File file = new File( DUMP_FOLDER_FILE, mode + "-of-" + queried + "-from-" + sender );
+
+        long numberOfLines = getNumberOfLines( file, event );
+
+        if ( numberOfLines < ( startingLine + 5 ) )
+        {
+            event.replyPrivately( "That page number is invalid, please enter a page number less than "
+                + Math.ceil( numberOfLines / LINES_PER_PAGE ) + 1 );
+            return;
+        }
+
+        try ( BufferedReader br = new BufferedReader( new FileReader( file ) ) )
+        {
+            for ( int i = 0; i < startingLine; i++ )
+            {
+                br.readLine();
+            }
+
+            String line;
+            for ( long i = Math.round( startingLine ); i < startingLine + LINES_PER_PAGE; i++ )
+            {
+                line = br.readLine();
+                event.replyPrivately( formatFactReply( queried, line ) );
+            }
+
+            event.replyPrivately( "There are " + Math.ceil( numberOfLines - ( startingLine + LINES_PER_PAGE ) )
+                + " lines remaining, with " + LINES_PER_PAGE + " lines per page." );
+        }
+        catch ( Exception e )
+        {
+            event.replyPrivately( "Error reading quote/fact dump from file." );
+        }
+    }
+
+    private static long getNumberOfLines( File file, ReceivePrivmsg event )
+    {
+        try ( LineNumberReader reader = new LineNumberReader( new FileReader( file ) ) )
+        {
+            while ( ( reader.readLine() ) != null )
+                ;
+            return reader.getLineNumber();
+        }
+        catch ( Exception e )
+        {
+            event.replyPrivately( "Error getting number of lines in file." );
+            return -1;
+        }
     }
 }
