@@ -46,6 +46,10 @@ public class Trivia
 
     private static ExecutorService timer = Executors.newScheduledThreadPool( 1 );
 
+    private static final Integer RECURSION_LIMIT = 10;
+
+    private static Integer CURRENT_RECURSION_DEPTH = 0;
+
     @Handler
     public void doTrivia( ReceivePrivmsg event )
     {
@@ -168,18 +172,26 @@ public class Trivia
 
         private String category;
 
-        private int invalidFlag;
-
         private static final String API_URL = "http://jservice.io/api/random";
 
         public TriviaGame()
             throws Exception
         {
             JSONObject triviaJSON = getQuestionJSON();
-            question = triviaJSON.getString( "question" );
-            category = triviaJSON.getJSONObject( "category" ).getString( "title" );
-            answer = Jsoup.parse( triviaJSON.getString( "answer" ) ).text();
-            stakes = getStakes( triviaJSON );
+            if ( triviaJSON != null )
+            {
+                question = triviaJSON.getString( "question" );
+                category = triviaJSON.getJSONObject( "category" ).getString( "title" );
+                answer = Jsoup.parse( triviaJSON.getString( "answer" ) ).text();
+                stakes = getStakes( triviaJSON );
+            }
+            else
+            {
+                question = "Could not find a question";
+                category = "Could not find a question";
+                answer = "Could not find a question";
+                stakes = 0;
+            }
         }
 
         private int getStakes( JSONObject trivia )
@@ -268,10 +280,16 @@ public class Trivia
             String triviaContent = getQuestionContent();
             JSONObject triviaJSON = new JSONArray( triviaContent ).getJSONObject( 0 );
             String question = triviaJSON.getString( "question" ).trim();
-            boolean invalidFlag = !( triviaJSON.getString( "invalid_count" ) == null );
-            if ( question.equals( "" ) || question.contains( "seen here" ) || invalidFlag )
+            boolean invalidFlag = !( triviaJSON.getString( "invalid_count" ).equals( "null" ) );
+            if ( ( question.equals( "" ) || question.contains( "seen here" ) || invalidFlag )
+                && ( CURRENT_RECURSION_DEPTH < RECURSION_LIMIT ) )
             {
+                CURRENT_RECURSION_DEPTH += 1;
                 return getQuestionJSON();
+            }
+            else if ( CURRENT_RECURSION_DEPTH >= RECURSION_LIMIT )
+            {
+                return null;
             }
             return triviaJSON;
         }
