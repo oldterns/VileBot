@@ -50,6 +50,8 @@ public class Trivia
 
     private static Integer CURRENT_RECURSION_DEPTH = 0;
 
+    private static final String WELCOME_STRING = "Welcome to Bot Jeopardy!";
+
     @Handler
     public void doTrivia( ReceivePrivmsg event )
     {
@@ -98,6 +100,7 @@ public class Trivia
         else
         {
             currentGame = new TriviaGame();
+            event.reply( WELCOME_STRING );
             event.reply( currentGame.getIntroString() );
             startTimer( event );
         }
@@ -247,7 +250,7 @@ public class Trivia
 
         public String getIntroString()
         {
-            return "Welcome to Bot Jeopardy!\n" + getQuestionBlurb() + "\n30 seconds on the clock.";
+            return getQuestionBlurb() + "\n30 seconds on the clock.";
         }
 
         public String getAlreadyPlayingString()
