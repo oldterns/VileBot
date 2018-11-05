@@ -103,7 +103,7 @@ public class Help
         sb.append( " { !tellme <question> }" );
         sb.append( " { !infoon <wikipedia query> }" );
         sb.append( " { !ttc }" );
-        sb.append( " { !remindme <message> <time_in_seconds> }" );
+        sb.append( " { !remindme <message> <time><d/m/s> }" );
         sb.append( "\n" );
         sb.append( "  Userlists:" );
         sb.append( " { !list <listname> }" );
