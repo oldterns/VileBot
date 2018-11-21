@@ -231,7 +231,7 @@ public class Karma
         }
         String reply = nick + " had their karma ";
         reply += karma == 1 ? "increased" : "decreased";
-        reply += " by " + karma;
+        reply += " by 1";
         event.reply( reply );
         KarmaDB.modNounKarma( nick, karma );
     }
