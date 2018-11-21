@@ -9,6 +9,7 @@ package com.oldterns.vilebot.handlers.user;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,9 +42,14 @@ public class Karma
 
     private static final Pattern decBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?--)(?:, +| +|$))" );
 
+    private static final Pattern incOrDecBlobPattern = Pattern.compile( "(?:(" + nounPattern + "?\\+-)(?:, +| +|$))" );
+
     private static final Pattern incrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + incBlobPattern + "+)(?:.*|$)" );
 
     private static final Pattern decrementPattern = Pattern.compile( "(?:^|^.*\\s+)(" + decBlobPattern + "+)(?:.*|$)" );
+
+    private static final Pattern incOrDecPattern =
+        Pattern.compile( "(?:^|^.*\\s+)(" + incOrDecBlobPattern + "+)(?:.*|$)" );
     // The opening (?:^|^.*\\s+) and closing (?:.*|$) are needed when only part of the message is ++ or -- events
 
     private static final Pattern selfKarmaQueryPattern = Pattern.compile( "^\\s*!(rev|)rank\\s*$" );
@@ -163,6 +169,71 @@ public class Karma
                 // TODO insult generator?
                 event.reply( "I think I'm supposed to insult you now." );
         }
+    }
+
+    @Handler
+    private void karmaIncOrDec( ReceivePrivmsg event )
+    {
+        // Match any string that has at least one word that ends with ++
+        Matcher incOrDecMatcher = incOrDecPattern.matcher( event.getText() );
+
+        if ( incOrDecMatcher.matches() )
+        {
+            if ( isPrivate( event ) )
+            {
+                KarmaDB.modNounKarma( event.getSender(), -1 );
+                return;
+            }
+
+            // Prevent users from increasing karma outside of #TheFoobar
+            if ( !event.getChannel().matches( Vilebot.getConfig().get( "ircChannel1" ) ) )
+            {
+                event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
+                    + " to give or receive karma." );
+                return;
+            }
+
+            // If one match is found, take the entire text of the message (group(0)) and check each word
+            // This is needed in the case that only part of the message is karma events (ie "wow anestico++")
+            String wordBlob = incOrDecMatcher.group( 0 );
+            String sender = BaseNick.toBaseNick( event.getSender() );
+
+            Set<String> nicks = new HashSet<String>();
+            Matcher nickMatcher = incOrDecBlobPattern.matcher( wordBlob );
+            while ( nickMatcher.find() )
+            {
+                nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
+            }
+
+            boolean insult = false;
+
+            for ( String nick : nicks )
+            {
+                if ( !nick.equals( sender ) )
+                    decideIncOrDec( event, nick );
+                else
+                    insult = true;
+            }
+
+            if ( insult )
+                // TODO insult generator?
+                event.reply( "I think I'm supposed to insult you now." );
+        }
+    }
+
+    private void decideIncOrDec( ReceivePrivmsg event, String nick )
+    {
+        int karma = 0;
+        Random rand = new Random();
+        while ( karma == 0 )
+        {
+            karma = rand.nextInt( 3 ) - 1;
+        }
+        String reply = nick + " had their karma ";
+        reply += karma == 1 ? "increased" : "decreased";
+        reply += " by " + karma;
+        event.reply( reply );
+        KarmaDB.modNounKarma( nick, karma );
     }
 
     private boolean isPrivate( ReceivePrivmsg event )
