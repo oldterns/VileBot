@@ -49,6 +49,7 @@ public class Help
         sb.append( "  Karma:" );
         sb.append( " { noun++ }" );
         sb.append( " { noun-- }" );
+        sb.append( " { noun+- }" );
         sb.append( " { !rank <noun> }" );
         sb.append( " { !revrank <place> }" );
         sb.append( " { !rankn <place> }" );
