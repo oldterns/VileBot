@@ -17,6 +17,7 @@ import java.util.regex.PatternSyntaxException;
 
 import com.oldterns.vilebot.db.ChurchDB;
 import com.oldterns.vilebot.db.QuoteFactDB;
+import com.oldterns.vilebot.handlers.user.Jaziz;
 import com.oldterns.vilebot.util.BaseNick;
 import com.oldterns.vilebot.util.Ignore;
 
@@ -254,6 +255,14 @@ public class QuotesAndFacts
             String noun = BaseNick.toBaseNick( matcher.group( 2 ) );
             String regex = matcher.group( 3 );
 
+            // check if quote/fact needs to be piped to jaziz
+            int jazizIdx = regex.lastIndexOf( "!jaziz" );
+            boolean jaziz = jazizIdx >= 0;
+            if ( jaziz )
+            {
+                regex = regex.substring( 0, jazizIdx - 1 );
+            }
+
             try
             {
                 // Case insensitive added automatically, use (?-i) in a message to reenable case sensitivity
@@ -287,7 +296,22 @@ public class QuotesAndFacts
                         String randomMatch = regexSetSearch( texts, pattern );
                         if ( randomMatch != null )
                         {
-                            event.reply( formatQuoteReply( noun, randomMatch ) );
+                            if ( jaziz )
+                            {
+                                try
+                                {
+                                    event.reply( formatQuoteReply( noun, Jaziz.jazizify( randomMatch ) ) );
+                                }
+                                catch ( Exception e )
+                                {
+                                    event.reply( "eeeh" );
+                                    e.printStackTrace();
+                                }
+                            }
+                            else
+                            {
+                                event.reply( formatQuoteReply( noun, randomMatch ) );
+                            }
                         }
                         else
                         {
