@@ -276,7 +276,22 @@ public class QuotesAndFacts
                         String randomMatch = regexSetSearch( texts, pattern );
                         if ( randomMatch != null )
                         {
-                            event.reply( formatFactReply( noun, randomMatch ) );
+                            if ( jaziz )
+                            {
+                                try
+                                {
+                                    event.reply( formatFactReply( noun, Jaziz.jazizify( randomMatch ) ) );
+                                }
+                                catch ( Exception e )
+                                {
+                                    event.reply( "eeeh" );
+                                    e.printStackTrace();
+                                }
+                            }
+                            else
+                            {
+                                event.reply( formatFactReply( noun, randomMatch ) );
+                            }
                         }
                         else
                         {
