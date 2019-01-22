@@ -2,6 +2,7 @@ logLevel=TRACE
 
 redisHost=localhost
 redisPort=6300
+redisPassword=
 
 ircBotAmount=1
 
