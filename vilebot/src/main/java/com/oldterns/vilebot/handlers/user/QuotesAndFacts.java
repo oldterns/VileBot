@@ -42,7 +42,8 @@ public class QuotesAndFacts
 
     private static final Pattern numPattern = Pattern.compile( "^!(fact|quote)number (" + nounPattern + ")\\s*$" );
 
-    private static final Pattern queryPattern = Pattern.compile( "^!(fact|quote) (" + nounPattern + ")\\s*$" );
+    private static final Pattern queryPattern =
+        Pattern.compile( "^!(fact|quote) (" + nounPattern + ") (!jaziz)?\\s*$" );
 
     private static final Pattern searchPattern = Pattern.compile( "^!(fact|quote)search (" + nounPattern + ") (.*)$" );
 
@@ -227,16 +228,19 @@ public class QuotesAndFacts
             String mode = matcher.group( 1 );
             String noun = BaseNick.toBaseNick( matcher.group( 2 ) );
 
+            // check if quote/fact needs to be piped to jaziz
+            boolean jaziz = event.getText().lastIndexOf( "!jaziz" ) >= 0;
+
             if ( "fact".equals( mode ) )
             {
-                if ( !replyWithFact( noun, event ) )
+                if ( !replyWithFact( noun, event, jaziz ) )
                 {
                     event.reply( noun + " has no facts." );
                 }
             }
             else
             {
-                if ( !replyWithQuote( noun, event ) )
+                if ( !replyWithQuote( noun, event, jaziz ) )
                 {
                     event.reply( noun + " has no quotes." );
                 }
@@ -380,18 +384,18 @@ public class QuotesAndFacts
         {
             if ( random.nextBoolean() )
             {
-                if ( !replyWithQuote( baseNick, event ) )
-                    replyWithFact( baseNick, event );
+                if ( !replyWithQuote( baseNick, event, false ) )
+                    replyWithFact( baseNick, event, false );
             }
             else
             {
-                if ( !replyWithFact( baseNick, event ) )
-                    replyWithQuote( baseNick, event );
+                if ( !replyWithFact( baseNick, event, false ) )
+                    replyWithQuote( baseNick, event, false );
             }
         }
     }
 
-    private static boolean replyWithFact( String noun, Replyable event )
+    private static boolean replyWithFact( String noun, Replyable event, boolean jaziz )
     {
         String text = QuoteFactDB.getRandFact( noun );
         if ( text != null )
@@ -404,7 +408,23 @@ public class QuotesAndFacts
                     noun = title;
                 }
             }
-            event.reply( formatFactReply( noun, text ) );
+            String replyText = formatFactReply( noun, text );
+            if ( jaziz )
+            {
+                try
+                {
+                    event.reply( formatFactReply( noun, Jaziz.jazizify( text ) ) );
+                }
+                catch ( Exception e )
+                {
+                    event.reply( "eeeh" );
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                event.reply( formatFactReply( noun, text ) );
+            }
             return true;
         }
         return false;
@@ -415,7 +435,7 @@ public class QuotesAndFacts
         return noun + " " + fact;
     }
 
-    private static boolean replyWithQuote( String noun, Replyable event )
+    private static boolean replyWithQuote( String noun, Replyable event, boolean jaziz )
     {
         String text = QuoteFactDB.getRandQuote( noun );
         if ( text != null )
@@ -428,7 +448,22 @@ public class QuotesAndFacts
                     noun = title;
                 }
             }
-            event.reply( formatQuoteReply( noun, text ) );
+            if ( jaziz )
+            {
+                try
+                {
+                    event.reply( formatQuoteReply( noun, Jaziz.jazizify( text ) ) );
+                }
+                catch ( Exception e )
+                {
+                    event.reply( "eeeh" );
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                event.reply( formatQuoteReply( noun, text ) );
+            }
             return true;
         }
         return false;
