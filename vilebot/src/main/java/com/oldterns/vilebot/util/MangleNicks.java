@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.util;
 
-import java.util.Collection;
+import java.util.List;
 
 import ca.szc.keratin.bot.KeratinBot;
 import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
@@ -9,22 +9,28 @@ import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 /**
  * Reverse all nicks in messages
  */
-public class MangleNicks()
+public class MangleNicks
 {
 
-    public static String mangleNicks(KeratinBot bot, ReceivePrivmsg event, String message) {
-        return mangleNicks(bot, event.getChannel(), message);
+    public static String mangleNicks( KeratinBot bot, ReceivePrivmsg event, String message )
+    {
+        return mangleNicks( bot, event.getChannel(), message );
     }
 
-    public static String mangleNicks(KeratinBot bot, ReceiveJoin event, String message) {
-        return mangleNicks(bot, event.getChannel(), message);
+    public static String mangleNicks( KeratinBot bot, ReceiveJoin event, String message )
+    {
+        return mangleNicks( bot, event.getChannel(), message );
     }
 
-    private static String mangleNicks(KeratinBot bot, String channel, String message) {
+    private static String mangleNicks( KeratinBot bot, String channel, String message )
+    {
         List<String> nicks;
-        try {
+        try
+        {
             nicks = bot.getChannel( channel ).getNicks();
-        } catch (Exception e) {
+        }
+        catch ( Exception e )
+        {
             // nicks list is empty
             return message;
         }
@@ -37,7 +43,20 @@ public class MangleNicks()
         return reply.toString().trim();
     }
 
-    private static String mangled(String word) {
-		return new StringBuilder( word ).reverse().toString();
-	}
+    private static String mangled( String word )
+    {
+        return new StringBuilder( word ).reverse().toString();
+    }
+
+    private static boolean inside( List<String> nicks, String word )
+    {
+        for ( String nick : nicks )
+        {
+            if ( word.contains( nick ) )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }

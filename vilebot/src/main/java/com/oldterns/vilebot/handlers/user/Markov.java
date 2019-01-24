@@ -124,16 +124,4 @@ public class Markov
         return ( key.endsWith( "!" ) || key.endsWith( "?" ) || key.endsWith( "." ) );
     }
 
-    private boolean inside( List<String> nicks, String word )
-    {
-        for ( String nick : nicks )
-        {
-            if ( word.contains( nick ) )
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }

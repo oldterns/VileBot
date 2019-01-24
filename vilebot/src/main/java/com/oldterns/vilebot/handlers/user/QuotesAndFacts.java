@@ -27,7 +27,6 @@ import net.engio.mbassy.listener.Handler;
 import ca.szc.keratin.bot.KeratinBot;
 import ca.szc.keratin.bot.annotation.AssignedBot;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.interfaces.Replyable;
 import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
@@ -53,7 +52,7 @@ public class QuotesAndFacts
     private static final Random random = new Random();
 
     @AssignedBot
-    private KeratinBot bot;
+    private static KeratinBot bot;
 
     @Handler
     private void factQuoteAdd( ReceivePrivmsg event )
@@ -475,22 +474,32 @@ public class QuotesAndFacts
 
     private static boolean replyWithQuote( String noun, ReceivePrivmsg event, boolean jaziz )
     {
-        String replyText = getReplyQuote(String noun, boolean jaziz);
-        if (replyText != null) {
-            replyText = MangleNicks.mangleNicks(bot, event, replyText);
-            event.reply(replyText);
+        String replyText = getReplyQuote( noun, jaziz );
+        if ( replyText != null )
+        {
+            replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            event.reply( replyText );
             return true;
-        } else { return false; }
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private static boolean replyWithQuote( String noun, ReceiveJoin event, boolean jaziz )
     {
-        String replyText = getReplyQuote(String noun, boolean jaziz);
-        if (replyText != null) {
-            replyText = MangleNicks.mangleNicks(bot, event, replyText);
-            event.reply(replyText);
+        String replyText = getReplyQuote( noun, jaziz );
+        if ( replyText != null )
+        {
+            replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            event.reply( replyText );
             return true;
-        } else { return false; }
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private static String getReplyQuote( String noun, boolean jaziz )
