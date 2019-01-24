@@ -45,6 +45,7 @@ public class QuotesAndFacts
     private static final Pattern queryPattern =
         Pattern.compile( "^!(fact|quote) (" + nounPattern + ")( !jaziz)?\\s*$" );
 
+    // "( !jaziz)" is not included in searchPattern because it is handled in factQuoteSearch method
     private static final Pattern searchPattern = Pattern.compile( "^!(fact|quote)search (" + nounPattern + ") (.*)$" );
 
     private static final Random random = new Random();
