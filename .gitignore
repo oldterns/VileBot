@@ -1,6 +1,8 @@
 /keratin-irc/
+keratin-irc
 *.swp
 .settings/
+.vscode/
 .project
 .classpath
 *.iml

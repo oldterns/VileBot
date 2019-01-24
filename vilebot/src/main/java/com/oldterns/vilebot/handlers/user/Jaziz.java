@@ -52,7 +52,7 @@ public class Jaziz
         }
     }
 
-    private String jazizify( String message )
+    public static String jazizify( String message )
         throws Exception
     {
         String[] words = splitWords( message );
@@ -70,12 +70,12 @@ public class Jaziz
         return stringify( words );
     }
 
-    private String[] splitWords( String message )
+    private static String[] splitWords( String message )
     {
         return message.split( "\\b" );
     }
 
-    private List<String> getSynonyms( String word )
+    private static List<String> getSynonyms( String word )
         throws Exception
     {
         JSONObject json = new JSONObject( getContent( word ) );
@@ -93,13 +93,13 @@ public class Jaziz
         return synonyms;
     }
 
-    private JSONArray getSyns( JSONObject json )
+    private static JSONArray getSyns( JSONObject json )
         throws JSONException
     {
         return json.has( "syn" ) ? json.getJSONArray( "syn" ) : new JSONArray();
     }
 
-    private String randomChoice( List<String> list )
+    private static String randomChoice( List<String> list )
     {
         if ( list.size() == 0 )
         {
@@ -109,7 +109,7 @@ public class Jaziz
         return list.get( index );
     }
 
-    private String stringify( String[] list )
+    private static String stringify( String[] list )
     {
         StringBuilder builder = new StringBuilder();
         for ( String word : list )
@@ -119,7 +119,7 @@ public class Jaziz
         return builder.toString().trim();
     }
 
-    private List<String> jsonToList( JSONArray array )
+    private static List<String> jsonToList( JSONArray array )
         throws JSONException
     {
         List<String> words = new ArrayList<String>();
@@ -130,7 +130,7 @@ public class Jaziz
         return words;
     }
 
-    private String getContent( String word )
+    private static String getContent( String word )
         throws Exception
     {
         String content;

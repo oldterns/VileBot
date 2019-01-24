@@ -10,7 +10,7 @@
 ### Create config file
 
     cp cfg/vilebot.conf.example cfg/vilebot.conf
-    $EDITOR cfg/vilebot.conf
+    $EDITOR vilebot/cfg/vilebot.conf
 
 ### Formatting
 
@@ -53,7 +53,7 @@ Maven is used to get dependencies and to build. This command will generate a jar
 
 Use the start script to start Vilebot:
 
-    ./server-control.sh start
+    ./vilebot/server-control.sh start
 
 ## Notes
 

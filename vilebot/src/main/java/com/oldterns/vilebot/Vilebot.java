@@ -23,6 +23,7 @@ import com.oldterns.vilebot.util.Ignore;
 
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Protocol;
 import ca.szc.keratin.bot.KeratinBot;
 import ca.szc.keratin.bot.misc.Logging;
 import ca.szc.keratin.core.net.IrcConnection.SslMode;
@@ -44,7 +45,16 @@ public class Vilebot
         // Database
         String redisHost = cfg.get( "redisHost" );
         int redisPort = Integer.parseInt( cfg.get( "redisPort" ) );
-        pool = new JedisPool( new JedisPoolConfig(), redisHost, redisPort );
+        String redisPassword = cfg.get( "redisPassword" );
+        if ( redisPassword.length() > 0 )
+        {
+            pool =
+                new JedisPool( new JedisPoolConfig(), redisHost, redisPort, Protocol.DEFAULT_TIMEOUT, redisPassword );
+        }
+        else
+        {
+            pool = new JedisPool( new JedisPoolConfig(), redisHost, redisPort );
+        }
 
         Runtime.getRuntime().addShutdownHook( new Thread()
         {
