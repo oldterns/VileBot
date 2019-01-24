@@ -5,6 +5,7 @@ import ca.szc.keratin.bot.annotation.AssignedBot;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.db.LogDB;
+import com.oldterns.vilebot.util.MangleNicks;
 import com.oldterns.vilebot.util.Zalgo;
 
 import net.engio.mbassy.listener.Handler;
@@ -41,7 +42,7 @@ public class Markov
         {
             train();
             String phrase = generatePhrase();
-            phrase = mangleNicks( phrase, message );
+            phrase = MangleNicks.mangleNicks( bot, message, phrase );
             if ( isGospel )
             {
                 phrase = Zalgo.generate( phrase );
@@ -123,36 +124,6 @@ public class Markov
         return ( key.endsWith( "!" ) || key.endsWith( "?" ) || key.endsWith( "." ) );
     }
 
-    private String mangleNicks( String phrase, ReceivePrivmsg msg )
-    {
-        List<String> nicks = getNicks( msg );
-
-        if ( nicks.isEmpty() )
-        {
-            return phrase;
-        }
-
-        StringBuilder reply = new StringBuilder();
-        for ( String word : phrase.split( " " ) )
-        {
-            reply.append( " " );
-            reply.append( inside( nicks, word ) ? mangled( word ) : word );
-        }
-        return reply.toString().trim();
-    }
-
-    private List<String> getNicks( ReceivePrivmsg msg )
-    {
-        try
-        {
-            return bot.getChannel( msg.getChannel() ).getNicks();
-        }
-        catch ( Exception e )
-        {
-            return Collections.emptyList();
-        }
-    }
-
     private boolean inside( List<String> nicks, String word )
     {
         for ( String nick : nicks )
@@ -163,11 +134,6 @@ public class Markov
             }
         }
         return false;
-    }
-
-    private String mangled( String word )
-    {
-        return new StringBuilder( word ).reverse().toString();
     }
 
 }
