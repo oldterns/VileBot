@@ -408,6 +408,7 @@ public class QuotesAndFacts
         if ( replyText != null )
         {
             replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = formatFactReply( getTitle( noun ), replyText );
             event.reply( replyText );
             return true;
         }
@@ -423,6 +424,7 @@ public class QuotesAndFacts
         if ( replyText != null )
         {
             replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = formatFactReply( getTitle( noun ), replyText );
             event.reply( replyText );
             return true;
         }
@@ -439,32 +441,19 @@ public class QuotesAndFacts
         {
             return text;
         }
-        if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
-        {
-            String title = ChurchDB.getDonorTitle( noun );
-            if ( title.trim().length() > 0 )
-            {
-                noun = title;
-            }
-        }
-        String replyText;
         if ( jaziz )
         {
             try
             {
-                replyText = formatFactReply( noun, Jaziz.jazizify( text ) );
+                text = Jaziz.jazizify( text );
             }
             catch ( Exception e )
             {
-                replyText = "eeeh";
+                text = "eeeh";
                 e.printStackTrace();
             }
         }
-        else
-        {
-            replyText = formatFactReply( noun, text );
-        }
-        return replyText;
+        return text;
     }
 
     private static String formatFactReply( String noun, String fact )
@@ -478,6 +467,7 @@ public class QuotesAndFacts
         if ( replyText != null )
         {
             replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = formatQuoteReply( getTitle( noun ), replyText );
             event.reply( replyText );
             return true;
         }
@@ -493,6 +483,7 @@ public class QuotesAndFacts
         if ( replyText != null )
         {
             replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = formatQuoteReply( getTitle( noun ), replyText );
             event.reply( replyText );
             return true;
         }
@@ -509,6 +500,28 @@ public class QuotesAndFacts
         {
             return text;
         }
+        if ( jaziz )
+        {
+            try
+            {
+                text = Jaziz.jazizify( text );
+            }
+            catch ( Exception e )
+            {
+                text = "eeeh";
+                e.printStackTrace();
+            }
+        }
+        return text;
+    }
+
+    private static String formatQuoteReply( String noun, String quote )
+    {
+        return noun + " once said, \"" + quote + "\".";
+    }
+
+    private static String getTitle( String noun )
+    {
         if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
         {
             String title = ChurchDB.getDonorTitle( noun );
@@ -517,29 +530,7 @@ public class QuotesAndFacts
                 noun = title;
             }
         }
-        String replyText;
-        if ( jaziz )
-        {
-            try
-            {
-                replyText = formatQuoteReply( noun, Jaziz.jazizify( text ) );
-            }
-            catch ( Exception e )
-            {
-                replyText = "eeeh";
-                e.printStackTrace();
-            }
-        }
-        else
-        {
-            replyText = formatQuoteReply( noun, text );
-        }
-        return replyText;
-    }
-
-    private static String formatQuoteReply( String noun, String quote )
-    {
-        return noun + " once said, \"" + quote + "\".";
+        return noun;
     }
 
     /**
