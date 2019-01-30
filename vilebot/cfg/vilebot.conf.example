@@ -32,8 +32,8 @@ wolframKey=
 
 rpsChannel=#exampleGameChannel
 jeopardyChannel=#exampleGameChannel
-OmgwordList=/path/to/word/list
 OmgwordChannel=#exampleGameChannel
-FortuneList=/path/to/fortune/list
-InspirationList=/path/to/inspirations/list
-InspirationIndex=/path/to/inspirations/index
+OmgwordList=files/wordlist.txt
+FortuneList=files/fortunelist.txt
+InspirationList=files/inspirationslist.txt
+InspirationIndex=files/inspirationsindex.txt
