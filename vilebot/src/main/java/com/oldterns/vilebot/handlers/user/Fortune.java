@@ -1,5 +1,6 @@
 package com.oldterns.vilebot.handlers.user;
 
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ public class Fortune
         try
         {
             ArrayList<String> fortunes = new ArrayList<>();
-            List<String> lines = Files.readAllLines( Paths.get( FORTUNE_LIST_PATH ) );
+            List<String> lines = Files.readAllLines( Paths.get( FORTUNE_LIST_PATH ), Charset.forName( "UTF-8" ) );
             for ( String line : lines )
             {
                 fortunes.add( line );

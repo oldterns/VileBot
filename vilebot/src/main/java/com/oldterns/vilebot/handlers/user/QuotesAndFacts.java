@@ -52,7 +52,7 @@ public class QuotesAndFacts
     private static final Random random = new Random();
 
     @AssignedBot
-    private static KeratinBot bot;
+    private KeratinBot bot;
 
     @Handler
     private void factQuoteAdd( ReceivePrivmsg event )
@@ -402,7 +402,7 @@ public class QuotesAndFacts
         }
     }
 
-    private static boolean replyWithFact( String noun, ReceivePrivmsg event, boolean jaziz )
+    private boolean replyWithFact( String noun, ReceivePrivmsg event, boolean jaziz )
     {
         String replyText = getReplyFact( noun, jaziz );
         if ( replyText != null )
@@ -418,7 +418,7 @@ public class QuotesAndFacts
         }
     }
 
-    private static boolean replyWithFact( String noun, ReceiveJoin event, boolean jaziz )
+    private boolean replyWithFact( String noun, ReceiveJoin event, boolean jaziz )
     {
         String replyText = getReplyFact( noun, jaziz );
         if ( replyText != null )
@@ -434,7 +434,7 @@ public class QuotesAndFacts
         }
     }
 
-    private static String getReplyFact( String noun, boolean jaziz )
+    private String getReplyFact( String noun, boolean jaziz )
     {
         String text = QuoteFactDB.getRandFact( noun );
         if ( text == null )
@@ -456,12 +456,12 @@ public class QuotesAndFacts
         return text;
     }
 
-    private static String formatFactReply( String noun, String fact )
+    private String formatFactReply( String noun, String fact )
     {
         return noun + " " + fact;
     }
 
-    private static boolean replyWithQuote( String noun, ReceivePrivmsg event, boolean jaziz )
+    private boolean replyWithQuote( String noun, ReceivePrivmsg event, boolean jaziz )
     {
         String replyText = getReplyQuote( noun, jaziz );
         if ( replyText != null )
@@ -477,7 +477,7 @@ public class QuotesAndFacts
         }
     }
 
-    private static boolean replyWithQuote( String noun, ReceiveJoin event, boolean jaziz )
+    private boolean replyWithQuote( String noun, ReceiveJoin event, boolean jaziz )
     {
         String replyText = getReplyQuote( noun, jaziz );
         if ( replyText != null )
@@ -493,7 +493,7 @@ public class QuotesAndFacts
         }
     }
 
-    private static String getReplyQuote( String noun, boolean jaziz )
+    private String getReplyQuote( String noun, boolean jaziz )
     {
         String text = QuoteFactDB.getRandQuote( noun );
         if ( text == null )
@@ -515,12 +515,12 @@ public class QuotesAndFacts
         return text;
     }
 
-    private static String formatQuoteReply( String noun, String quote )
+    private String formatQuoteReply( String noun, String quote )
     {
         return noun + " once said, \"" + quote + "\".";
     }
 
-    private static String getTitle( String noun )
+    private String getTitle( String noun )
     {
         if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
         {
@@ -541,7 +541,7 @@ public class QuotesAndFacts
      * @return A copy of the input String with the characters removed
      * @see String.trim()
      */
-    private static String trimChars( String input, String charsToRemove )
+    private String trimChars( String input, String charsToRemove )
     {
         char[] value = input.toCharArray();
         char[] rmChars = charsToRemove.toCharArray();
