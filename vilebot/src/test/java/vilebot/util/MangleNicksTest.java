@@ -51,7 +51,7 @@ public class MangleNicksTest
     {
         String messageText = "i am the karma police";
         String returnText1 = MangleNicks.mangleNicks( bot, rcvPrivMsg, messageText );
-        String returnText2 = MangleNicks.mangleNicks( bot, rcvPrivMsg, messageText );
+        String returnText2 = MangleNicks.mangleNicks( bot, rcvJoin, messageText );
 
         assertEquals( returnText1, messageText );
         assertEquals( returnText2, messageText );
@@ -62,7 +62,7 @@ public class MangleNicksTest
     {
         String messageText = "salman is a man of many bots";
         String returnText1 = MangleNicks.mangleNicks( bot, rcvPrivMsg, messageText );
-        String returnText2 = MangleNicks.mangleNicks( bot, rcvPrivMsg, messageText );
+        String returnText2 = MangleNicks.mangleNicks( bot, rcvJoin, messageText );
         String expectedReturn = "namlas is a man of many bots";
 
         assertEquals( returnText1, expectedReturn );
@@ -74,7 +74,7 @@ public class MangleNicksTest
     {
         String messageText = "salman is actually sasiddiq";
         String returnText1 = MangleNicks.mangleNicks( bot, rcvPrivMsg, messageText );
-        String returnText2 = MangleNicks.mangleNicks( bot, rcvPrivMsg, messageText );
+        String returnText2 = MangleNicks.mangleNicks( bot, rcvJoin, messageText );
         String expectedReturn = "namlas is actually qiddisas";
 
         assertEquals( returnText1, expectedReturn );

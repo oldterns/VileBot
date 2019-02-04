@@ -1,5 +1,6 @@
 package com.oldterns.vilebot.handlers.user;
 
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public class Inspiration
         try
         {
             ArrayList<String> inspirations = new ArrayList<>();
-            List<String> lines = Files.readAllLines( Paths.get( FORTUNE_LIST_PATH ) );
+            List<String> lines = Files.readAllLines( Paths.get( FORTUNE_LIST_PATH ), Charset.forName( "UTF-8" ) );
             for ( String line : lines )
             {
                 inspirations.add( line );

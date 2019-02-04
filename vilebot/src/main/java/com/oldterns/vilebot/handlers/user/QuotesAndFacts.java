@@ -52,7 +52,7 @@ public class QuotesAndFacts
     private static final Random random = new Random();
 
     @AssignedBot
-    private static KeratinBot bot;
+    private KeratinBot bot;
 
     @Handler
     private void factQuoteAdd( ReceivePrivmsg event )
@@ -402,12 +402,13 @@ public class QuotesAndFacts
         }
     }
 
-    private static boolean replyWithFact( String noun, ReceivePrivmsg event, boolean jaziz )
+    private boolean replyWithFact( String noun, ReceivePrivmsg event, boolean jaziz )
     {
         String replyText = getReplyFact( noun, jaziz );
         if ( replyText != null )
         {
             replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = formatFactReply( getTitle( noun ), replyText );
             event.reply( replyText );
             return true;
         }
@@ -417,12 +418,13 @@ public class QuotesAndFacts
         }
     }
 
-    private static boolean replyWithFact( String noun, ReceiveJoin event, boolean jaziz )
+    private boolean replyWithFact( String noun, ReceiveJoin event, boolean jaziz )
     {
         String replyText = getReplyFact( noun, jaziz );
         if ( replyText != null )
         {
             replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = formatFactReply( getTitle( noun ), replyText );
             event.reply( replyText );
             return true;
         }
@@ -432,52 +434,40 @@ public class QuotesAndFacts
         }
     }
 
-    private static String getReplyFact( String noun, boolean jaziz )
+    private String getReplyFact( String noun, boolean jaziz )
     {
         String text = QuoteFactDB.getRandFact( noun );
         if ( text == null )
         {
             return text;
         }
-        if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
-        {
-            String title = ChurchDB.getDonorTitle( noun );
-            if ( title.trim().length() > 0 )
-            {
-                noun = title;
-            }
-        }
-        String replyText;
         if ( jaziz )
         {
             try
             {
-                replyText = formatFactReply( noun, Jaziz.jazizify( text ) );
+                text = Jaziz.jazizify( text );
             }
             catch ( Exception e )
             {
-                replyText = "eeeh";
+                text = "eeeh";
                 e.printStackTrace();
             }
         }
-        else
-        {
-            replyText = formatFactReply( noun, text );
-        }
-        return replyText;
+        return text;
     }
 
-    private static String formatFactReply( String noun, String fact )
+    private String formatFactReply( String noun, String fact )
     {
         return noun + " " + fact;
     }
 
-    private static boolean replyWithQuote( String noun, ReceivePrivmsg event, boolean jaziz )
+    private boolean replyWithQuote( String noun, ReceivePrivmsg event, boolean jaziz )
     {
         String replyText = getReplyQuote( noun, jaziz );
         if ( replyText != null )
         {
             replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = formatQuoteReply( getTitle( noun ), replyText );
             event.reply( replyText );
             return true;
         }
@@ -487,12 +477,13 @@ public class QuotesAndFacts
         }
     }
 
-    private static boolean replyWithQuote( String noun, ReceiveJoin event, boolean jaziz )
+    private boolean replyWithQuote( String noun, ReceiveJoin event, boolean jaziz )
     {
         String replyText = getReplyQuote( noun, jaziz );
         if ( replyText != null )
         {
             replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = formatQuoteReply( getTitle( noun ), replyText );
             event.reply( replyText );
             return true;
         }
@@ -502,13 +493,35 @@ public class QuotesAndFacts
         }
     }
 
-    private static String getReplyQuote( String noun, boolean jaziz )
+    private String getReplyQuote( String noun, boolean jaziz )
     {
         String text = QuoteFactDB.getRandQuote( noun );
         if ( text == null )
         {
             return text;
         }
+        if ( jaziz )
+        {
+            try
+            {
+                text = Jaziz.jazizify( text );
+            }
+            catch ( Exception e )
+            {
+                text = "eeeh";
+                e.printStackTrace();
+            }
+        }
+        return text;
+    }
+
+    private String formatQuoteReply( String noun, String quote )
+    {
+        return noun + " once said, \"" + quote + "\".";
+    }
+
+    private String getTitle( String noun )
+    {
         if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
         {
             String title = ChurchDB.getDonorTitle( noun );
@@ -517,29 +530,7 @@ public class QuotesAndFacts
                 noun = title;
             }
         }
-        String replyText;
-        if ( jaziz )
-        {
-            try
-            {
-                replyText = formatQuoteReply( noun, Jaziz.jazizify( text ) );
-            }
-            catch ( Exception e )
-            {
-                replyText = "eeeh";
-                e.printStackTrace();
-            }
-        }
-        else
-        {
-            replyText = formatQuoteReply( noun, text );
-        }
-        return replyText;
-    }
-
-    private static String formatQuoteReply( String noun, String quote )
-    {
-        return noun + " once said, \"" + quote + "\".";
+        return noun;
     }
 
     /**
@@ -550,7 +541,7 @@ public class QuotesAndFacts
      * @return A copy of the input String with the characters removed
      * @see String.trim()
      */
-    private static String trimChars( String input, String charsToRemove )
+    private String trimChars( String input, String charsToRemove )
     {
         char[] value = input.toCharArray();
         char[] rmChars = charsToRemove.toCharArray();

@@ -7,6 +7,7 @@ import com.oldterns.vilebot.db.KarmaDB;
 import com.oldterns.vilebot.util.BaseNick;
 import net.engio.mbassy.listener.Handler;
 
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
@@ -163,7 +164,7 @@ public class Omgword
         try
         {
             ArrayList<String> words = new ArrayList<>();
-            List<String> lines = Files.readAllLines( Paths.get( WORD_LIST_PATH ) );
+            List<String> lines = Files.readAllLines( Paths.get( WORD_LIST_PATH ), Charset.forName( "UTF-8" ) );
             for ( String line : lines )
             {
                 words.addAll( Arrays.asList( line.split( " " ) ) );
