@@ -23,6 +23,8 @@ public class Ascii
 
     private static final int MAX_CHARS_PER_LINE = 20;
 
+    private static final int MAX_CHARS = MAX_CHARS_PER_LINE * 3; // max 3 lines
+
     private static final String fontFile = "./files/fonts/%s.flf";
 
     private static final String fontFileDir = "./files/fonts/";
@@ -56,14 +58,24 @@ public class Ascii
     }
 
     @Handler
-    public void asciiFonts( ReceivePrivmsg event )
+    public void asciifonts( ReceivePrivmsg event )
     {
         String text = event.getText();
         Matcher matcher = asciiFontsPattern.matcher( text );
 
         if ( matcher.matches() )
         {
-            event.replyPrivately( "Available fonts for !ascii: " + String.join( ", ", availableFonts ) );
+            StringBuilder sb = new StringBuilder();
+            sb.append( "Available fonts for !ascii:\n" );
+            for ( int i = 0; i < availableFonts.size(); i++ )
+            {
+                sb.append( String.format( "%20s ", availableFonts.get( i ) ) );
+                if ( ( ( i + 1 ) % 5 ) == 0 )
+                {
+                    sb.append( "\n" );
+                }
+            }
+            event.replyPrivately( sb.toString() );
         }
     }
 
@@ -122,11 +134,16 @@ public class Ascii
     private String[] splitMessage( String message )
     {
         List<String> lines = new ArrayList<>();
+        if ( message.length() > MAX_CHARS )
+        {
+            message = message.substring( 0, MAX_CHARS );
+        }
         int len = message.length();
         for ( int i = 0; i < len; i += MAX_CHARS_PER_LINE )
         {
             int substrEndIdx = Math.min( len, i + MAX_CHARS_PER_LINE );
-            if ( Character.isLetter( message.charAt( substrEndIdx - 1 ) ) && i + MAX_CHARS_PER_LINE < len )
+            if ( i + MAX_CHARS_PER_LINE < len && Character.isLetter( message.charAt( substrEndIdx - 1 ) )
+                && Character.isLetter( message.charAt( substrEndIdx ) ) )
             {
                 lines.add( message.substring( i, substrEndIdx ) + "-" );
             }
