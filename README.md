@@ -5,7 +5,7 @@
 
 ### Clone keratin-irc
 
-    git clone git@github.com:ASzc/keratin-irc.git
+    git clone https://github.com/ASzc/keratin-irc.git
 
 ### Create config file
 
