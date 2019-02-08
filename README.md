@@ -43,6 +43,13 @@ Install redis server
 
 redis-server is run with the local config file automatically by server-control.sh
 
+### ASCII Fonts
+
+Download fonts for !ascii command
+
+    cd vilebot
+    ./download-fonts.sh
+
 ## Build
 
 Maven is used to get dependencies and to build. This command will generate a jar in target/

@@ -3,6 +3,9 @@ dist: trusty
 jdk: openjdk8
 before_install:
     - git clone https://github.com/ASzc/keratin-irc.git
+    - cd vilebot/
+    - bash download-fonts.sh
+    - cd ../
     - cp vilebot/cfg/vilebot.conf.example vilebot/cfg/vilebot.conf
 install: true
 script: mvn package
