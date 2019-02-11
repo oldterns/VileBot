@@ -2,6 +2,8 @@ package vilebot.handlers.user;
 
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.handlers.user.Ascii;
+import com.oldterns.vilebot.util.LimitCommand;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,6 +22,7 @@ public class AsciiTest
     @Before
     public void setSenderAndChannel()
     {
+        asciiClass.limitCommand = new LimitCommand( 9, 3600 );
         event = mock( ReceivePrivmsg.class );
         when( event.getSender() ).thenReturn( "salman" );
         when( event.getChannel() ).thenReturn( "#thefoobar" );
