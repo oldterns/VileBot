@@ -13,6 +13,7 @@ import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import net.engio.mbassy.listener.Handler;
 
 import com.github.lalyos.jfiglet.FigletFont;
+import com.oldterns.vilebot.util.LimitCommand;
 
 @HandlerContainer
 public class Ascii
@@ -32,6 +33,8 @@ public class Ascii
 
     private static final List<String> availableFonts = getAvailableFonts();
 
+    public LimitCommand limitCommand = new LimitCommand();
+
     @Handler
     public void ascii( ReceivePrivmsg event )
     {
@@ -41,20 +44,22 @@ public class Ascii
 
         if ( asciiMatch.matches() )
         {
-            // check if first word is a font name
-            String font = asciiMatch.group( 2 ).split( " ", 2 )[0];
-            String asciiArt;
-            if ( availableFonts.contains( font ) )
+            if ( event.getChannel().equals( "#thefoobar" ) )
             {
-                String message = asciiMatch.group( 2 ).split( " ", 2 )[1];
-                asciiArt = getAsciiArt( message, font );
+                String isLimit = limitCommand.addUse( event.getSender() );
+                if ( isLimit.isEmpty() )
+                {
+                    runAscii( event, asciiMatch );
+                }
+                else
+                {
+                    event.reply( isLimit );
+                }
             }
             else
             {
-                String message = asciiMatch.group( 2 );
-                asciiArt = getAsciiArt( message );
+                runAscii( event, asciiMatch );
             }
-            event.reply( asciiArt );
         }
     }
 
@@ -78,6 +83,24 @@ public class Ascii
             }
             event.replyPrivately( sb.toString() );
         }
+    }
+
+    private void runAscii( ReceivePrivmsg event, Matcher asciiMatch )
+    {
+        // check if first word is a font name
+        String font = asciiMatch.group( 2 ).split( " ", 2 )[0];
+        String asciiArt;
+        if ( availableFonts.contains( font ) )
+        {
+            String message = asciiMatch.group( 2 ).split( " ", 2 )[1];
+            asciiArt = getAsciiArt( message, font );
+        }
+        else
+        {
+            String message = asciiMatch.group( 2 );
+            asciiArt = getAsciiArt( message );
+        }
+        event.reply( asciiArt );
     }
 
     private static List<String> getAvailableFonts()
