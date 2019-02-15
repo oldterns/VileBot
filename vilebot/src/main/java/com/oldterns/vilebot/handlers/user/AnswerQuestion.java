@@ -34,7 +34,7 @@ public class AnswerQuestion
     private static final int MAX_RESPONSE = 500;
 
     @Handler
-    private void tellMe( ReceivePrivmsg event )
+    public void tellMe( ReceivePrivmsg event )
     {
         String text = event.getText();
         Matcher matcher = questionPattern.matcher( text );
@@ -68,7 +68,7 @@ public class AnswerQuestion
     {
         searchTerm = URLEncoder.encode( searchTerm, "UTF-8" );
         String url = "http://api.wolframalpha.com/v2/query?input=" + searchTerm + "&appid=" + API_KEY
-            + "&podstate=InstantaneousWeather:WeatherData__Show+metric";
+            + "&format=plaintext&output=XML";
         return url;
     }
 
@@ -96,8 +96,8 @@ public class AnswerQuestion
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         Document document = documentBuilder.parse( new InputSource( new StringReader( response ) ) );
-        NodeList nodeList = document.getElementsByTagName( "subpod" );
-        String answer = nodeList.item( 1 ).getTextContent().trim();
+        NodeList nodeList = document.getElementsByTagName( "plaintext" );
+        String answer = nodeList.item( 0 ).getTextContent().trim() + "\n" + nodeList.item( 1 ).getTextContent().trim();
 
         if ( answer.isEmpty() )
         {
