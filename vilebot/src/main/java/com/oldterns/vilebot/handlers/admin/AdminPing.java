@@ -1,41 +1,35 @@
-/**
- * Copyright (C) 2013 Oldterns
- *
- * This file may be modified and distributed under the terms
- * of the MIT license. See the LICENSE file for details.
- */
 package com.oldterns.vilebot.handlers.admin;
 
 import com.oldterns.vilebot.db.GroupDB;
 import com.oldterns.vilebot.util.Sessions;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-
-@HandlerContainer
+//@HandlerContainer
 public class AdminPing
+    extends ListenerAdapter
 {
 
     /**
      * Do I have admin access?
      */
-    @Handler
-    private void ping( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
-        String sender = event.getSender();
+        String text = event.getMessage();
+        String sender = event.getUser().getNick();
 
         if ( "!admin ping".equals( text ) )
         {
             String username = Sessions.getSession( sender );
             if ( GroupDB.isAdmin( username ) )
             {
-                event.replyDirectly( "You have an active admin session" );
+                event.respond( "You have an active admin session" );
             }
             else
             {
-                event.replyDirectly( "You do not have an active admin session" );
+                event.respond( "You do not have an active admin session" );
             }
         }
     }

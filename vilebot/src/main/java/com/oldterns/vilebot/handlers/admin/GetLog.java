@@ -1,30 +1,31 @@
 package com.oldterns.vilebot.handlers.admin;
 
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.db.GroupDB;
 import com.oldterns.vilebot.db.LogDB;
 import com.oldterns.vilebot.util.Sessions;
-import net.engio.mbassy.listener.Handler;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.util.regex.Pattern;
 
 /**
  * Created by eunderhi on 18/08/15.
  */
-@HandlerContainer
+// @HandlerContainer
 public class GetLog
+    extends ListenerAdapter
 {
 
     private static final Pattern showLog = Pattern.compile( "!admin showLog$" );
 
     private static final Pattern deleteLog = Pattern.compile( "!admin deleteLog$" );
 
-    @Handler
-    private void getLog( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
-        String sender = event.getSender();
+        String text = event.getMessage();
+        String sender = event.getUser().getNick();
         String username = Sessions.getSession( sender );
 
         boolean showLogMatches = showLog.matcher( text ).matches();
@@ -34,13 +35,13 @@ public class GetLog
         {
             if ( showLogMatches )
             {
-                event.reply( "Getting log..." );
-                event.reply( LogDB.getLog() );
+                event.respondWith( "Getting log..." );
+                event.respondWith( LogDB.getLog() );
             }
             else if ( deleteLogMatches )
             {
                 LogDB.deleteLog();
-                event.reply( "Log deleted" );
+                event.respondWith( "Log deleted" );
             }
         }
     }

@@ -6,24 +6,25 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
-@HandlerContainer
+//@HandlerContainer
 public class UserPing
+    extends ListenerAdapter
 {
     /**
      * Reply to user !ping command with username: pong
      */
-    @Handler
-    private void userPingPong( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
 
         if ( text.startsWith( "!ping" ) )
         {
-            event.replyDirectly( "pong" );
+            event.respond( "pong" );
         }
     }
 }

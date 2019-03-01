@@ -4,6 +4,8 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.util.ASCII;
 import net.engio.mbassy.listener.Handler;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,15 +18,17 @@ import java.util.regex.Pattern;
  * Created by eunderhi on 17/08/15.
  */
 
-@HandlerContainer
+// @HandlerContainer
 public class ImageToAscii
+    extends ListenerAdapter
 {
     private static final Pattern questionPattern = Pattern.compile( "^!(convert)\\s(.+)$" );
 
-    @Handler
-    private void tellMe( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher matcher = questionPattern.matcher( text );
 
         if ( matcher.matches() )
@@ -33,16 +37,16 @@ public class ImageToAscii
             try
             {
                 String image = convertImage( URL );
-                event.reply( image );
+                event.respondWith( image );
             }
             catch ( Exception e )
             {
-                event.reply( "Could not convert image." );
+                event.respondWith( "Could not convert image." );
             }
         }
     }
 
-    String convertImage( String strURL )
+    private String convertImage( String strURL )
         throws Exception
     {
         URL url = new URL( strURL );
@@ -51,7 +55,7 @@ public class ImageToAscii
         return new ASCII().convert( image );
     }
 
-    BufferedImage shrink( BufferedImage image )
+    private BufferedImage shrink( BufferedImage image )
     {
         int MAX_WIDTH = 50;
         int height = image.getHeight();

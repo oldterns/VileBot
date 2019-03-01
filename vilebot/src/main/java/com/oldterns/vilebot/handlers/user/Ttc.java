@@ -1,12 +1,11 @@
 package com.oldterns.vilebot.handlers.user;
 
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import net.engio.mbassy.listener.Handler;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -17,18 +16,20 @@ import java.util.regex.Pattern;
 /**
  * Created by eunderhi on 27/10/15.
  */
-@HandlerContainer
+// @HandlerContainer
 public class Ttc
+    extends ListenerAdapter
 {
 
     private static final Pattern TTC_PATTERN = Pattern.compile( "^!ttc$" );
 
     public static final String TTC_URL = "https://www.ttc.ca/Service_Advisories/all_service_alerts.jsp";
 
-    @Handler
-    public void getInfo( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher match = TTC_PATTERN.matcher( text );
 
         if ( match.matches() )
@@ -37,18 +38,18 @@ public class Ttc
         }
     }
 
-    private void printAlerts( ReceivePrivmsg event )
+    private void printAlerts( GenericMessageEvent event )
     {
         try
         {
             for ( Element element : parseContent( getContent() ) )
             {
-                event.reply( element.text() );
+                event.respondWith( element.text() );
             }
         }
         catch ( Exception e )
         {
-            event.reply( "Unable to retrieve alerts." );
+            event.respondWith( "Unable to retrieve alerts." );
         }
     }
 

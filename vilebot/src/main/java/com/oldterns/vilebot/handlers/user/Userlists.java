@@ -1,10 +1,8 @@
-/**
- * Copyright (C) 2013 Oldterns
- *
- * This file may be modified and distributed under the terms
- * of the MIT license. See the LICENSE file for details.
- */
 package com.oldterns.vilebot.handlers.user;
+
+import com.oldterns.vilebot.db.UserlistDB;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,14 +10,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.oldterns.vilebot.db.UserlistDB;
-
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-
-@HandlerContainer
+//@HandlerContainer
 public class Userlists
+    extends ListenerAdapter
 {
     private static final Pattern enumeratePattern = Pattern.compile( "!lists" );
 
@@ -32,149 +25,169 @@ public class Userlists
 
     private Pattern expandPattern = Pattern.compile( "(\\S+): (.*)" );
 
-    @Handler
-    private void listsEnumerate( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
-        Matcher matcher = enumeratePattern.matcher( text );
+        String text = event.getMessage();
 
-        if ( matcher.matches() )
-        {
-            Set<String> lists = UserlistDB.getLists();
+        Matcher enumerateMatcher = enumeratePattern.matcher( text );
+        Matcher queryMatcher = queryPattern.matcher( text );
+        Matcher addRemoveMatcher = addRemovePattern.matcher( text );
+        Matcher expandMatcher = expandPattern.matcher( text );
 
-            if ( lists != null && lists.size() > 0 )
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.append( "Available lists: " );
-                for ( String list : lists )
-                {
-                    sb.append( list );
-                    sb.append( ", " );
-                }
-                sb.delete( sb.length() - 2, sb.length() );
-                event.reply( sb.toString() );
-            }
-            else
-            {
-                event.reply( "There are no lists." );
-            }
-        }
+        if ( enumerateMatcher.matches() )
+            listsEnumerate( event );
+        if ( queryMatcher.matches() )
+            listQuery( event, queryMatcher );
+        if ( addRemoveMatcher.matches() )
+            listAddRemove( event, addRemoveMatcher );
+        if ( expandMatcher.matches() )
+            listExpansion( event, expandMatcher );
     }
 
-    @Handler
-    private void listQuery( ReceivePrivmsg event )
+    // @Handler
+    private void listsEnumerate( GenericMessageEvent event )
     {
-        String text = event.getText();
-        Matcher matcher = queryPattern.matcher( text );
+        // String text = event.getText();
+        // Matcher matcher = enumeratePattern.matcher( text );
+        //
+        // if ( matcher.matches() )
+        // {
+        Set<String> lists = UserlistDB.getLists();
 
-        if ( matcher.matches() )
+        if ( lists != null && lists.size() > 0 )
         {
-            String listName = matcher.group( 1 );
-
-            Set<String> users = UserlistDB.getUsersIn( listName );
-            if ( users != null && users.size() > 0 )
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.append( "The list " );
-                sb.append( listName );
-                sb.append( " contains: " );
-
-                for ( String user : users )
-                {
-                    sb.append( user );
-                    sb.append( ", " );
-                }
-                sb.delete( sb.length() - 2, sb.length() );
-
-                event.replyPrivately( sb.toString() );
-            }
-            else
-            {
-                event.replyPrivately( "The list " + listName + " does not exist or is empty." );
-            }
-        }
-    }
-
-    @Handler
-    private void listAddRemove( ReceivePrivmsg event )
-    {
-        String text = event.getText();
-        Matcher matcher = addRemovePattern.matcher( text );
-
-        if ( matcher.matches() )
-        {
-            String mode = matcher.group( 1 );
-            String listName = matcher.group( 2 );
-            String nickBlob = matcher.group( 3 );
-            if ( nickBlob == null )
-            {
-                nickBlob = matcher.group( 4 );
-            }
-
-            List<String> nicks = new LinkedList<String>();
-            Matcher nickMatcher = nickBlobPattern.matcher( nickBlob );
-            while ( nickMatcher.find() )
-            {
-                nicks.add( nickMatcher.group( 1 ) );
-            }
-
             StringBuilder sb = new StringBuilder();
-
-            if ( "add".equals( mode ) )
+            sb.append( "Available lists: " );
+            for ( String list : lists )
             {
-                UserlistDB.addUsersTo( listName, nicks );
-                sb.append( "Added the following names to list " );
+                sb.append( list );
+                sb.append( ", " );
             }
-            else if ( "rem".equals( mode ) )
-            {
-                UserlistDB.removeUsersFrom( listName, nicks );
-                sb.append( "Removed the following names from list " );
-            }
+            sb.delete( sb.length() - 2, sb.length() );
+            event.respondWith( sb.toString() );
+        }
+        else
+        {
+            event.respondWith( "There are no lists." );
+        }
+        // }
+    }
 
+    // @Handler
+    private void listQuery( GenericMessageEvent event, Matcher matcher )
+    {
+        // String text = event.getText();
+        // Matcher matcher = queryPattern.matcher( text );
+        //
+        // if ( matcher.matches() )
+        // {
+        String listName = matcher.group( 1 );
+
+        Set<String> users = UserlistDB.getUsersIn( listName );
+        if ( users != null && users.size() > 0 )
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append( "The list " );
             sb.append( listName );
-            sb.append( ": " );
+            sb.append( " contains: " );
 
-            for ( String nick : nicks )
+            for ( String user : users )
             {
-                sb.append( nick );
+                sb.append( user );
                 sb.append( ", " );
             }
             sb.delete( sb.length() - 2, sb.length() );
 
-            event.reply( sb.toString() );
+            event.respondPrivateMessage( sb.toString() );
         }
-    }
-
-    @Handler
-    private void listExpansion( ReceivePrivmsg event )
-    {
-        String sender = event.getSender();
-        String text = event.getText();
-        Matcher matcher = expandPattern.matcher( text );
-
-        if ( matcher.matches() )
+        else
         {
-            String listName = matcher.group( 1 );
-            String msg = matcher.group( 2 );
+            event.respondPrivateMessage( "The list " + listName + " does not exist or is empty." );
+        }
+        // }
+    }
 
-            Set<String> users = UserlistDB.getUsersIn( listName );
-            if ( users != null && users.size() > 0 )
+    // @Handler
+    private void listAddRemove( GenericMessageEvent event, Matcher matcher )
+    {
+        // String text = event.getText();
+        // Matcher matcher = addRemovePattern.matcher( text );
+        //
+        // if ( matcher.matches() )
+        // {
+        String mode = matcher.group( 1 );
+        String listName = matcher.group( 2 );
+        String nickBlob = matcher.group( 3 );
+        if ( nickBlob == null )
+        {
+            nickBlob = matcher.group( 4 );
+        }
+
+        List<String> nicks = new LinkedList<>();
+        Matcher nickMatcher = nickBlobPattern.matcher( nickBlob );
+        while ( nickMatcher.find() )
+        {
+            nicks.add( nickMatcher.group( 1 ) );
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if ( "add".equals( mode ) )
+        {
+            UserlistDB.addUsersTo( listName, nicks );
+            sb.append( "Added the following names to list " );
+        }
+        else if ( "rem".equals( mode ) )
+        {
+            UserlistDB.removeUsersFrom( listName, nicks );
+            sb.append( "Removed the following names from list " );
+        }
+
+        sb.append( listName );
+        sb.append( ": " );
+
+        for ( String nick : nicks )
+        {
+            sb.append( nick );
+            sb.append( ", " );
+        }
+        sb.delete( sb.length() - 2, sb.length() );
+
+        event.respondWith( sb.toString() );
+        // }
+    }
+
+    // @Handler
+    private void listExpansion( GenericMessageEvent event, Matcher matcher )
+    {
+        String sender = event.getUser().getNick();
+        // String text = event.getText();
+        // Matcher matcher = expandPattern.matcher( text );
+        //
+        // if ( matcher.matches() )
+        // {
+        String listName = matcher.group( 1 );
+        String msg = matcher.group( 2 );
+
+        Set<String> users = UserlistDB.getUsersIn( listName );
+        if ( users != null && users.size() > 0 )
+        {
+            StringBuilder sb = new StringBuilder();
+            for ( String user : users )
             {
-                StringBuilder sb = new StringBuilder();
-                for ( String user : users )
+                if ( !user.equals( sender ) )
                 {
-                    if ( !user.equals( sender ) )
-                    {
-                        sb.append( user );
-                        sb.append( ", " );
-                    }
+                    sb.append( user );
+                    sb.append( ", " );
                 }
-                sb.delete( sb.length() - 2, sb.length() );
-                sb.append( ": " );
-                sb.append( msg );
-
-                event.reply( sb.toString() );
             }
+            sb.delete( sb.length() - 2, sb.length() );
+            sb.append( ": " );
+            sb.append( msg );
+
+            event.respondWith( sb.toString() );
         }
     }
+    // }
 }

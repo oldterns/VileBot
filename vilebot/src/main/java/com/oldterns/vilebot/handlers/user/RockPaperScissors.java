@@ -1,49 +1,36 @@
 package com.oldterns.vilebot.handlers.user;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
+import com.oldterns.vilebot.Vilebot;
+import com.oldterns.vilebot.util.BaseNick;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.hooks.events.PrivateMessageEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.oldterns.vilebot.Vilebot;
-import com.oldterns.vilebot.db.KarmaDB;
-import com.oldterns.vilebot.util.BaseNick;
-
-import bsh.EvalError;
-import bsh.Interpreter;
-import ca.szc.keratin.bot.KeratinBot;
-import ca.szc.keratin.bot.annotation.AssignedBot;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import net.engio.mbassy.listener.Handler;
 
 /**
  * Created by Christopher Chianelli on 27/08/17. Thanks to Josh Matsuoka for helping squashing bugs RockPaperScissors
  * implementation based off of Trivia.java
  */
-@HandlerContainer
+// @HandlerContainer
 public class RockPaperScissors
+    extends ListenerAdapter
 {
 
     private static final String RPS_CHANNEL = Vilebot.getConfig().get( "rpsChannel" );
 
     private static final int DEFAULT_STAKE = 10;
 
-    public static final String RED = "\u000304";
+    private static final String RED = "\u000304";
 
-    public static final String RESET = "\u000f";
+    private static final String RESET = "\u000f";
 
-    public static final String BLUE = "\u000302";
+    private static final String BLUE = "\u000302";
 
-    public static final String GREEN = "\u000303";
+    private static final String GREEN = "\u000303";
 
     private static final Pattern rpsPattern = Pattern.compile( "^!rps (\\S*)(.*)" );
 
@@ -55,8 +42,8 @@ public class RockPaperScissors
 
     private static RPSGame currGame = null;
 
-    @AssignedBot
-    private KeratinBot bot;
+    // @AssignedBot
+    // private KeratinBot bot;
 
     private static class RPSGame
     {
@@ -72,11 +59,11 @@ public class RockPaperScissors
 
         private String daredThing;
 
-        private ReceivePrivmsg event;
+        private GenericMessageEvent event;
 
         Random rand = new Random();
 
-        public RPSGame( String callerNick, String daredNick, String daredThing, ReceivePrivmsg event, KeratinBot bot )
+        RPSGame( String callerNick, String daredNick, String daredThing, GenericMessageEvent event )
         {
             this.callerNick = callerNick;
             this.daredNick = daredNick;
@@ -85,7 +72,7 @@ public class RockPaperScissors
             this.daredThing = daredThing;
             this.event = event;
             rand = new Random();
-            if ( daredNick.equals( bot.getNick() ) )
+            if ( daredNick.equals( event.getBot().getNick() ) )
             {
                 this.daredAnswer = answers[rand.nextInt( answers.length )];
             }
@@ -101,7 +88,7 @@ public class RockPaperScissors
             return daredNick;
         }
 
-        private ReceivePrivmsg getEvent()
+        private GenericMessageEvent getEvent()
         {
             return event;
         }
@@ -201,15 +188,16 @@ public class RockPaperScissors
         }
     }
 
-    @Handler
-    public void rockPaperScissors( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher rpsMatcher = rpsPattern.matcher( text );
         Matcher answerMatcher = answerPattern.matcher( text );
         Matcher rulesMatcher = rulesPattern.matcher( text );
         Matcher cancelMatcher = cancelPattern.matcher( text );
-        if ( rpsMatcher.matches() && correctChannel( event ) )
+        if ( event instanceof MessageEvent && rpsMatcher.matches() && correctChannel( (MessageEvent) event ) )
         {
             try
             {
@@ -217,7 +205,7 @@ public class RockPaperScissors
             }
             catch ( Exception e )
             {
-                event.reply( e.getMessage() );
+                event.respondWith( e.getMessage() );
             }
         }
         else if ( answerMatcher.matches() && correctSolutionChannel( event ) )
@@ -227,7 +215,7 @@ public class RockPaperScissors
         }
         else if ( rulesMatcher.matches() )
         {
-            event.replyPrivately( getRules() );
+            event.respondPrivateMessage( getRules( event ) );
         }
         else if ( cancelMatcher.matches() )
         {
@@ -235,154 +223,136 @@ public class RockPaperScissors
         }
     }
 
-    private boolean correctChannel( ReceivePrivmsg event )
+    private boolean correctChannel( MessageEvent event )
     {
-        String currChannel = event.getChannel();
+        String currChannel = event.getChannel().getName();
         if ( RPS_CHANNEL.equals( currChannel ) )
         {
             return true;
         }
         else
         {
-            event.reply( "To play Rock Paper Scissors join : " + RPS_CHANNEL );
+            event.respondWith( "To play Rock Paper Scissors join : " + RPS_CHANNEL );
             return false;
         }
     }
 
-    private boolean isPrivate( ReceivePrivmsg event )
+    private boolean isPrivate( GenericMessageEvent event )
     {
-        try
-        {
-            bot.getChannel( event.getChannel() ).getNicks();
-        }
-        catch ( Exception e )
-        {
-            return true;
-        }
-        return false;
+        return event instanceof PrivateMessageEvent;
     }
 
-    private boolean inGameChannel( ReceivePrivmsg event )
+    private boolean inGameChannel( GenericMessageEvent event )
     {
-        String currChannel = event.getChannel();
-        if ( RPS_CHANNEL.equals( currChannel ) )
-        {
-            try
-            {
-                return bot.getChannel( event.getChannel() ).getNicks().contains( event.getSender() );
-            }
-            catch ( Exception e )
-            {
-                return false;
-            }
-        }
-        return true;
+        return event instanceof MessageEvent && ( (MessageEvent) event ).getChannel().getName().equals( RPS_CHANNEL );
     }
 
-    private boolean correctSolutionChannel( ReceivePrivmsg event )
+    private boolean correctSolutionChannel( GenericMessageEvent event )
     {
-        String currChannel = event.getChannel();
+        // String currChannel = event.getChannel();
         if ( ( isPrivate( event ) && inGameChannel( event ) ) )
         {
             return true;
         }
-        else if ( currChannel.equals( RPS_CHANNEL ) )
+        else if ( ( (MessageEvent) event ).getChannel().getName().equals( RPS_CHANNEL ) )
         {
-            event.reply( getSubmissionRuleString() );
+            event.respondWith( getSubmissionRuleString( event ) );
             return false;
         }
         else
         {
-            event.reply( "To play Rock Paper Scissors join : " + RPS_CHANNEL );
+            event.respondWith( "To play Rock Paper Scissors join : " + RPS_CHANNEL );
             return false;
         }
     }
 
-    private synchronized void cancelGame( ReceivePrivmsg event )
+    private synchronized void cancelGame( GenericMessageEvent event )
     {
         if ( null != currGame )
         {
-            String caller = BaseNick.toBaseNick( event.getSender() );
+            String caller = BaseNick.toBaseNick( event.getUser().getNick() );
             if ( caller.equals( currGame.getCaller() ) || caller.equals( currGame.getDared() ) )
             {
                 currGame = null;
-                event.reply( "RPS game cancelled" );
+                event.respondWith( "RPS game cancelled" );
             }
             else
             {
-                event.reply( "Only " + currGame.getCaller() + " or " + currGame.getDared() + " can cancel this game." );
+                event.respondWith( "Only " + currGame.getCaller() + " or " + currGame.getDared()
+                    + " can cancel this game." );
             }
         }
         else
         {
-            event.reply( "No active game. Start a new one with !rps dared" );
+            event.respondWith( "No active game. Start a new one with !rps dared" );
         }
     }
 
-    private synchronized void startRPSGame( ReceivePrivmsg event, String dared, String daredThing )
+    private synchronized void startRPSGame( GenericMessageEvent event, String dared, String daredThing )
         throws Exception
     {
         if ( null == currGame )
         {
-            String caller = BaseNick.toBaseNick( event.getSender() );
+            String caller = BaseNick.toBaseNick( event.getUser().getNick() );
             if ( caller.equals( dared ) )
             {
-                event.reply( "You cannot challenge yourself to a Rock Paper Scissors game!" );
+                event.respondWith( "You cannot challenge yourself to a Rock Paper Scissors game!" );
                 return;
             }
             if ( !daredThing.trim().isEmpty() )
             {
-                currGame = new RPSGame( caller, dared, daredThing.trim(), event, bot );
+                currGame = new RPSGame( caller, dared, daredThing.trim(), event );
             }
             else
             {
-                currGame = new RPSGame( caller, dared, null, event, bot );
+                currGame = new RPSGame( caller, dared, null, event );
             }
-            event.reply( currGame.getRPSIntro() + getSubmissionRuleString() );
+            event.respondWith( currGame.getRPSIntro() + getSubmissionRuleString( event ) );
         }
         else
         {
-            event.reply( currGame.alreadyPlaying() );
+            event.respondWith( currGame.alreadyPlaying() );
         }
     }
 
-    private synchronized void checkAnswer( ReceivePrivmsg event, String submission )
+    private synchronized void checkAnswer( GenericMessageEvent event, String submission )
     {
-        String contestant = BaseNick.toBaseNick( event.getSender() );
+        String contestant = BaseNick.toBaseNick( event.getUser().getNick() );
         if ( currGame != null )
         {
             try
             {
                 boolean endGame = currGame.setSubmission( contestant, submission );
-                event.reply( String.format( "Your submission of %s has been recieved!", submission ) );
+                event.respondWith( String.format( "Your submission of %s has been recieved!", submission ) );
                 if ( endGame )
                 {
-                    currGame.getEvent().reply( currGame.getRPSOutro() );
+                    currGame.getEvent().respondWith( currGame.getRPSOutro() );
                     currGame = null;
                 }
             }
             catch ( Exception e )
             {
                 e.printStackTrace();
-                event.reply( e.getMessage() );
+                event.respondWith( e.getMessage() );
             }
         }
         else
         {
-            event.reply( "No active game. Start a new one with !rps dared [bet]" );
+            event.respondWith( "No active game. Start a new one with !rps dared [bet]" );
         }
 
     }
 
-    private String getRules()
+    private String getRules( GenericMessageEvent event )
     {
         return RED + "RPS RULES: \n" + RESET + "1) Dare someone to play rock paper scissors with you! \n" + RESET
-            + "2) Rock beats scissors, paper beats rocks, and scissors beat paper \n" + "3) Use /msg " + bot.getNick()
-            + " !(rock|paper|scissors) to set your action. Cannot be undone.";
+            + "2) Rock beats scissors, paper beats rocks, and scissors beat paper \n" + "3) Use /msg "
+            + event.getBot().getNick() + " !(rock|paper|scissors) to set your action. Cannot be undone.";
     }
 
-    private String getSubmissionRuleString()
+    private String getSubmissionRuleString( GenericMessageEvent event )
     {
-        return RED + "Use \" /msg " + RESET + bot.getNick() + RED + " !(rock|paper|scissors) \" to submit." + RESET;
+        return RED + "Use \" /msg " + RESET + event.getBot().getNick() + RED + " !(rock|paper|scissors) \" to submit."
+            + RESET;
     }
 }

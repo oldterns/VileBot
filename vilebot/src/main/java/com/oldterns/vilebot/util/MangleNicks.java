@@ -1,10 +1,9 @@
 package com.oldterns.vilebot.util;
 
-import java.util.List;
-
-import ca.szc.keratin.bot.KeratinBot;
-import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import com.google.common.collect.ImmutableSortedSet;
+import org.pircbotx.hooks.events.JoinEvent;
+import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 /**
  * Reverse all nicks in messages
@@ -12,28 +11,39 @@ import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 public class MangleNicks
 {
 
-    public static String mangleNicks( KeratinBot bot, ReceivePrivmsg event, String message )
+    public static String mangleNicks( MessageEvent event, String message )
     {
-        return mangleNicks( bot, event.getChannel(), message );
+        return mangleNicks( event.getChannel().getUsersNicks(), message );
     }
 
-    public static String mangleNicks( KeratinBot bot, ReceiveJoin event, String message )
+    public static String mangleNicks( JoinEvent event, String message )
     {
-        return mangleNicks( bot, event.getChannel(), message );
+        return mangleNicks( event.getChannel().getUsersNicks(), message );
     }
 
-    private static String mangleNicks( KeratinBot bot, String channel, String message )
+    public static String mangleNicks( GenericMessageEvent event, String message )
     {
-        List<String> nicks;
-        try
+        return mangleNicks( ImmutableSortedSet.of(), message );
+    }
+
+    private static String mangleNicks( ImmutableSortedSet<String> nicks, String message )
+    {
+        // List<String> nicks;
+        // try
+        // {
+        // nicks = bot.getChannel( channel ).getNicks();
+        // }
+        // catch ( Exception e )
+        // {
+        // // nicks list is empty
+        // return message;
+        // }
+
+        if ( nicks.isEmpty() )
         {
-            nicks = bot.getChannel( channel ).getNicks();
-        }
-        catch ( Exception e )
-        {
-            // nicks list is empty
             return message;
         }
+
         StringBuilder reply = new StringBuilder();
         for ( String word : message.split( " " ) )
         {
@@ -48,7 +58,7 @@ public class MangleNicks
         return new StringBuilder( word ).reverse().toString();
     }
 
-    private static boolean inside( List<String> nicks, String word )
+    private static boolean inside( ImmutableSortedSet<String> nicks, String word )
     {
         for ( String nick : nicks )
         {

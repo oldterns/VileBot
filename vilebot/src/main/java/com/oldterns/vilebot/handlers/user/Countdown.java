@@ -3,7 +3,6 @@ package com.oldterns.vilebot.handlers.user;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
@@ -13,23 +12,26 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.ImmutableSortedSet;
 import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.db.KarmaDB;
 import com.oldterns.vilebot.util.BaseNick;
 
 import bsh.EvalError;
 import bsh.Interpreter;
-import ca.szc.keratin.bot.KeratinBot;
-import ca.szc.keratin.bot.annotation.AssignedBot;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import net.engio.mbassy.listener.Handler;
+import org.pircbotx.User;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.hooks.events.PrivateMessageEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 /**
  * Created by ipun on 29/06/17. Countdown implementation based off of Trivia.java
  */
-@HandlerContainer
+// @HandlerContainer
 public class Countdown
+    extends ListenerAdapter
 {
 
     private static final String COUNTDOWN_CHANNEL = Vilebot.getConfig().get( "countdownChannel" );
@@ -40,13 +42,13 @@ public class Countdown
 
     private static final int INVALID_STAKE = 10;
 
-    public static final String RED = "\u000304";
+    private static final String RED = "\u000304";
 
-    public static final String RESET = "\u000f";
+    private static final String RESET = "\u000f";
 
-    public static final String BLUE = "\u000302";
+    private static final String BLUE = "\u000302";
 
-    public static final String GREEN = "\u000303";
+    private static final String GREEN = "\u000303";
 
     private static final Pattern countdownPattern = Pattern.compile( "^!countdown" );
 
@@ -58,8 +60,8 @@ public class Countdown
 
     private static ExecutorService timer = Executors.newScheduledThreadPool( 1 );
 
-    @AssignedBot
-    private KeratinBot bot;
+    // @AssignedBot
+    // private KeratinBot bot;
 
     private static class CountdownGame
     {
@@ -88,18 +90,18 @@ public class Countdown
 
         Random rand = new Random();
 
-        public CountdownGame()
+        CountdownGame()
         {
             shuffleNumbers();
             largeNumberCount = rand.nextInt( LARGE_NUMBERS.size() + 1 );
             smallNumberCount = VALID_NUMBER_COUNT - largeNumberCount;
             questionNumbers.addAll( LARGE_NUMBERS.subList( 0, largeNumberCount ) );
             questionNumbers.addAll( SMALL_NUMBERS.subList( 0, smallNumberCount ) );
-            targetNumber = gnereateTargetNumber();
+            targetNumber = generateTargetNumber();
         }
 
         // target number should be between 100-999.
-        private int gnereateTargetNumber()
+        private int generateTargetNumber()
         {
             return rand.nextInt( 900 ) + 100;
         }
@@ -239,10 +241,11 @@ public class Countdown
         }
     }
 
-    @Handler
-    public void countdown( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher countdownMatcher = countdownPattern.matcher( text );
         Matcher answerMatcher = answerPattern.matcher( text );
         Matcher rulesMatcher = rulesPattern.matcher( text );
@@ -257,45 +260,41 @@ public class Countdown
         }
         else if ( rulesMatcher.matches() )
         {
-            event.replyPrivately( getRules() );
+            event.respondPrivateMessage( getRules() );
         }
     }
 
-    private boolean correctChannel( ReceivePrivmsg event )
+    private boolean correctChannel( GenericMessageEvent event )
     {
-        String currChannel = event.getChannel();
-        if ( COUNTDOWN_CHANNEL.equals( currChannel ) )
+        if ( event instanceof MessageEvent )
         {
-            return true;
+            String currChannel = ( (MessageEvent) event ).getChannel().getName();
+            if ( currChannel.equals( COUNTDOWN_CHANNEL ) )
+            {
+                return true;
+            }
         }
-        else
-        {
-            event.reply( "To play Countdown join : " + COUNTDOWN_CHANNEL );
-            return false;
-        }
-    }
-
-    private boolean isPrivate( ReceivePrivmsg event )
-    {
-        try
-        {
-            bot.getChannel( event.getChannel() ).getNicks();
-        }
-        catch ( Exception e )
-        {
-            return true;
-        }
+        event.respondWith( "To play Countdown join : " + COUNTDOWN_CHANNEL );
         return false;
     }
 
-    private boolean inGameChannel( ReceivePrivmsg event )
+    private boolean isPrivate( GenericMessageEvent event )
     {
-        String currChannel = event.getChannel();
-        if ( COUNTDOWN_CHANNEL.equals( currChannel ) )
+        return event instanceof PrivateMessageEvent;
+    }
+
+    private boolean inGameChannel( GenericMessageEvent event )
+    {
+        if ( event instanceof PrivateMessageEvent )
+        {
+            return false;
+        }
+        String currChannel = ( (MessageEvent) event ).getChannel().getName();
+        if ( currChannel.equals( COUNTDOWN_CHANNEL ) )
         {
             try
             {
-                return bot.getChannel( event.getChannel() ).getNicks().contains( event.getSender() );
+                return ( (MessageEvent) event ).getChannel().getUsersNicks().contains( event.getUser().getNick() );
             }
             catch ( Exception e )
             {
@@ -305,42 +304,46 @@ public class Countdown
         return true;
     }
 
-    private boolean correctSolutionChannel( ReceivePrivmsg event )
+    private boolean correctSolutionChannel( GenericMessageEvent event )
     {
-        String currChannel = event.getChannel();
+        if ( event instanceof PrivateMessageEvent )
+        {
+            return false;
+        }
+        String currChannel = ( (MessageEvent) event ).getChannel().getName();
         if ( ( isPrivate( event ) && inGameChannel( event ) ) )
         {
             return true;
         }
         else if ( currChannel.equals( COUNTDOWN_CHANNEL ) )
         {
-            event.reply( getSubmissionRuleString() );
+            event.respondWith( getSubmissionRuleString( event ) );
             return false;
         }
         else
         {
-            event.reply( "To play Countdown join : " + COUNTDOWN_CHANNEL );
+            event.respondWith( "To play Countdown join : " + COUNTDOWN_CHANNEL );
             return false;
         }
     }
 
-    private synchronized void startCountdownGame( ReceivePrivmsg event )
+    private synchronized void startCountdownGame( GenericMessageEvent event )
     {
         if ( currGame == null )
         {
             currGame = new CountdownGame();
-            event.reply( currGame.getCountdownIntro() + getSubmissionRuleString() );
+            event.respondWith( currGame.getCountdownIntro() + getSubmissionRuleString( event ) );
             startTimer( event );
         }
         else
         {
-            event.reply( currGame.alreadyPlaying() );
+            event.respondWith( currGame.alreadyPlaying() );
         }
     }
 
-    private synchronized void checkAnswer( ReceivePrivmsg event, String submission )
+    private synchronized void checkAnswer( GenericMessageEvent event, String submission )
     {
-        String contestant = BaseNick.toBaseNick( event.getSender() );
+        String contestant = BaseNick.toBaseNick( event.getUser().getNick() );
         if ( currGame != null )
         {
             try
@@ -353,93 +356,90 @@ public class Countdown
                         currGame.setSubmission( contestant, submission, contestantAnswer );
                         if ( isPrivate( event ) )
                         {
-                            event.reply( String.format( "Your submission of %s has been recieved!", submission ) );
+                            event.respondWith( String.format( "Your submission of %s has been recieved!",
+                                                              submission ) );
                         }
                         else
                         {
-                            event.reply( String.format( "%s's submission recieved!", contestant ) );
+                            event.respondWith( String.format( "%s's submission recieved!", contestant ) );
                         }
                     }
                     else
                     {
-                        event.reply( String.format( "Sorry %s, you've already submitted for this game.", contestant ) );
+                        event.respondWith( String.format( "Sorry %s, you've already submitted for this game.",
+                                                          contestant ) );
                     }
                 }
                 else
                 {
-                    event.reply( String.format( "You have put an answer that breaks the threshold of +-%d, you lose %d karma.",
-                                                ANSWER_THRESHOLD, INVALID_STAKE ) );
+                    event.respondWith( String.format( "You have put an answer that breaks the threshold of +-%d, you lose %d karma.",
+                                                      ANSWER_THRESHOLD, INVALID_STAKE ) );
                     KarmaDB.modNounKarma( contestant, -1 * INVALID_STAKE );
                 }
             }
             catch ( Exception e )
             {
                 e.printStackTrace();
-                event.reply( String.format( "Sorry %s! You have put an invalid answer, you lose %d karma.", contestant,
-                                            INVALID_STAKE ) );
+                event.respondWith( String.format( "Sorry %s! You have put an invalid answer, you lose %d karma.",
+                                                  contestant, INVALID_STAKE ) );
                 KarmaDB.modNounKarma( contestant, -1 * INVALID_STAKE );
             }
         }
         else
         {
-            event.reply( "No active game. Start a new one with !countdown" );
+            event.respondWith( "No active game. Start a new one with !countdown" );
         }
 
     }
 
-    private void startTimer( final ReceivePrivmsg event )
+    private void startTimer( final GenericMessageEvent event )
     {
-        timer.submit( new Runnable()
-        {
-            @Override
-            public void run()
+        timer.submit( () -> {
+            try
             {
-                try
-                {
-                    Thread.sleep( TIMEOUT );
-                    timeoutTimer( event );
-                }
-                catch ( InterruptedException e )
-                {
-                    e.printStackTrace();
-                }
+                Thread.sleep( TIMEOUT );
+                timeoutTimer( event );
+            }
+            catch ( InterruptedException e )
+            {
+                e.printStackTrace();
             }
         } );
     }
 
-    private void timeoutTimer( ReceivePrivmsg event )
+    private void timeoutTimer( GenericMessageEvent event )
     {
         stopTimer();
         Set<String> keys = currGame.submissions.keySet();
-        event.reply( String.format( "Your time is up! The target number was %s \n",
-                                    RED + currGame.getTargetNumber() + RESET ) );
+        event.respondWith( String.format( "Your time is up! The target number was %s \n",
+                                          RED + currGame.getTargetNumber() + RESET ) );
         if ( !keys.isEmpty() )
         {
-            event.reply( "The final submissions are: \n" );
+            event.respondWith( "The final submissions are: \n" );
             for ( String key : keys )
             {
-                event.reply( key + ", with " + currGame.getSubmissionAndAnswer( key ) + "\n" );
+                event.respondWith( key + ", with " + currGame.getSubmissionAndAnswer( key ) + "\n" );
             }
             Set<String> winners = currGame.winners.keySet();
             if ( !winners.isEmpty() )
             {
                 int karmaAwarded;
-                event.reply( "The winners are : \n" );
+                event.respondWith( "The winners are : \n" );
                 for ( String winner : winners )
                 {
                     karmaAwarded = currGame.karmaAwarded( winner );
-                    event.reply( winner + " awarded " + GREEN + karmaAwarded + RESET + " karma \n" );
+                    event.respondWith( winner + " awarded " + GREEN + karmaAwarded + RESET + " karma \n" );
                     KarmaDB.modNounKarma( winner, karmaAwarded );
                 }
             }
             else
             {
-                event.reply( "There are no winners for this game. Better luck next time!" );
+                event.respondWith( "There are no winners for this game. Better luck next time!" );
             }
         }
         else
         {
-            event.reply( "There were no submissions for this game. Better luck next time!" );
+            event.respondWith( "There were no submissions for this game. Better luck next time!" );
         }
         currGame = null;
     }
@@ -467,8 +467,9 @@ public class Countdown
             + " karma. \n" + RESET + "4) Use /msg Countdownb0t !solution <your answer> for your answers. ";
     }
 
-    private String getSubmissionRuleString()
+    private String getSubmissionRuleString( GenericMessageEvent event )
     {
-        return RED + "Use \" /msg " + RESET + bot.getNick() + RED + " !solution < answer > \" to submit." + RESET;
+        return RED + "Use \" /msg " + RESET + event.getBot().getNick() + RED + " !solution < answer > \" to submit."
+            + RESET;
     }
 }

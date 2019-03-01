@@ -15,12 +15,15 @@ import com.oldterns.vilebot.Vilebot;
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import net.engio.mbassy.listener.Handler;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 /**
  * Created by ipun on 15/05/16.
  */
-@HandlerContainer
+// @HandlerContainer
 public class Fortune
+    extends ListenerAdapter
 {
     private static final Pattern FORTUNE_PATTERN = Pattern.compile( "^!fortune(.*)" );
 
@@ -30,10 +33,11 @@ public class Fortune
 
     private static final String DIRTY_ARG = "dirty";
 
-    @Handler
-    public void fortune( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher fortuneMatcher = FORTUNE_PATTERN.matcher( text );
         try
         {
@@ -46,7 +50,7 @@ public class Fortune
                 }
                 if ( dirty.equals( DIRTY_ARG ) )
                 {
-                    event.reply( "oooo you dirty" );
+                    event.respondWith( "oooo you dirty" );
                 }
             }
         }
@@ -57,23 +61,18 @@ public class Fortune
         }
     }
 
-    private void fortuneReply( ReceivePrivmsg event )
+    private void fortuneReply( GenericMessageEvent event )
     {
         String randomFortune = fortune.get( new Random().nextInt( fortune.size() ) );
-        event.reply( randomFortune );
+        event.respondWith( randomFortune );
     }
 
     private ArrayList<String> loadFortunes()
     {
         try
         {
-            ArrayList<String> fortunes = new ArrayList<>();
             List<String> lines = Files.readAllLines( Paths.get( FORTUNE_LIST_PATH ), Charset.forName( "UTF-8" ) );
-            for ( String line : lines )
-            {
-                fortunes.add( line );
-            }
-            return fortunes;
+            return new ArrayList<>( lines );
         }
         catch ( Exception e )
         {

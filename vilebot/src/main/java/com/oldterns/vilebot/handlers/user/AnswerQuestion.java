@@ -4,6 +4,8 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
 import net.engio.mbassy.listener.Handler;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -23,8 +25,9 @@ import java.util.regex.Pattern;
  * Created by eunderhi on 13/08/15.
  */
 
-@HandlerContainer
+// @HandlerContainer
 public class AnswerQuestion
+    extends ListenerAdapter
 {
 
     private static final Pattern questionPattern = Pattern.compile( "^!(tellme)\\s(.+)$" );
@@ -33,19 +36,29 @@ public class AnswerQuestion
 
     private static final int MAX_RESPONSE = 500;
 
-    @Handler
-    public void tellMe( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
-        Matcher matcher = questionPattern.matcher( text );
+        String text = event.getMessage();
+        Matcher tellMeMatcher = questionPattern.matcher( text );
 
-        if ( matcher.matches() )
-        {
-            String question = matcher.group( 2 );
-            String answer = getAnswer( question );
-            answer = truncate( answer );
-            event.reply( answer );
-        }
+        if ( tellMeMatcher.matches() )
+            tellMe( event, tellMeMatcher );
+    }
+
+    // @Handler
+    public void tellMe( GenericMessageEvent event, Matcher matcher )
+    {
+        // String text = event.getText();
+        // Matcher matcher = questionPattern.matcher( text );
+        //
+        // if ( matcher.matches() )
+        // {
+        String question = matcher.group( 2 );
+        String answer = getAnswer( question );
+        answer = truncate( answer );
+        event.respondWith( answer );
+        // }
     }
 
     String getAnswer( String searchTerm )

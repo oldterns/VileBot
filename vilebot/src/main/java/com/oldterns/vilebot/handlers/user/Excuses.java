@@ -14,16 +14,20 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 
 import com.oldterns.vilebot.db.ExcuseDB;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
-@HandlerContainer
+//@HandlerContainer
 public class Excuses
+    extends ListenerAdapter
 {
     private static final Pattern excusePattern = Pattern.compile( "!excuse" );
 
-    @Handler
-    private void excusesQuery( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher matcher = excusePattern.matcher( text );
 
         if ( matcher.matches() )
@@ -31,11 +35,11 @@ public class Excuses
             String excuse = ExcuseDB.getRandExcuse();
             if ( excuse != null )
             {
-                event.reply( excuse );
+                event.respondWith( excuse );
             }
             else
             {
-                event.reply( "No excuses available" );
+                event.respondWith( "No excuses available" );
             }
         }
     }

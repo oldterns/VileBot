@@ -1,14 +1,10 @@
 package com.oldterns.vilebot.handlers.user;
 
-import ca.szc.keratin.bot.KeratinBot;
-import ca.szc.keratin.bot.annotation.AssignedBot;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.db.LogDB;
 import com.oldterns.vilebot.util.MangleNicks;
 import com.oldterns.vilebot.util.Zalgo;
-
-import net.engio.mbassy.listener.Handler;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -17,24 +13,26 @@ import java.util.regex.Pattern;
  * Created by emmett on 12/08/15.
  */
 
-@HandlerContainer
+// @HandlerContainer
 public class Markov
+    extends ListenerAdapter
 {
 
-    Map<String, List<String>> markovMap = new HashMap<String, List<String>>();
+    private Map<String, List<String>> markovMap = new HashMap<>();
 
     private static final Pattern cmd = Pattern.compile( "^!speak$" );
 
     private static final Pattern gospelPattern = Pattern.compile( "^!gospel$" );
 
-    @AssignedBot
-    private KeratinBot bot;
+    // @AssignedBot
+    // private KeratinBot bot;
 
-    @Handler
-    public void speak( ReceivePrivmsg message )
+    // @Handler
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
 
-        String text = message.getText();
+        String text = event.getMessage();
         boolean markovMap = cmd.matcher( text ).matches();
         boolean isGospel = gospelPattern.matcher( text ).matches();
 
@@ -42,12 +40,12 @@ public class Markov
         {
             train();
             String phrase = generatePhrase();
-            phrase = MangleNicks.mangleNicks( bot, message, phrase );
+            phrase = MangleNicks.mangleNicks( event, phrase );
             if ( isGospel )
             {
                 phrase = Zalgo.generate( phrase );
             }
-            message.reply( phrase );
+            event.respondWith( phrase );
         }
     }
 
@@ -76,7 +74,7 @@ public class Markov
             }
             else
             {
-                List<String> valueList = new ArrayList<String>();
+                List<String> valueList = new ArrayList<>();
                 valueList.add( value );
                 markovMap.put( key, valueList );
             }
@@ -87,11 +85,11 @@ public class Markov
     {
         Random random = new Random();
         String key = getRandomKey( random );
-        String phrase = "";
+        StringBuilder phrase = new StringBuilder();
 
         while ( key != null && phrase.length() < 1000 )
         {
-            phrase += key + " ";
+            phrase.append( key ).append( " " );
             if ( shouldEnd( key ) )
             {
                 break;
@@ -99,7 +97,7 @@ public class Markov
             key = nextKey( key, random );
         }
 
-        return phrase.replace( "\n", " " );
+        return phrase.toString().replace( "\n", " " );
     }
 
     private String nextKey( String key, Random random )

@@ -14,12 +14,12 @@ import java.util.regex.Pattern;
 
 import com.oldterns.vilebot.CharactersThatBreakEclipse;
 
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
-@HandlerContainer
+//@HandlerContainer
 public class Jokes
+    extends ListenerAdapter
 {
     private static final Pattern listJokePattern = Pattern.compile( "!(randommeme|dance|chuck)" );
 
@@ -37,56 +37,73 @@ public class Jokes
 
     private static final List<String> jokes = generateJokes();
 
-    @Handler
-    private void containersIsLinux( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
-        Matcher matcher = containerPattern.matcher( text );
-        if ( matcher.find() )
-        {
-            event.reply( jokes.get( random.nextInt( jokes.size() ) ) );
-        }
+        String text = event.getMessage();
+
+        Matcher containersIsLinuxMatcher = containerPattern.matcher( text );
+        Matcher redditLODMatcher = redditPattern.matcher( text );
+        Matcher listBasedJokesMatcher = listJokePattern.matcher( text );
+
+        if ( containersIsLinuxMatcher.find() )
+            containersIsLinux( event );
+        if ( redditLODMatcher.matches() )
+            redditLOD( event );
+        if ( listBasedJokesMatcher.matches() )
+            listBasedJokes( event, listBasedJokesMatcher );
     }
 
-    @Handler
-    private void redditLOD( ReceivePrivmsg event )
+    // @Handler
+    private void containersIsLinux( GenericMessageEvent event )
     {
-        String text = event.getText();
-        Matcher containerMatcher = redditPattern.matcher( text );
+        // String text = event.getText();
+        // Matcher matcher = containerPattern.matcher( text );
+        // if ( matcher.find() )
+        // {
+        event.respondWith( jokes.get( random.nextInt( jokes.size() ) ) );
+        // }
+    }
 
-        if ( containerMatcher.matches() )
+    // @Handler
+    private void redditLOD( GenericMessageEvent event )
+    {
+        // String text = event.getText();
+        // Matcher containerMatcher = redditPattern.matcher( text );
+        //
+        // if ( containerMatcher.matches() )
+        // {
+        if ( random.nextInt( 10 ) > 6 )
         {
-            if ( random.nextInt( 10 ) > 6 )
-            {
-                event.reply( CharactersThatBreakEclipse.LODEMOT );
-            }
+            event.respondWith( CharactersThatBreakEclipse.LODEMOT );
         }
+        // }
     }
 
     /**
      * Reply to user !randommeme command with a random selection from the meme list
      */
-    @Handler
-    private void listBasedJokes( ReceivePrivmsg event )
+    // @Handler
+    private void listBasedJokes( GenericMessageEvent event, Matcher matcher )
     {
-        String text = event.getText();
-        Matcher matcher = listJokePattern.matcher( text );
+        // String text = event.getText();
+        // Matcher matcher = listJokePattern.matcher( text );
+        //
+        // if ( matcher.matches() )
+        // {
+        String mode = matcher.group( 1 );
 
-        if ( matcher.matches() )
-        {
-            String mode = matcher.group( 1 );
+        String reply;
 
-            String reply;
+        if ( "dance".equals( mode ) )
+            reply = dances.get( random.nextInt( dances.size() ) );
+        else if ( "chuck".equals( mode ) )
+            reply = chucks.get( random.nextInt( chucks.size() ) );
+        else
+            reply = memes.get( random.nextInt( memes.size() ) );
 
-            if ( "dance".equals( mode ) )
-                reply = dances.get( random.nextInt( dances.size() ) );
-            else if ( "chuck".equals( mode ) )
-                reply = chucks.get( random.nextInt( chucks.size() ) );
-            else
-                reply = memes.get( random.nextInt( memes.size() ) );
-
-            event.reply( reply );
-        }
+        event.respondWith( reply );
+        // }
     }
 
     private static List<String> generateChucks()

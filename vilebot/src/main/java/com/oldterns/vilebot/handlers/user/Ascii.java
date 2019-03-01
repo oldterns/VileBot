@@ -5,18 +5,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import com.oldterns.vilebot.Vilebot;
 import net.engio.mbassy.listener.Handler;
 
 import com.github.lalyos.jfiglet.FigletFont;
 import com.oldterns.vilebot.util.LimitCommand;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
-@HandlerContainer
+//@HandlerContainer
 public class Ascii
+    extends ListenerAdapter
 {
 
     private static final Pattern asciiPattern = Pattern.compile( "^!(ascii)\\s(.+)$" );
@@ -35,57 +41,73 @@ public class Ascii
 
     public LimitCommand limitCommand = new LimitCommand();
 
-    @Handler
-    public void ascii( ReceivePrivmsg event )
-    {
+    private static final String RESTRICTED_CHANNEL = Vilebot.getConfig().get( "ircChannel1" );
 
-        String text = event.getText();
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
+    {
+        String text = event.getMessage();
         Matcher asciiMatch = asciiPattern.matcher( text );
+        Matcher asciifontsMatch = asciiFontsPattern.matcher( text );
 
         if ( asciiMatch.matches() )
+            ascii( event, asciiMatch );
+        if ( asciifontsMatch.matches() )
+            asciifonts( event );
+    }
+
+    // @Handler
+    public void ascii( GenericMessageEvent event, Matcher matcher )
+    {
+
+        // String text = event.getText();
+        // Matcher asciiMatch = asciiPattern.matcher( text );
+
+        // if ( matcher.matches() )
+        // {
+        if ( event instanceof MessageEvent
+            && ( (MessageEvent) event ).getChannel().getName().equals( RESTRICTED_CHANNEL ) )
         {
-            if ( event.getChannel().equals( "#thefoobar" ) )
+            String isLimit = limitCommand.addUse( event.getUser().getNick() );
+            if ( isLimit.isEmpty() )
             {
-                String isLimit = limitCommand.addUse( event.getSender() );
-                if ( isLimit.isEmpty() )
-                {
-                    runAscii( event, asciiMatch );
-                }
-                else
-                {
-                    event.reply( isLimit );
-                }
+                runAscii( event, matcher );
             }
             else
             {
-                runAscii( event, asciiMatch );
+                event.respondWith( isLimit );
             }
         }
-    }
-
-    @Handler
-    public void asciifonts( ReceivePrivmsg event )
-    {
-        String text = event.getText();
-        Matcher matcher = asciiFontsPattern.matcher( text );
-
-        if ( matcher.matches() )
+        else
         {
-            StringBuilder sb = new StringBuilder();
-            sb.append( "Available fonts for !ascii:\n" );
-            for ( int i = 0; i < availableFonts.size(); i++ )
-            {
-                sb.append( String.format( "%20s ", availableFonts.get( i ) ) );
-                if ( ( ( i + 1 ) % 5 ) == 0 )
-                {
-                    sb.append( "\n" );
-                }
-            }
-            event.replyPrivately( sb.toString() );
+            runAscii( event, matcher );
         }
+        // }
     }
 
-    private void runAscii( ReceivePrivmsg event, Matcher asciiMatch )
+    // @Handler
+    public void asciifonts( GenericMessageEvent event )
+    {
+        // String text = event.getText();
+        // Matcher matcher = asciiFontsPattern.matcher( text );
+        //
+        // if ( matcher.matches() )
+        // {
+        StringBuilder sb = new StringBuilder();
+        sb.append( "Available fonts for !ascii:\n" );
+        for ( int i = 0; i < availableFonts.size(); i++ )
+        {
+            sb.append( String.format( "%20s ", availableFonts.get( i ) ) );
+            if ( ( ( i + 1 ) % 5 ) == 0 )
+            {
+                sb.append( "\n" );
+            }
+        }
+        event.respondPrivateMessage( sb.toString() );
+        // }
+    }
+
+    private void runAscii( GenericMessageEvent event, Matcher asciiMatch )
     {
         // check if first word is a font name
         String font = asciiMatch.group( 2 ).split( " ", 2 )[0];
@@ -100,13 +122,13 @@ public class Ascii
             String message = asciiMatch.group( 2 );
             asciiArt = getAsciiArt( message );
         }
-        event.reply( asciiArt );
+        event.respondWith( asciiArt );
     }
 
     private static List<String> getAvailableFonts()
     {
         List<String> fonts = new ArrayList<>();
-        for ( File flf : new File( fontFileDir ).listFiles() )
+        for ( File flf : Objects.requireNonNull( new File( fontFileDir ).listFiles() ) )
         {
             if ( flf.isFile() )
             {

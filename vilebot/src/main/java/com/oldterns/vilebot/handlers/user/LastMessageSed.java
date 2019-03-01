@@ -1,34 +1,28 @@
-/**
- * Copyright (C) 2013 Oldterns
- *
- * This file may be modified and distributed under the terms
- * of the MIT license. See the LICENSE file for details.
- */
 package com.oldterns.vilebot.handlers.user;
+
+import ca.szc.keratin.bot.misc.Colors;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ca.szc.keratin.bot.KeratinBot;
-import ca.szc.keratin.bot.annotation.AssignedBot;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.bot.misc.Colors;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+//import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+//import net.engio.mbassy.listener.Handler;
 
-import net.engio.mbassy.listener.Handler;
-
-@HandlerContainer
+//@HandlerContainer
 public class LastMessageSed
+    extends ListenerAdapter
 {
-    @AssignedBot
-    private KeratinBot bot;
+    // @AssignedBot
+    // private KeratinBot bot;
 
     /**
      * Map with String key of IRC nick, to String value of the last line of text.
      */
-    private final Map<String, String> lastMessageMapByNick = new HashMap<String, String>();
+    private final Map<String, String> lastMessageMapByNick = new HashMap<>();
 
     /**
      * Syncronise access to lastMessageMapByNick on this.
@@ -47,21 +41,20 @@ public class LastMessageSed
      * Say the last thing the person said, replaced as specified. Otherwise just record the line as the last thing the
      * person said.
      */
-    @Handler
-    private void replace( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher sedMatcher = replacePattern.matcher( text );
 
-        String nick = event.getSender();
+        String nick = event.getUser().getNick();
 
         if ( sedMatcher.matches() )
         {
             String correction = "Correction: ";
 
-            /**
-             * If the last group of the regex captures a non-null string, the user is fixing another user's message.
-             */
+            // If the last group of the regex captures a non-null string, the user is fixing another user's message.
             if ( sedMatcher.group( 5 ) != null )
             {
                 nick = sedMatcher.group( 5 );
@@ -80,7 +73,7 @@ public class LastMessageSed
 
                     if ( !lastMessage.contains( regexp ) )
                     {
-                        event.reply( "Wow. Seriously? Try subbing out a string that actually occurred. Do you even sed, bro?" );
+                        event.respondWith( "Wow. Seriously? Try subbing out a string that actually occurred. Do you even sed, bro?" );
                     }
                     else
                     {
@@ -101,7 +94,7 @@ public class LastMessageSed
                             replacedMsgWHL = lastMessage.replaceFirst( regexp, replacementWHL );
                         }
 
-                        event.reply( correction + replacedMsgWHL );
+                        event.respondWith( correction + replacedMsgWHL );
                         lastMessageMapByNick.put( nick, replacedMsg );
                     }
                 }

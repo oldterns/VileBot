@@ -17,13 +17,16 @@ import net.engio.mbassy.listener.Handler;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 /**
  * Will find the HTML title of HTTP(S) pages from certain domains. Generally it's only worth adding trustworthy domains
  * that don't include titles in the URL for SEO.
  */
-@HandlerContainer
+// @HandlerContainer
 public class UrlTitleAnnouncer
+    extends ListenerAdapter
 {
 
     private static final Pattern urlPattern =
@@ -31,15 +34,16 @@ public class UrlTitleAnnouncer
 
     private static final Pattern titlePattern = Pattern.compile( "<title>(.*)</title>" );
 
-    @Handler
-    public void urlAnnouncer( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        Matcher urlMatcher = urlPattern.matcher( event.getText() );
+        Matcher urlMatcher = urlPattern.matcher( event.getMessage() );
 
         if ( urlMatcher.find() )
         {
             String title = scrapeURLHTMLTitle( urlMatcher.group( 1 ) );
-            event.reply( "'" + title + "'" );
+            event.respondWith( "'" + title + "'" );
         }
     }
 

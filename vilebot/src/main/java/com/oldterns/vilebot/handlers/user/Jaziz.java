@@ -4,6 +4,8 @@ import ca.szc.keratin.bot.annotation.HandlerContainer;
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
 import net.engio.mbassy.listener.Handler;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 import twitter4j.JSONArray;
 import twitter4j.JSONException;
 import twitter4j.JSONObject;
@@ -18,41 +20,43 @@ import java.util.regex.Pattern;
 /**
  * Created by eunderhi on 27/07/16.
  */
-@HandlerContainer
+// @HandlerContainer
 public class Jaziz
+    extends ListenerAdapter
 {
 
     private static final String API_KEY = Vilebot.getConfig().get( "thesaurusKey" );
 
-    public static final String API_URL = "http://words.bighugelabs.com/api/2/" + API_KEY + "/";
+    private static final String API_URL = "http://words.bighugelabs.com/api/2/" + API_KEY + "/";
 
-    public static final String API_FORMAT = "/json";
+    private static final String API_FORMAT = "/json";
 
     private static final Random random = new Random();
 
     private static final Pattern jazizPattern = Pattern.compile( "^!jaziz (.+)" );
 
-    @Handler
-    public void jaziz( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        Matcher questionMatcher = jazizPattern.matcher( event.getText() );
+        Matcher questionMatcher = jazizPattern.matcher( event.getMessage() );
         if ( questionMatcher.matches() )
         {
             String message = questionMatcher.group( 1 );
             try
             {
                 message = jazizify( message );
-                event.reply( message );
+                event.respondWith( message );
             }
             catch ( Exception e )
             {
-                event.reply( "eeeh" );
+                event.respondWith( "eeeh" );
                 e.printStackTrace();
             }
         }
     }
 
-    public static String jazizify( String message )
+    static String jazizify( String message )
         throws Exception
     {
         String[] words = splitWords( message );
@@ -122,7 +126,7 @@ public class Jaziz
     private static List<String> jsonToList( JSONArray array )
         throws JSONException
     {
-        List<String> words = new ArrayList<String>();
+        List<String> words = new ArrayList<>();
         for ( int i = 0; i < array.length(); i++ )
         {
             words.add( array.getString( i ) );

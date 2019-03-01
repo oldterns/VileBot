@@ -1,8 +1,8 @@
 package com.oldterns.vilebot.handlers.user;
 
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import net.engio.mbassy.listener.Handler;
+import com.oldterns.vilebot.util.BaseNick;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -12,10 +12,9 @@ import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.oldterns.vilebot.util.BaseNick;
-
-@HandlerContainer
+//@HandlerContainer
 public class RemindMe
+    extends ListenerAdapter
 {
 
     private static final String timeFormat = "(\\d+\\w*)";
@@ -40,17 +39,18 @@ public class RemindMe
 
     private final int MAX_REMINDERS = 10;
 
-    @Handler
-    public void doRemindMe( ReceivePrivmsg event )
+    // @Handler
+    @Override
+    public void onGenericMessage( GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher matcher = remindMePattern.matcher( text );
 
         if ( matcher.matches() )
         {
             String message = matcher.group( 1 );
             String time = matcher.group( 2 );
-            String creator = BaseNick.toBaseNick( event.getSender() );
+            String creator = BaseNick.toBaseNick( event.getUser().getNick() );
             if ( !userReminders.containsKey( creator ) )
             {
                 userReminders.put( creator, 0 );
@@ -58,14 +58,14 @@ public class RemindMe
             Calendar timerTime = getTimerTime( time, creator );
             if ( timerTime == null )
             {
-                event.replyPrivately( String.format( "The given time of %s is invalid. The cause is %s.", time,
-                                                     timeError ) );
+                event.respondPrivateMessage( String.format( "The given time of %s is invalid. The cause is %s.", time,
+                                                            timeError ) );
             }
             else
             {
                 Timer timer = new Timer();
                 timer.schedule( createTimerTask( event, message, creator ), timerTime.getTime() );
-                event.replyPrivately( "Created reminder for " + timerTime.getTime() );
+                event.respondPrivateMessage( "Created reminder for " + timerTime.getTime() );
                 int amountOfReminders = userReminders.get( creator );
                 amountOfReminders++;
                 userReminders.put( creator, amountOfReminders );
@@ -73,14 +73,14 @@ public class RemindMe
         }
     }
 
-    private TimerTask createTimerTask( final ReceivePrivmsg event, final String message, final String creator )
+    private TimerTask createTimerTask( final GenericMessageEvent event, final String message, final String creator )
     {
         return new TimerTask()
         {
             @Override
             public void run()
             {
-                event.replyPrivately( "This is your reminder that you should: " + message );
+                event.respondPrivateMessage( "This is your reminder that you should: " + message );
                 int amountOfReminders = userReminders.get( creator );
                 amountOfReminders--;
                 userReminders.put( creator, amountOfReminders );
@@ -96,7 +96,7 @@ public class RemindMe
         {
             return null;
         }
-        Integer timeValue = new Integer( time.substring( 0, time.length() - 1 ) );
+        int timeValue = Integer.parseInt( time.substring( 0, time.length() - 1 ) );
         switch ( time.substring( time.length() - 1 ) )
         {
             case "d":
@@ -127,7 +127,7 @@ public class RemindMe
         try
         {
             String givenTime = time.substring( 0, time.length() - 1 );
-            new Integer( givenTime );
+            Integer.valueOf( givenTime );
         }
         catch ( Exception e )
         {
@@ -146,7 +146,7 @@ public class RemindMe
     {
         try
         {
-            new Integer( time );
+            Integer.valueOf( time );
         }
         catch ( Exception e )
         {
