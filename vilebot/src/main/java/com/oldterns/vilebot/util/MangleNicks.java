@@ -28,16 +28,6 @@ public class MangleNicks
 
     private static String mangleNicks( ImmutableSortedSet<String> nicks, String message )
     {
-        // List<String> nicks;
-        // try
-        // {
-        // nicks = bot.getChannel( channel ).getNicks();
-        // }
-        // catch ( Exception e )
-        // {
-        // // nicks list is empty
-        // return message;
-        // }
 
         if ( nicks.isEmpty() )
         {

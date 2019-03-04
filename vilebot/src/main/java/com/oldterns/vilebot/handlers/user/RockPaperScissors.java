@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
  * Created by Christopher Chianelli on 27/08/17. Thanks to Josh Matsuoka for helping squashing bugs RockPaperScissors
  * implementation based off of Trivia.java
  */
-// @HandlerContainer
 public class RockPaperScissors
     extends ListenerAdapter
 {
@@ -41,9 +40,6 @@ public class RockPaperScissors
     private static final Pattern rulesPattern = Pattern.compile( "^!rpsrules" );
 
     private static RPSGame currGame = null;
-
-    // @AssignedBot
-    // private KeratinBot bot;
 
     private static class RPSGame
     {
@@ -188,7 +184,6 @@ public class RockPaperScissors
         }
     }
 
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {
@@ -249,7 +244,6 @@ public class RockPaperScissors
 
     private boolean correctSolutionChannel( GenericMessageEvent event )
     {
-        // String currChannel = event.getChannel();
         if ( ( isPrivate( event ) && inGameChannel( event ) ) )
         {
             return true;
@@ -289,7 +283,6 @@ public class RockPaperScissors
     }
 
     private synchronized void startRPSGame( GenericMessageEvent event, String dared, String daredThing )
-        throws Exception
     {
         if ( null == currGame )
         {

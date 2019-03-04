@@ -6,7 +6,6 @@ import org.pircbotx.hooks.types.GenericMessageEvent;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//@HandlerContainer
 public class Help
     extends ListenerAdapter
 {
@@ -14,7 +13,6 @@ public class Help
 
     private static final String helpMessage = generateHelpMessage();
 
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

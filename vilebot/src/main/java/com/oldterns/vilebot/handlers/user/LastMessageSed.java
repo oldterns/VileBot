@@ -9,15 +9,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-//import net.engio.mbassy.listener.Handler;
-
-//@HandlerContainer
 public class LastMessageSed
     extends ListenerAdapter
 {
-    // @AssignedBot
-    // private KeratinBot bot;
 
     /**
      * Map with String key of IRC nick, to String value of the last line of text.
@@ -41,7 +35,6 @@ public class LastMessageSed
      * Say the last thing the person said, replaced as specified. Otherwise just record the line as the last thing the
      * person said.
      */
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

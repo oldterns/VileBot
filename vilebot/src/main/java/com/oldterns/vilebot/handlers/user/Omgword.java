@@ -10,7 +10,11 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -19,7 +23,6 @@ import java.util.regex.Pattern;
 /**
  * Based off of the omgword game from CasinoBot: http://casinobot.codeplex.com/
  */
-// @HandlerContainer
 public class Omgword
     extends ListenerAdapter
 {
@@ -46,15 +49,12 @@ public class Omgword
 
     private static ExecutorService timer = Executors.newScheduledThreadPool( 1 );
 
-    // @Handler
     @Override
     public void onMessage( MessageEvent event )
     {
         String text = event.getMessage();
         Matcher questionMatcher = QUESTION_PATTERN.matcher( text );
         Matcher answerMatcher = ANSWER_PATTERN.matcher( text );
-        // try
-        // {
         if ( questionMatcher.matches() && shouldStartGame( event ) )
         {
             startGame( event );
@@ -64,12 +64,6 @@ public class Omgword
             String answer = answerMatcher.group( 1 );
             finishGame( event, answer );
         }
-        // }
-        // catch ( Exception e )
-        // {
-        // e.printStackTrace();
-        // System.exit( 1 );
-        // }
     }
 
     private boolean shouldStartGame( MessageEvent event )
@@ -85,7 +79,6 @@ public class Omgword
     }
 
     private synchronized void startGame( MessageEvent event )
-    // throws Exception
     {
         if ( currentGame != null )
         {

@@ -1,23 +1,15 @@
 package vilebot.util;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.concurrent.TimeUnit;
-
 import com.oldterns.vilebot.Vilebot;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.oldterns.vilebot.handlers.user.Ascii;
 import com.oldterns.vilebot.util.LimitCommand;
-
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import org.junit.Before;
+import org.junit.Test;
 import org.pircbotx.Channel;
 import org.pircbotx.User;
 import org.pircbotx.hooks.events.MessageEvent;
+
+import static org.mockito.Mockito.*;
 
 public class LimitCommandTest
 {
@@ -48,7 +40,6 @@ public class LimitCommandTest
 
     @Test
     public void testWithAscii()
-        throws Exception
     {
         String ircmsg = "!ascii #thefoobar";
         when( event.getMessage() ).thenReturn( ircmsg );
@@ -57,20 +48,9 @@ public class LimitCommandTest
 
         for ( int i = 0; i < maxUses + 1; i++ )
         {
-            // runEvent();
             asciiClass.onGenericMessage( event );
         }
-        // TimeUnit.SECONDS.sleep( 1 );
-        // runEvent();
-        // asciiClass.onGenericMessage( event );
         verify( event, times( maxUses ) ).respondWith( expectedReply );
         verify( event, times( 1 ) ).respondWith( "jucook has the maximum uses" );
     }
-
-    // private void runEvent()
-    // {
-    // String ircmsg = "!ascii #thefoobar";
-    // when( event.getMessage() ).thenReturn( ircmsg );
-    // asciiClass.onGenericMessage( event );
-    // }
 }

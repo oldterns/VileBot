@@ -21,7 +21,7 @@ import org.pircbotx.hooks.types.GenericMessageEvent;
 /**
  * Created by ipun on 15/05/16.
  */
-// @HandlerContainer
+
 public class Inspiration
     extends ListenerAdapter
 {
@@ -35,7 +35,6 @@ public class Inspiration
 
     private List<String> inspirationIndex = loadInspirationIndex();
 
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

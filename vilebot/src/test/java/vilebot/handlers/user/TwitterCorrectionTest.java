@@ -1,6 +1,5 @@
 package vilebot.handlers.user;
 
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.handlers.user.TwitterCorrection;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -11,14 +10,14 @@ import static org.mockito.Mockito.*;
 public class TwitterCorrectionTest
 {
 
-    String correctResponse =
+    private String correctResponse =
         "You seem to be using twitter addressing syntax. On IRC you would say this instead: ipun: message";
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass( String.class );
 
-    TwitterCorrection tester = new TwitterCorrection();
+    private TwitterCorrection tester = new TwitterCorrection();
 
-    MessageEvent event = mock( MessageEvent.class );
+    private MessageEvent event = mock( MessageEvent.class );
 
     @Test
     public void validTwitterCorrectionTest1()

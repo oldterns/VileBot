@@ -14,12 +14,9 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-//@HandlerContainer
 public class LastSeen
     extends ListenerAdapter
 {
-    // @AssignedBot
-    // private KeratinBot bot;
 
     private static TimeZone timeZone = TimeZone.getTimeZone( "America/Toronto" );
 
@@ -28,7 +25,6 @@ public class LastSeen
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {
-        // String text = event.getMessage();
         String userNick = BaseNick.toBaseNick( event.getUser().getNick() );
         String botNick = event.getBot().getNick();
 
@@ -43,13 +39,8 @@ public class LastSeen
         }
     }
 
-    // @Handler
     private void longTimeNoSee( JoinEvent event, String joiner )
     {
-        // String joiner = BaseNick.toBaseNick( event.getJoiner() );
-        //
-        // if ( !bot.getNick().equals( joiner ) && !Ignore.getOnJoin().contains( joiner ) )
-        // {
         OutputIRC outputQ = event.getBot().send();
         String replyTarget = event.getChannel().getName();
 
@@ -68,43 +59,7 @@ public class LastSeen
         }
 
         LastSeenDB.updateLastSeenTime( joiner );
-        // }
     }
-
-    // @Handler
-    // private void updateLastSeenOnChanMsg( MessageEvent event )
-    // {
-    // String nick = BaseNick.toBaseNick( event.getUser().getNick() );
-    //
-    // if ( !bot.getNick().equals( nick ) )
-    // LastSeenDB.updateLastSeenTime( nick );
-    // }
-    //
-    // private void updateLastSeenOnPrivmsg( PrivateMessageEvent event )
-    // {
-    // String nick = BaseNick.toBaseNick( event.getUser().getNick() );
-    //
-    // if ( !bot.getNick().equals( nick ) )
-    // LastSeenDB.updateLastSeenTime( nick );
-    // }
-    //
-    // @Handler
-    // private void updateLastSeenOnPart( ReceivePart event )
-    // {
-    // String nick = BaseNick.toBaseNick( event.getParter() );
-    //
-    // if ( !bot.getNick().equals( nick ) )
-    // LastSeenDB.updateLastSeenTime( nick );
-    // }
-    //
-    // @Handler
-    // private void updateLastSeenOnQuit( ReceiveQuit event )
-    // {
-    // String nick = BaseNick.toBaseNick( event.getQuitter() );
-    //
-    // if ( !bot.getNick().equals( nick ) )
-    // LastSeenDB.updateLastSeenTime( nick );
-    // }
 
     private static DateFormat makeDateFormat()
     {

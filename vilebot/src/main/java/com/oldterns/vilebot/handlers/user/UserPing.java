@@ -9,14 +9,12 @@ package com.oldterns.vilebot.handlers.user;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
-//@HandlerContainer
 public class UserPing
     extends ListenerAdapter
 {
     /**
      * Reply to user !ping command with username: pong
      */
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

@@ -6,25 +6,20 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-
-import net.engio.mbassy.listener.Handler;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Will find the HTML title of HTTP(S) pages from certain domains. Generally it's only worth adding trustworthy domains
  * that don't include titles in the URL for SEO.
  */
-// @HandlerContainer
+
 public class UrlTitleAnnouncer
     extends ListenerAdapter
 {
@@ -34,7 +29,6 @@ public class UrlTitleAnnouncer
 
     private static final Pattern titlePattern = Pattern.compile( "<title>(.*)</title>" );
 
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

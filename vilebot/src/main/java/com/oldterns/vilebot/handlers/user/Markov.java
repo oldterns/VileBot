@@ -6,14 +6,17 @@ import com.oldterns.vilebot.util.Zalgo;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 /**
  * Created by emmett on 12/08/15.
  */
 
-// @HandlerContainer
 public class Markov
     extends ListenerAdapter
 {
@@ -24,10 +27,6 @@ public class Markov
 
     private static final Pattern gospelPattern = Pattern.compile( "^!gospel$" );
 
-    // @AssignedBot
-    // private KeratinBot bot;
-
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

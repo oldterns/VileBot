@@ -9,7 +9,6 @@ import org.pircbotx.hooks.types.GenericMessageEvent;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//@HandlerContainer
 public class AdminManagement
     extends ListenerAdapter
 {
@@ -29,15 +28,8 @@ public class AdminManagement
             rem( event, remMatcher );
     }
 
-    // @Handler
     private void set( GenericMessageEvent event, Matcher matcher )
     {
-        // String text = event.getText();
-        // Matcher matcher = adminSetPattern.matcher( text );
-        // String sender = event.getSender();
-
-        // if ( matcher.matches() )
-        // {
         String editedAdminNick = matcher.group( 1 );
         String password = matcher.group( 2 );
 
@@ -58,12 +50,6 @@ public class AdminManagement
     // @Handler
     private void rem( GenericMessageEvent event, Matcher matcher )
     {
-        // String text = event.getText();
-        // Matcher matcher = adminRemPattern.matcher( text );
-        // String sender = event.getSender();
-        //
-        // if ( matcher.matches() )
-        // {
         String editedAdminNick = matcher.group( 1 );
 
         String username = Sessions.getSession( event.getUser().getNick() );

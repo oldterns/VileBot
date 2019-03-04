@@ -6,16 +6,12 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
-//@HandlerContainer
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class Help
     extends ListenerAdapter
 {
@@ -26,7 +22,6 @@ public class Help
     /**
      * Reply to user !help command with help info
      */
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

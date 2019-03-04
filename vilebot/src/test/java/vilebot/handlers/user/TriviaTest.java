@@ -1,22 +1,16 @@
 package vilebot.handlers.user;
 
+import com.oldterns.vilebot.handlers.user.Trivia;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.oldterns.vilebot.handlers.user.Trivia;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.pircbotx.Channel;
+import org.pircbotx.hooks.events.MessageEvent;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import org.pircbotx.Channel;
-import org.pircbotx.hooks.events.MessageEvent;
+import static org.mockito.Mockito.*;
 
 public class TriviaTest
 {

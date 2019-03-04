@@ -9,7 +9,11 @@ package com.oldterns.vilebot.handlers.user;
 import com.oldterns.vilebot.Vilebot;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
-import twitter4j.*;
+import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 import java.net.MalformedURLException;
@@ -23,7 +27,7 @@ import java.util.regex.Pattern;
  * consumerKey consumerSecret accessToken accessTokenSecret Where all of the above are created at
  * https://apps.twitter.com
  */
-// @HandlerContainer
+
 public class UrlTweetAnnouncer
     extends ListenerAdapter
 {
@@ -43,10 +47,6 @@ public class UrlTweetAnnouncer
 
     private final String accessTokenSecret = cfg.get( "accessTokenSecret" ); // may be known as 'Access token secret'
 
-    // @AssignedBot
-    // private KeratinBot bot;
-
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

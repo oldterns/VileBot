@@ -8,10 +8,6 @@ import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.util.regex.Pattern;
 
-/**
- * Created by eunderhi on 18/08/15.
- */
-// @HandlerContainer
 public class GetLog
     extends ListenerAdapter
 {
@@ -20,7 +16,6 @@ public class GetLog
 
     private static final Pattern deleteLog = Pattern.compile( "!admin deleteLog$" );
 
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

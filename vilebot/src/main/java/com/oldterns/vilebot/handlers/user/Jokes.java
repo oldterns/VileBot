@@ -17,7 +17,6 @@ import com.oldterns.vilebot.CharactersThatBreakEclipse;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
-//@HandlerContainer
 public class Jokes
     extends ListenerAdapter
 {
@@ -54,43 +53,24 @@ public class Jokes
             listBasedJokes( event, listBasedJokesMatcher );
     }
 
-    // @Handler
     private void containersIsLinux( GenericMessageEvent event )
     {
-        // String text = event.getText();
-        // Matcher matcher = containerPattern.matcher( text );
-        // if ( matcher.find() )
-        // {
         event.respondWith( jokes.get( random.nextInt( jokes.size() ) ) );
-        // }
     }
 
-    // @Handler
     private void redditLOD( GenericMessageEvent event )
     {
-        // String text = event.getText();
-        // Matcher containerMatcher = redditPattern.matcher( text );
-        //
-        // if ( containerMatcher.matches() )
-        // {
         if ( random.nextInt( 10 ) > 6 )
         {
             event.respondWith( CharactersThatBreakEclipse.LODEMOT );
         }
-        // }
     }
 
     /**
      * Reply to user !randommeme command with a random selection from the meme list
      */
-    // @Handler
     private void listBasedJokes( GenericMessageEvent event, Matcher matcher )
     {
-        // String text = event.getText();
-        // Matcher matcher = listJokePattern.matcher( text );
-        //
-        // if ( matcher.matches() )
-        // {
         String mode = matcher.group( 1 );
 
         String reply;
@@ -103,12 +83,11 @@ public class Jokes
             reply = memes.get( random.nextInt( memes.size() ) );
 
         event.respondWith( reply );
-        // }
     }
 
     private static List<String> generateChucks()
     {
-        List<String> chucks = new ArrayList<String>();
+        List<String> chucks = new ArrayList<>();
 
         // Anyone called Chuck except Chuck Norris
 
@@ -142,7 +121,7 @@ public class Jokes
 
     private static List<String> generateMemes()
     {
-        List<String> memes = new ArrayList<String>();
+        List<String> memes = new ArrayList<>();
 
         memes.add( CharactersThatBreakEclipse.LODEMOT );
         memes.add( "Derp." );
@@ -158,7 +137,6 @@ public class Jokes
         return memes;
     }
 
-    @SuppressWarnings( "unused" )
     private static List<String> generateEaster()
     {
         List<String> easter = new ArrayList<String>();

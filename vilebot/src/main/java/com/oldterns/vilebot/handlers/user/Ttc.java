@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 /**
  * Created by eunderhi on 27/10/15.
  */
-// @HandlerContainer
+
 public class Ttc
     extends ListenerAdapter
 {
@@ -25,7 +25,6 @@ public class Ttc
 
     public static final String TTC_URL = "https://www.ttc.ca/Service_Advisories/all_service_alerts.jsp";
 
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {
@@ -54,7 +53,6 @@ public class Ttc
     }
 
     private Elements parseContent( String content )
-        throws Exception
     {
         Elements alerts = new Elements();
         Document doc = Jsoup.parse( content );

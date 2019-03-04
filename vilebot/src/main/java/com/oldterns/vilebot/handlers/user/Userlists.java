@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//@HandlerContainer
 public class Userlists
     extends ListenerAdapter
 {
@@ -45,14 +44,8 @@ public class Userlists
             listExpansion( event, expandMatcher );
     }
 
-    // @Handler
     private void listsEnumerate( GenericMessageEvent event )
     {
-        // String text = event.getText();
-        // Matcher matcher = enumeratePattern.matcher( text );
-        //
-        // if ( matcher.matches() )
-        // {
         Set<String> lists = UserlistDB.getLists();
 
         if ( lists != null && lists.size() > 0 )
@@ -71,17 +64,10 @@ public class Userlists
         {
             event.respondWith( "There are no lists." );
         }
-        // }
     }
 
-    // @Handler
     private void listQuery( GenericMessageEvent event, Matcher matcher )
     {
-        // String text = event.getText();
-        // Matcher matcher = queryPattern.matcher( text );
-        //
-        // if ( matcher.matches() )
-        // {
         String listName = matcher.group( 1 );
 
         Set<String> users = UserlistDB.getUsersIn( listName );
@@ -105,17 +91,10 @@ public class Userlists
         {
             event.respondPrivateMessage( "The list " + listName + " does not exist or is empty." );
         }
-        // }
     }
 
-    // @Handler
     private void listAddRemove( GenericMessageEvent event, Matcher matcher )
     {
-        // String text = event.getText();
-        // Matcher matcher = addRemovePattern.matcher( text );
-        //
-        // if ( matcher.matches() )
-        // {
         String mode = matcher.group( 1 );
         String listName = matcher.group( 2 );
         String nickBlob = matcher.group( 3 );
@@ -155,18 +134,11 @@ public class Userlists
         sb.delete( sb.length() - 2, sb.length() );
 
         event.respondWith( sb.toString() );
-        // }
     }
 
-    // @Handler
     private void listExpansion( GenericMessageEvent event, Matcher matcher )
     {
         String sender = event.getUser().getNick();
-        // String text = event.getText();
-        // Matcher matcher = expandPattern.matcher( text );
-        //
-        // if ( matcher.matches() )
-        // {
         String listName = matcher.group( 1 );
         String msg = matcher.group( 2 );
 
@@ -189,5 +161,4 @@ public class Userlists
             event.respondWith( sb.toString() );
         }
     }
-    // }
 }

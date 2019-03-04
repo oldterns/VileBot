@@ -1,22 +1,14 @@
 package vilebot.handlers.user;
 
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.handlers.user.Ascii;
 import com.oldterns.vilebot.util.LimitCommand;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.pircbotx.Channel;
-import org.pircbotx.PircBotX;
 import org.pircbotx.User;
 import org.pircbotx.hooks.events.MessageEvent;
-import org.pircbotx.hooks.types.GenericMessageEvent;
-import org.pircbotx.output.OutputIRC;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class AsciiTest
 {
@@ -30,13 +22,8 @@ public class AsciiTest
     {
         asciiClass.limitCommand = new LimitCommand( 9, 3600 );
         event = mock( MessageEvent.class );
-        PircBotX bot = mock( PircBotX.class );
         User user = mock( User.class );
         Channel channel = mock( Channel.class );
-        OutputIRC outputIRC = mock( OutputIRC.class );
-
-        when( event.getBot() ).thenReturn( bot );
-        when( bot.send() ).thenReturn( outputIRC );
         when( event.getUser() ).thenReturn( user );
         when( event.getChannel() ).thenReturn( channel );
         when( user.getNick() ).thenReturn( "salman" );

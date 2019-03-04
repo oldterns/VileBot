@@ -16,12 +16,16 @@ import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.JoinEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-//@HandlerContainer
 public class QuotesAndFacts
     extends ListenerAdapter
 {
@@ -42,9 +46,6 @@ public class QuotesAndFacts
     private static final Pattern searchPattern = Pattern.compile( "^!(fact|quote)search (" + nounPattern + ") (.*)$" );
 
     private static final Random random = new Random();
-
-    // @AssignedBot
-    // private KeratinBot bot;
 
     @Override
     public void onJoin( final JoinEvent event ) // announce fact or quote on join
@@ -91,13 +92,8 @@ public class QuotesAndFacts
             factQuoteSearch( event, searchMatcher );
     }
 
-    // @Handler
     private void factQuoteAdd( GenericMessageEvent event, Matcher addMatcher )
     {
-        // Matcher matcher = addPattern.matcher( event.getText() );
-        //
-        // if ( matcher.matches() )
-        // {
         String mode = addMatcher.group( 1 );
         String noun = BaseNick.toBaseNick( addMatcher.group( 2 ) );
         String text = addMatcher.group( 3 );
@@ -123,16 +119,10 @@ public class QuotesAndFacts
             event.respondWith( StringUtil.capitalizeFirstLetter( mode )
                 + "s from yourself are both terrible and uninteresting." );
         }
-        // }
     }
 
-    // @Handler
     private void factQuoteDump( GenericMessageEvent event, Matcher dumpMatcher )
     {
-        // Matcher matcher = dumpPattern.matcher( text );
-        //
-        // if ( matcher.matches() )
-        // {
         String mode = dumpMatcher.group( 1 );
         String queried = BaseNick.toBaseNick( dumpMatcher.group( 2 ) );
 
@@ -160,16 +150,10 @@ public class QuotesAndFacts
                 event.respondPrivateMessage( formatFactReply( queried, quote ) );
             }
         }
-        // }
     }
 
-    // @Handler
     private void factQuoteRandomDump( GenericMessageEvent event, Matcher factQuoteRandomDumpMatcher )
     {
-        // Matcher matcher = randomPattern.matcher( event.getText() );
-        //
-        // if ( matcher.matches() )
-        // {
         String mode = factQuoteRandomDumpMatcher.group( 1 );
         String queried = BaseNick.toBaseNick( factQuoteRandomDumpMatcher.group( 2 ) );
 
@@ -221,16 +205,10 @@ public class QuotesAndFacts
                 }
             }
         }
-        // }
     }
 
-    // @Handler
     private void factQuoteNum( GenericMessageEvent event, Matcher factQuoteNumMatcher )
     {
-        // Matcher matcher = numPattern.matcher( event.getText() );
-        //
-        // if ( matcher.matches() )
-        // {
         String mode = factQuoteNumMatcher.group( 1 );
         String queried = BaseNick.toBaseNick( factQuoteNumMatcher.group( 2 ) );
         if ( "fact".equals( mode ) )
@@ -257,16 +235,10 @@ public class QuotesAndFacts
                 event.respondPrivateMessage( queried + " has " + quotesLength + " quotes." );
             }
         }
-        // }
     }
 
-    // @Handler
     private void factQuoteQuery( GenericMessageEvent event, Matcher queryMatcher )
     {
-        // Matcher matcher = queryPattern.matcher( event.getText() );
-        //
-        // if ( matcher.matches() )
-        // {
         String mode = queryMatcher.group( 1 );
         String noun = BaseNick.toBaseNick( queryMatcher.group( 2 ) );
 
@@ -287,16 +259,10 @@ public class QuotesAndFacts
                 event.respondWith( noun + " has no quotes." );
             }
         }
-        // }
     }
 
-    // @Handler
     private void factQuoteSearch( GenericMessageEvent event, Matcher searchMatcher )
     {
-        // Matcher matcher = searchPattern.matcher( event.getText() );
-        //
-        // if ( matcher.matches() )
-        // {
         String mode = searchMatcher.group( 1 );
         String noun = BaseNick.toBaseNick( searchMatcher.group( 2 ) );
         String regex = searchMatcher.group( 3 );
@@ -391,7 +357,6 @@ public class QuotesAndFacts
         {
             event.respondWith( "Syntax error in regex pattern" );
         }
-        // }
     }
 
     private static String regexSetSearch( Set<String> texts, Pattern pattern )

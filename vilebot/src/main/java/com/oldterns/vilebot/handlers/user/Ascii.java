@@ -1,5 +1,12 @@
 package com.oldterns.vilebot.handlers.user;
 
+import com.github.lalyos.jfiglet.FigletFont;
+import com.oldterns.vilebot.Vilebot;
+import com.oldterns.vilebot.util.LimitCommand;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,18 +16,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import com.oldterns.vilebot.Vilebot;
-import net.engio.mbassy.listener.Handler;
-
-import com.github.lalyos.jfiglet.FigletFont;
-import com.oldterns.vilebot.util.LimitCommand;
-import org.pircbotx.hooks.ListenerAdapter;
-import org.pircbotx.hooks.events.MessageEvent;
-import org.pircbotx.hooks.types.GenericMessageEvent;
-
-//@HandlerContainer
 public class Ascii
     extends ListenerAdapter
 {
@@ -56,15 +51,8 @@ public class Ascii
             asciifonts( event );
     }
 
-    // @Handler
     private void ascii( GenericMessageEvent event, Matcher matcher )
     {
-
-        // String text = event.getText();
-        // Matcher asciiMatch = asciiPattern.matcher( text );
-
-        // if ( matcher.matches() )
-        // {
         if ( event instanceof MessageEvent
             && ( (MessageEvent) event ).getChannel().getName().equals( RESTRICTED_CHANNEL ) )
         {
@@ -82,17 +70,10 @@ public class Ascii
         {
             runAscii( event, matcher );
         }
-        // }
     }
 
-    // @Handler
     private void asciifonts( GenericMessageEvent event )
     {
-        // String text = event.getText();
-        // Matcher matcher = asciiFontsPattern.matcher( text );
-        //
-        // if ( matcher.matches() )
-        // {
         StringBuilder sb = new StringBuilder();
         sb.append( "Available fonts for !ascii:\n" );
         for ( int i = 0; i < availableFonts.size(); i++ )
@@ -104,7 +85,6 @@ public class Ascii
             }
         }
         event.respondPrivateMessage( sb.toString() );
-        // }
     }
 
     private void runAscii( GenericMessageEvent event, Matcher asciiMatch )
@@ -140,7 +120,7 @@ public class Ascii
         return fonts;
     }
 
-    private String getAsciiArt( String text )
+    private static String getAsciiArt( String text )
     {
         try
         {
@@ -164,7 +144,7 @@ public class Ascii
         try
         {
             StringBuilder sb = new StringBuilder();
-            String lines[] = splitMessage( text );
+            String[] lines = splitMessage( text );
             for ( String line : lines )
             {
                 sb.append( FigletFont.convertOneLine( String.format( fontFile, font ), line ) );
@@ -178,7 +158,7 @@ public class Ascii
         }
     }
 
-    private String[] splitMessage( String message )
+    private static String[] splitMessage( String message )
     {
         List<String> lines = new ArrayList<>();
         if ( message.length() > MAX_CHARS )

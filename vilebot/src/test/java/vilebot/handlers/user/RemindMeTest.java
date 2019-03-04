@@ -1,21 +1,15 @@
 package vilebot.handlers.user;
 
+import com.oldterns.vilebot.handlers.user.RemindMe;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.oldterns.vilebot.handlers.user.RemindMe;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.pircbotx.User;
+import org.pircbotx.hooks.events.MessageEvent;
 
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import org.pircbotx.User;
-import org.pircbotx.hooks.events.MessageEvent;
+import static org.mockito.Mockito.*;
 
 public class RemindMeTest
 {

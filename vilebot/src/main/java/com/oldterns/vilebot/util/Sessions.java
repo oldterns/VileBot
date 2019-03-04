@@ -14,23 +14,23 @@ public class Sessions
 
         private final String username;
 
-        public SessionEntry( String username, long expiryMillis )
+        SessionEntry( String username, long expiryMillis )
         {
             this.username = username;
             this.expiryMillis = expiryMillis;
         }
 
-        public long getExpiryMillis()
+        long getExpiryMillis()
         {
             return expiryMillis;
         }
 
-        public String getUsername()
+        String getUsername()
         {
             return username;
         }
 
-        public boolean isExpired()
+        boolean isExpired()
         {
             return getExpiryMillis() < System.currentTimeMillis();
         }
@@ -46,8 +46,7 @@ public class Sessions
 
     private static int queryCount = 0;
 
-    private static final ConcurrentHashMap<String, SessionEntry> sessions =
-        new ConcurrentHashMap<String, SessionEntry>();
+    private static final ConcurrentHashMap<String, SessionEntry> sessions = new ConcurrentHashMap<>();
 
     /**
      * Create a session mapping a ircNick to an internal username, with a certain expiry time.

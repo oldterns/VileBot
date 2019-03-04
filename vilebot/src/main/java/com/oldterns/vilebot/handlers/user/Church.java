@@ -15,7 +15,6 @@ import org.pircbotx.hooks.types.GenericMessageEvent;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-//@HandlerContainer
 public class Church
     extends ListenerAdapter
 {
@@ -68,12 +67,8 @@ public class Church
             inquisitDecision( event, matcherAye, matcherNay );
     }
 
-    // @Handler
     private void donateToChurch( GenericMessageEvent event, Matcher matcher )
     {
-        // Matcher matcher = donatePattern.matcher( event.getMessage() );
-        // if ( matcher.matches() )
-        // {
         if ( currentVote != null )
         {
             event.respondWith( "There is an ongoing vote, you cannot donate at this time." );
@@ -104,20 +99,14 @@ public class Church
             }
             event.respondWith( "Thank you for your donation of " + donationAmount + " " + donor + "!" );
         }
-        // }
     }
 
-    // @Handler
     private void viewChurchTotal( GenericMessageEvent event )
     {
-        // Matcher matcher = churchTotalPattern.matcher( event.getMessage() );
-        // if ( matcher.matches() )
-        // {
         long totalDonations = ChurchDB.getTotalDonations();
         long churchTotal = totalDonations + ChurchDB.getTotalNonDonations();
         event.respondWith( "The church coffers contains " + churchTotal + ", of which " + totalDonations
             + " was contributed by its loyal believers." );
-        // }
     }
 
     // @Handler
@@ -169,12 +158,8 @@ public class Church
         // }
     }
 
-    // @Handler
     private void inquisit( GenericMessageEvent event, Matcher matcher )
     {
-        // Matcher matcher = inquisitPattern.matcher( event.getMessage() );
-        // if ( matcher.matches() )
-        // {
         if ( currentVote != null )
         {
             event.respondWith( "There is an ongoing inquisition against " + currentVote.getDecisionTarget()
@@ -217,7 +202,6 @@ public class Church
             + ". Please cast your votes with !aye or !nay" );
         event.respondWith( membersToPing.toString() );
         startInquisitionVote( event, inquisitedNick, donorRank );
-        // }
     }
 
     private synchronized void startInquisitionVote( GenericMessageEvent event, String inquisitedNick, int donorRank )
@@ -228,13 +212,8 @@ public class Church
         startTimer( event );
     }
 
-    // @Handler
     private void inquisitDecision( GenericMessageEvent event, Matcher matcherAye, Matcher matcherNay )
     {
-        // Matcher matcherAye = topDonorsAyePattern.matcher( event.getMessage() );
-        // Matcher matcherNay = topDonorsNayPattern.matcher( event.getMessage() );
-        // if ( matcherAye.matches() || matcherNay.matches() )
-        // {
         if ( currentVote == null )
         {
             event.respondWith( "There is no ongoing vote." );
@@ -266,7 +245,6 @@ public class Church
             currentChoices.append( noun ).append( " (" ).append( currentVote.getDonorVote( i++ ) ).append( ") " );
         }
         event.respondWith( currentChoices.toString() );
-        // }
     }
 
     private void startTimer( final GenericMessageEvent event )

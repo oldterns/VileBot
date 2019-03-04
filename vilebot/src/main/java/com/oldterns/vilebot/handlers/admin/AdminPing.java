@@ -5,10 +5,8 @@ import com.oldterns.vilebot.util.Sessions;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
-import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.pircbotx.output.OutputIRC;
 
-//@HandlerContainer
 public class AdminPing
     extends ListenerAdapter
 {
@@ -16,8 +14,6 @@ public class AdminPing
     /**
      * Do I have admin access?
      */
-    // @Handler
-    // @Override
 
     @Override
     public void onPrivateMessage( final PrivateMessageEvent event )
@@ -41,9 +37,6 @@ public class AdminPing
 
     private void adminPing( OutputIRC outputQ, String replyTarget, String text, String sender )
     {
-        // String text = event.getMessage();
-        // String sender = event.getUser().getNick();
-
         if ( "!admin ping".equals( text ) )
         {
             String username = Sessions.getSession( sender );

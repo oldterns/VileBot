@@ -1,12 +1,5 @@
 package com.oldterns.vilebot.handlers.user;
 
-/**
- * Created by eunderhi on 14/08/15.
- */
-
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import net.engio.mbassy.listener.Handler;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -20,11 +13,6 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by emmett on 12/08/15.
- */
-
-// @HandlerContainer
 public class GetInfoOn
     extends ListenerAdapter
 {
@@ -33,17 +21,15 @@ public class GetInfoOn
 
     private static final Pattern dumbQuestionPattern = Pattern.compile( "^!(infun)\\s(.+)$" );
 
-    // @Handler
     @Override
     public void onGenericMessage( GenericMessageEvent event )
     {
         String text = event.getMessage();
-        Matcher foonMatch = questionPattern.matcher( text );
-        // Matcher funMatch = dumbQuestionPattern.matcher(text);
+        Matcher infoonMatch = questionPattern.matcher( text );
 
-        if ( foonMatch.matches() )
+        if ( infoonMatch.matches() )
         {
-            String question = foonMatch.group( 2 );
+            String question = infoonMatch.group( 2 );
             String queryModifier = " site:wikipedia.org";
             String answer = getWiki( question, queryModifier );
             event.respondWith( answer );
@@ -69,8 +55,7 @@ public class GetInfoOn
     {
         String googleURL = makeGoogleURL( query );
         String googleResponse = getContent( googleURL );
-        String wikiURL = getWikiLink( googleResponse );
-        return wikiURL;
+        return getWikiLink( googleResponse );
     }
 
     private String makeGoogleURL( String query )

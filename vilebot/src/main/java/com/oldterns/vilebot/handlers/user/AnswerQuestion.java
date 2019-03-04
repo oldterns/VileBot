@@ -1,9 +1,6 @@
 package com.oldterns.vilebot.handlers.user;
 
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
-import net.engio.mbassy.listener.Handler;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.w3c.dom.Document;
@@ -14,18 +11,13 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by eunderhi on 13/08/15.
- */
-
-// @HandlerContainer
 public class AnswerQuestion
     extends ListenerAdapter
 {
@@ -46,29 +38,21 @@ public class AnswerQuestion
             tellMe( event, tellMeMatcher );
     }
 
-    // @Handler
-    public void tellMe( GenericMessageEvent event, Matcher matcher )
+    private void tellMe( GenericMessageEvent event, Matcher matcher )
     {
-        // String text = event.getText();
-        // Matcher matcher = questionPattern.matcher( text );
-        //
-        // if ( matcher.matches() )
-        // {
         String question = matcher.group( 2 );
         String answer = getAnswer( question );
         answer = truncate( answer );
         event.respondWith( answer );
-        // }
     }
 
-    String getAnswer( String searchTerm )
+    private String getAnswer( String searchTerm )
     {
         try
         {
             String url = makeURL( searchTerm );
             String response = getContent( url );
-            String answer = parseResponse( response );
-            return answer;
+            return parseResponse( response );
         }
         catch ( Exception e )
         {
@@ -76,7 +60,7 @@ public class AnswerQuestion
         }
     }
 
-    String makeURL( String searchTerm )
+    private String makeURL( String searchTerm )
         throws UnsupportedEncodingException
     {
         searchTerm = URLEncoder.encode( searchTerm, "UTF-8" );
@@ -85,7 +69,7 @@ public class AnswerQuestion
         return url;
     }
 
-    String getContent( String url )
+    private String getContent( String url )
     {
         String content = null;
         URLConnection connection;
@@ -103,7 +87,7 @@ public class AnswerQuestion
         return content;
     }
 
-    String parseResponse( String response )
+    private String parseResponse( String response )
         throws Exception
     {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();

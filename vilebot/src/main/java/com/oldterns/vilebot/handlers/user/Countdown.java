@@ -1,5 +1,15 @@
 package com.oldterns.vilebot.handlers.user;
 
+import bsh.EvalError;
+import bsh.Interpreter;
+import com.oldterns.vilebot.Vilebot;
+import com.oldterns.vilebot.db.KarmaDB;
+import com.oldterns.vilebot.util.BaseNick;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.hooks.events.PrivateMessageEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,28 +22,12 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.collect.ImmutableSortedSet;
-import com.oldterns.vilebot.Vilebot;
-import com.oldterns.vilebot.db.KarmaDB;
-import com.oldterns.vilebot.util.BaseNick;
-
-import bsh.EvalError;
-import bsh.Interpreter;
-import net.engio.mbassy.listener.Handler;
-import org.pircbotx.User;
-import org.pircbotx.hooks.ListenerAdapter;
-import org.pircbotx.hooks.events.MessageEvent;
-import org.pircbotx.hooks.events.PrivateMessageEvent;
-import org.pircbotx.hooks.types.GenericMessageEvent;
-
 /**
  * Created by ipun on 29/06/17. Countdown implementation based off of Trivia.java
  */
-// @HandlerContainer
 public class Countdown
     extends ListenerAdapter
 {
-
     private static final String COUNTDOWN_CHANNEL = Vilebot.getConfig().get( "countdownChannel" );
 
     private static final long TIMEOUT = 45000L;
@@ -59,9 +53,6 @@ public class Countdown
     private static CountdownGame currGame = null;
 
     private static ExecutorService timer = Executors.newScheduledThreadPool( 1 );
-
-    // @AssignedBot
-    // private KeratinBot bot;
 
     private static class CountdownGame
     {
@@ -241,7 +232,6 @@ public class Countdown
         }
     }
 
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

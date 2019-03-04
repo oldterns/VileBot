@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//@HandlerContainer
 public class Auth
     extends ListenerAdapter
 {
@@ -19,7 +18,6 @@ public class Auth
 
     private static final long sessionLength = TimeUnit.MINUTES.toMillis( 5 );
 
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

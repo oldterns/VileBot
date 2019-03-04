@@ -21,7 +21,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//@HandlerContainer
 public class Weather
     extends ListenerAdapter
 {
@@ -83,9 +82,6 @@ public class Weather
 
     private static final Pattern forecastPattern = Pattern.compile( "!forecast(?: ([a-zA-Z]{3})|)" );
 
-    // @AssignedBot
-    // private KeratinBot bot;
-
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {
@@ -100,13 +96,8 @@ public class Weather
             currentWeather( event, weatherMatcher );
     }
 
-    // @Handler
     private void forecastWeather( GenericMessageEvent event, Matcher matcher )
     {
-        // String text = event.getMessage();
-        // Matcher matcher = forecastPattern.matcher( text );
-        // if ( matcher.matches() )
-        // {
         String locationCode = matcher.group( 1 ); // The IATA code
         if ( locationCode == null )
         {
@@ -135,17 +126,10 @@ public class Weather
                 event.respondWith( sb.toString() );
             }
         }
-        // }
     }
 
-    // @Handler
     private void currentWeather( GenericMessageEvent event, Matcher matcher )
     {
-        // String text = event.getText();
-        // Matcher matcher = weatherPattern.matcher( text );
-        //
-        // if ( matcher.matches() )
-        // {
         String modifier = matcher.group( 1 ); // Either less or more or null
         String locationCode = matcher.group( 2 ); // The IATA code
         if ( locationCode == null )
@@ -205,7 +189,6 @@ public class Weather
         {
             event.respondWith( "No weather feed available for " + locationCode );
         }
-        // }
     }
 
     private WeatherData getWeatherFor( String locationCode )
@@ -267,8 +250,6 @@ public class Weather
             {
                 SyndFeedInput input = new SyndFeedInput();
                 SyndFeed feed = input.build( reader );
-
-                // System.out.println( feed );
 
                 for ( Object rawEntry : feed.getEntries() )
                 {

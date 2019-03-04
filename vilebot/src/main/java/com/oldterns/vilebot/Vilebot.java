@@ -6,6 +6,19 @@
  */
 package com.oldterns.vilebot;
 
+import com.oldterns.vilebot.handlers.admin.*;
+import com.oldterns.vilebot.handlers.user.Help;
+import com.oldterns.vilebot.handlers.user.*;
+import com.oldterns.vilebot.util.BaseNick;
+import org.apache.log4j.Logger;
+import org.pircbotx.Configuration;
+import org.pircbotx.MultiBotManager;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Protocol;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,23 +26,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import com.oldterns.vilebot.handlers.admin.*;
-import com.oldterns.vilebot.handlers.user.*;
-import com.oldterns.vilebot.handlers.user.Help;
-import org.apache.log4j.Logger;
-
-import org.pircbotx.Configuration;
-import org.pircbotx.MultiBotManager;
-import org.pircbotx.PircBotX;
-import org.pircbotx.hooks.ListenerAdapter;
-
-import org.pircbotx.hooks.types.GenericMessageEvent;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.Protocol;
-
-import com.oldterns.vilebot.util.BaseNick;
 
 public class Vilebot
     extends ListenerAdapter
@@ -43,12 +39,8 @@ public class Vilebot
 
     private static JedisPool pool;
 
-    // private static final Map<String, String> cfg = Collections.unmodifiableMap( getConfigMap( "cfg", "vilebot.conf" )
-    // );
-
     public static void main( String[] args )
     {
-        logger.debug( "starting main()" );
         // Database
         String redisHost = cfg.get( "redisHost" );
         int redisPort = Integer.parseInt( cfg.get( "redisPort" ) );
@@ -78,15 +70,13 @@ public class Vilebot
             String ircRealName = cfg.get( "ircRealName" + i );
             String ircServerAddress = cfg.get( "ircServerAddress" + i );
             int ircPort = Integer.parseInt( cfg.get( "ircPort" + i ) );
-            // SslMode ircSslMode = SslMode.valueOf( cfg.getString( "ircSslMode" + i ) );
             String ircChannel = cfg.get( "ircChannel" + i );
-            // boolean ircChannelAutoOp = Boolean.parseBoolean( cfg.getString( "ircChannelAutoOp" + i ) );
 
             BaseNick.addBotNick( ircNick );
 
             Configuration botConfiguration =
                 new Configuration.Builder().setName( ircNick ).setLogin( ircUser ).setRealName( ircRealName ).addServer( ircServerAddress,
-                                                                                                                         ircPort ).addAutoJoinChannel( ircChannel ).setAutoReconnect( true ).addListener( new AdminManagement() ).addListener( new AdminPing() ).addListener( new Auth() ).addListener( new GetLog() ).addListener( new com.oldterns.vilebot.handlers.admin.Help() )
+                                                                                                                         ircPort ).addAutoJoinChannel( ircChannel ).setAutoReconnect( true ).addListener( new Vilebot() ).addListener( new AdminManagement() ).addListener( new AdminPing() ).addListener( new Auth() ).addListener( new GetLog() ).addListener( new com.oldterns.vilebot.handlers.admin.Help() )
                                            // .addListener(new NickChange())
                                            // .addListener(new com.oldterns.vilebot.handlers.admin.Ops())
                                            .addListener( new Quit() ).addListener( new AnswerQuestion() ).addListener( new Ascii() ).addListener( new ChatLogger() ).addListener( new Church() ).addListener( new Countdown() ).addListener( new Decide() ).addListener( new Excuses() ).addListener( new Fortune() ).addListener( new GetInfoOn() ).addListener( new Help() ).addListener( new ImageToAscii() ).addListener( new Inspiration() ).addListener( new Jaziz() ).addListener( new Jokes() ).addListener( new Karma() ).addListener( new KarmaRoll() ).addListener( new LastMessageSed() ).addListener( new LastSeen() ).addListener( new Markov() ).addListener( new Omgword() )

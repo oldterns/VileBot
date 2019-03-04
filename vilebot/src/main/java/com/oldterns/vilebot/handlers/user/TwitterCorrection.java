@@ -12,13 +12,11 @@ import org.pircbotx.hooks.types.GenericMessageEvent;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//@HandlerContainer
 public class TwitterCorrection
     extends ListenerAdapter
 {
     private static final Pattern twitterSyntaxUsePattern = Pattern.compile( "(?:^|\\s+)[@](\\S+)(?:\\s|:|)" );
 
-    // @Handler
     public void onGenericMessage( final GenericMessageEvent event )
     {
         String text = event.getMessage();

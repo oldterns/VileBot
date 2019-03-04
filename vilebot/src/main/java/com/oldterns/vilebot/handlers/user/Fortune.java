@@ -1,27 +1,21 @@
 package com.oldterns.vilebot.handlers.user;
 
+import com.oldterns.vilebot.Vilebot;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.oldterns.vilebot.Vilebot;
-
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import net.engio.mbassy.listener.Handler;
-import org.pircbotx.hooks.ListenerAdapter;
-import org.pircbotx.hooks.types.GenericMessageEvent;
-
 /**
  * Created by ipun on 15/05/16.
  */
-// @HandlerContainer
 public class Fortune
     extends ListenerAdapter
 {
@@ -33,7 +27,6 @@ public class Fortune
 
     private static final String DIRTY_ARG = "dirty";
 
-    // @Handler
     @Override
     public void onGenericMessage( GenericMessageEvent event )
     {
@@ -48,7 +41,7 @@ public class Fortune
                 {
                     fortuneReply( event );
                 }
-                if ( dirty.equals( DIRTY_ARG ) )
+                else if ( dirty.equals( DIRTY_ARG ) )
                 {
                     event.respondWith( "oooo you dirty" );
                 }

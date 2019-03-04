@@ -12,7 +12,6 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//@HandlerContainer
 public class KarmaRoll
     extends ListenerAdapter
 {
@@ -44,11 +43,7 @@ public class KarmaRoll
     private void userHelp( GenericMessageEvent event, Matcher rollMatcher )
     {
         String sender = BaseNick.toBaseNick( event.getUser().getNick() );
-        // String text = event.getText();
-        // Matcher matcher = rollPattern.matcher( text );
 
-        // if ( matcher.matches() )
-        // {
         // Infers ircChannel1 in JSON is #thefoobar for production Vilebot
         if ( !( event instanceof MessageEvent )
             || !( (MessageEvent) event ).getChannel().getName().equals( Vilebot.getConfig().get( "ircChannel1" ) ) )
@@ -163,7 +158,6 @@ public class KarmaRoll
                 }
             }
         }
-        // }
     }
 
     /**
@@ -180,14 +174,8 @@ public class KarmaRoll
         return !( wager > 10 ) && ( wager > 0 ) || ( wager > 10 ) && ( senderKarma >= wager );
     }
 
-    // @Handler
     private void manualCancel( GenericMessageEvent event )
     {
-        // String text = event.getText();
-        // Matcher matcher = cancelPattern.matcher( text );
-        //
-        // if ( matcher.matches() )
-        // {
         if ( !currentGame.getFirstPlayerNick().equals( event.getUser().getNick() ) )
         {
             event.respondWith( "Only " + currentGame.getFirstPlayerNick() + " may cancel this game." );
@@ -198,7 +186,6 @@ public class KarmaRoll
             currentGame = null;
         }
         event.respondWith( "Roll game cancelled." );
-        // }
     }
 
     private static class RollGame

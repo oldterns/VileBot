@@ -6,19 +6,15 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import org.pircbotx.hooks.ListenerAdapter;
-import org.pircbotx.hooks.types.GenericMessageEvent;
-
-//@HandlerContainer
 public class Decide
     extends ListenerAdapter
 {
@@ -29,7 +25,6 @@ public class Decide
 
     private static final Random random = new Random();
 
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {

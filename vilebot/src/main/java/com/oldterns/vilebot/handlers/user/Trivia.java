@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 /**
  * Created by eunderhi on 25/07/16. Simple Jeopardy implementation.
  */
-// @HandlerContainer
+
 public class Trivia
     extends ListenerAdapter
 {
@@ -53,7 +53,6 @@ public class Trivia
 
     private static final String WELCOME_STRING = "Welcome to Bot Jeopardy!";
 
-    // @Handler
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {
@@ -82,8 +81,6 @@ public class Trivia
 
     private boolean shouldStartGame( GenericMessageEvent event )
     {
-        // String actualChannel = event.getChannel();
-
         if ( event instanceof MessageEvent
             && ( (MessageEvent) event ).getChannel().getName().equals( JEOPARDY_CHANNEL ) )
         {
