@@ -442,7 +442,7 @@ public class QuotesAndFacts
         {
             replyText = MangleNicks.mangleNicks( event, replyText );
             replyText = formatFactReply( getTitle( noun ), replyText );
-            event.respond( replyText );
+            event.getBot().send().message( event.getChannel().getName(), replyText );
             return true;
         }
         else
@@ -501,7 +501,7 @@ public class QuotesAndFacts
         {
             replyText = MangleNicks.mangleNicks( event, replyText );
             replyText = formatQuoteReply( getTitle( noun ), replyText );
-            event.respond( replyText );
+            event.getBot().send().message( event.getChannel().getName(), replyText );
             return true;
         }
         else

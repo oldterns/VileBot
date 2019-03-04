@@ -1,5 +1,6 @@
 package vilebot.handlers.user;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.oldterns.vilebot.handlers.user.Trivia;
@@ -14,42 +15,54 @@ import java.io.File;
 import java.io.FileReader;
 
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import org.pircbotx.Channel;
+import org.pircbotx.hooks.events.MessageEvent;
 
 public class TriviaTest
 {
 
-    ReceivePrivmsg event = mock( ReceivePrivmsg.class );
+    private MessageEvent event;
+
+    private Channel channel;
 
     private static final String VILEBOT_CONFIG_FILE = "cfg/vilebot.conf";
 
     private static final String VILEBOT_CONFIG_FILE_SECONDARY = "cfg/vilebot.conf.example";
 
+    @Before
+    public void setup()
+    {
+        event = mock( MessageEvent.class );
+        channel = mock( Channel.class );
+        when( event.getChannel() ).thenReturn( channel );
+        when( channel.getName() ).thenReturn( getJeopardyChannel() );
+    }
+
     @Test
     public void verifyNotInChannelErrorTest()
     {
-        StringBuilder correctReply = new StringBuilder( "To play jeopardy join: " );
-        correctReply.append( getJeopardyChannel() );
-
-        when( event.getText() ).thenReturn( "!jeopardy" );
+        when( event.getMessage() ).thenReturn( "!jeopardy" );
+        when( channel.getName() ).thenReturn( getJeopardyChannel() + "blah" );
 
         Trivia trivia = new Trivia();
-        trivia.doTrivia( event );
+        trivia.onGenericMessage( event );
 
-        verify( event, times( 1 ) ).reply( correctReply.toString() );
+        verify( event, times( 1 ) ).respondWith( "To play jeopardy join: " + getJeopardyChannel() );
     }
 
     @Test
     public void verifyRightChannelStartsGameTest()
     {
         String correctReply = "Welcome to Bot Jeopardy!";
-
-        when( event.getText() ).thenReturn( "!jeopardy" );
-        when( event.getChannel() ).thenReturn( getJeopardyChannel() );
+        Channel channel = mock( Channel.class );
+        when( event.getMessage() ).thenReturn( "!jeopardy" );
+        when( event.getChannel() ).thenReturn( channel );
+        when( channel.getName() ).thenReturn( getJeopardyChannel() );
 
         Trivia trivia = new Trivia();
-        trivia.doTrivia( event );
+        trivia.onGenericMessage( event );
 
-        verify( event, times( 1 ) ).reply( correctReply );
+        verify( event, times( 1 ) ).respondWith( correctReply );
     }
 
     private String getJeopardyChannel()
@@ -57,7 +70,7 @@ public class TriviaTest
         String configLine = "";
         String jeopardyChannel = "";
 
-        BufferedReader configFile = null;
+        BufferedReader configFile;
 
         try
         {

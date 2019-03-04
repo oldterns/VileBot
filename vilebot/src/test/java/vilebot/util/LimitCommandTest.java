@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.TimeUnit;
 
+import com.oldterns.vilebot.Vilebot;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,13 +15,16 @@ import com.oldterns.vilebot.handlers.user.Ascii;
 import com.oldterns.vilebot.util.LimitCommand;
 
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import org.pircbotx.Channel;
+import org.pircbotx.User;
+import org.pircbotx.hooks.events.MessageEvent;
 
 public class LimitCommandTest
 {
 
-    Ascii asciiClass = new Ascii();
+    private Ascii asciiClass = new Ascii();
 
-    ReceivePrivmsg event;
+    private MessageEvent event;
 
     private String expectedReply = "    _  _     _     _               __                   _                    \n"
         + "  _| || |_  | |_  | |__     ___   / _|   ___     ___   | |__     __ _   _ __ \n"
@@ -33,29 +37,40 @@ public class LimitCommandTest
     public void setSenderAndChannel()
     {
         asciiClass.limitCommand = new LimitCommand( 2, 1 );
-        event = mock( ReceivePrivmsg.class );
-        when( event.getSender() ).thenReturn( "jucook" );
-        when( event.getChannel() ).thenReturn( "#thefoobar" );
+        event = mock( MessageEvent.class );
+        User user = mock( User.class );
+        Channel channel = mock( Channel.class );
+        when( ( event.getUser() ) ).thenReturn( user );
+        when( user.getNick() ).thenReturn( "jucook" );
+        when( event.getChannel() ).thenReturn( channel );
+        when( channel.getName() ).thenReturn( Vilebot.getConfig().get( "ircChannel1" ) );
     }
 
     @Test
     public void testWithAscii()
         throws Exception
     {
-        for ( int i = 0; i < 3; i++ )
+        String ircmsg = "!ascii #thefoobar";
+        when( event.getMessage() ).thenReturn( ircmsg );
+
+        int maxUses = asciiClass.limitCommand.getMaxUses();
+
+        for ( int i = 0; i < maxUses + 1; i++ )
         {
-            runEvent();
+            // runEvent();
+            asciiClass.onGenericMessage( event );
         }
-        TimeUnit.SECONDS.sleep( 1 );
-        runEvent();
-        verify( event, times( 1 ) ).reply( "jucook has the maximum uses" );
-        verify( event, times( 3 ) ).reply( expectedReply );
+        // TimeUnit.SECONDS.sleep( 1 );
+        // runEvent();
+        // asciiClass.onGenericMessage( event );
+        verify( event, times( maxUses ) ).respondWith( expectedReply );
+        verify( event, times( 1 ) ).respondWith( "jucook has the maximum uses" );
     }
 
-    private void runEvent()
-    {
-        String ircmsg = "!ascii #thefoobar";
-        when( event.getText() ).thenReturn( ircmsg );
-        asciiClass.ascii( event );
-    }
+    // private void runEvent()
+    // {
+    // String ircmsg = "!ascii #thefoobar";
+    // when( event.getMessage() ).thenReturn( ircmsg );
+    // asciiClass.onGenericMessage( event );
+    // }
 }

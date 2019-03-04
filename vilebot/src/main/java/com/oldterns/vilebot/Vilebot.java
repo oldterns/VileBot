@@ -21,8 +21,10 @@ import org.apache.log4j.Logger;
 
 import org.pircbotx.Configuration;
 import org.pircbotx.MultiBotManager;
+import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.ListenerAdapter;
 
+import org.pircbotx.hooks.types.GenericMessageEvent;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
@@ -46,6 +48,7 @@ public class Vilebot
 
     public static void main( String[] args )
     {
+        logger.debug( "starting main()" );
         // Database
         String redisHost = cfg.get( "redisHost" );
         int redisPort = Integer.parseInt( cfg.get( "redisPort" ) );
@@ -60,13 +63,7 @@ public class Vilebot
             pool = new JedisPool( new JedisPoolConfig(), redisHost, redisPort );
         }
 
-        Runtime.getRuntime().addShutdownHook( new Thread()
-        {
-            public void run()
-            {
-                pool.destroy();
-            }
-        } );
+        Runtime.getRuntime().addShutdownHook( new Thread( () -> pool.destroy() ) );
 
         BaseNick.setPrimaryBotNick( cfg.get( "ircNick1" ) );
 
@@ -100,7 +97,6 @@ public class Vilebot
         }
 
         botManager.start();
-
         // Done
     }
 
@@ -150,5 +146,11 @@ public class Vilebot
     public static Map<String, String> getConfig()
     {
         return new HashMap<>( cfg );
+    }
+
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
+    {
+        logger.info( String.format( "[%s] %s", event.getUser().getNick(), event.getMessage() ) );
     }
 }

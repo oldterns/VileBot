@@ -24,7 +24,7 @@ public class UserPing
 
         if ( text.startsWith( "!ping" ) )
         {
-            event.respond( "pong" );
+            event.respondWith( "pong" );
         }
     }
 }

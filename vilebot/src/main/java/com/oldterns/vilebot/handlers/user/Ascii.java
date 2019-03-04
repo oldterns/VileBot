@@ -57,7 +57,7 @@ public class Ascii
     }
 
     // @Handler
-    public void ascii( GenericMessageEvent event, Matcher matcher )
+    private void ascii( GenericMessageEvent event, Matcher matcher )
     {
 
         // String text = event.getText();
@@ -86,7 +86,7 @@ public class Ascii
     }
 
     // @Handler
-    public void asciifonts( GenericMessageEvent event )
+    private void asciifonts( GenericMessageEvent event )
     {
         // String text = event.getText();
         // Matcher matcher = asciiFontsPattern.matcher( text );
@@ -145,7 +145,7 @@ public class Ascii
         try
         {
             StringBuilder sb = new StringBuilder();
-            String lines[] = splitMessage( text );
+            String[] lines = splitMessage( text );
             for ( String line : lines )
             {
                 sb.append( FigletFont.convertOneLine( line ) );

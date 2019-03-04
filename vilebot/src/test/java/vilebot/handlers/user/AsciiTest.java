@@ -6,6 +6,12 @@ import com.oldterns.vilebot.util.LimitCommand;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pircbotx.Channel;
+import org.pircbotx.PircBotX;
+import org.pircbotx.User;
+import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+import org.pircbotx.output.OutputIRC;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -15,17 +21,26 @@ import static org.mockito.Mockito.when;
 public class AsciiTest
 {
 
-    Ascii asciiClass = new Ascii();
+    private Ascii asciiClass = new Ascii();
 
-    ReceivePrivmsg event;
+    private MessageEvent event;
 
     @Before
     public void setSenderAndChannel()
     {
         asciiClass.limitCommand = new LimitCommand( 9, 3600 );
-        event = mock( ReceivePrivmsg.class );
-        when( event.getSender() ).thenReturn( "salman" );
-        when( event.getChannel() ).thenReturn( "#thefoobar" );
+        event = mock( MessageEvent.class );
+        PircBotX bot = mock( PircBotX.class );
+        User user = mock( User.class );
+        Channel channel = mock( Channel.class );
+        OutputIRC outputIRC = mock( OutputIRC.class );
+
+        when( event.getBot() ).thenReturn( bot );
+        when( bot.send() ).thenReturn( outputIRC );
+        when( event.getUser() ).thenReturn( user );
+        when( event.getChannel() ).thenReturn( channel );
+        when( user.getNick() ).thenReturn( "salman" );
+        when( channel.getName() ).thenReturn( "#thefoobar" );
     }
 
     @Test
@@ -38,9 +53,9 @@ public class AsciiTest
             + " |_      _| | |_  | | | | |  __/ |  _| | (_) | | (_) | | |_) | | (_| | | |   \n"
             + "   |_||_|    \\__| |_| |_|  \\___| |_|    \\___/   \\___/  |_.__/   \\__,_| |_|   \n"
             + "                                                                             \n";
-        when( event.getText() ).thenReturn( ircmsg );
-        asciiClass.ascii( event );
-        verify( event, times( 1 ) ).reply( expectedReply );
+        when( event.getMessage() ).thenReturn( ircmsg );
+        asciiClass.onGenericMessage( event );
+        verify( event, times( 1 ) ).respondWith( expectedReply );
     }
 
     @Test
@@ -54,9 +69,9 @@ public class AsciiTest
             + "/_  ~~  _\\ |__|  |___|  / \\___  > |__|    \\____/  \\____/  |___  /(____  / |__|   \n"
             + "  |_||_|              \\/      \\/                              \\/      \\/         \n";
 
-        when( event.getText() ).thenReturn( ircmsg );
-        asciiClass.ascii( event );
-        verify( event, times( 1 ) ).reply( expectedReply );
+        when( event.getMessage() ).thenReturn( ircmsg );
+        asciiClass.onGenericMessage( event );
+        verify( event, times( 1 ) ).respondWith( expectedReply );
     }
 
     @Test
@@ -77,9 +92,9 @@ public class AsciiTest
                 + "    \\___| |_| |_|  \\___/   \\__,_|  \\__, | |_| |_|  (_)   (_) \n"
                 + "                                   |___/                     \n";
 
-        when( event.getText() ).thenReturn( ircmsg );
-        asciiClass.ascii( event );
-        verify( event, times( 1 ) ).reply( expectedReply );
+        when( event.getMessage() ).thenReturn( ircmsg );
+        asciiClass.onGenericMessage( event );
+        verify( event, times( 1 ) ).respondWith( expectedReply );
     }
 
     @Test
@@ -100,9 +115,9 @@ public class AsciiTest
                 + "  \\___  >|___|  / \\____/ |____/  \\___  / |___|  /  |___|     |___|   \n"
                 + "      \\/      \\/                /_____/       \\/   <___>     <___>   \n";
 
-        when( event.getText() ).thenReturn( ircmsg );
-        asciiClass.ascii( event );
-        verify( event, times( 1 ) ).reply( expectedReply );
+        when( event.getMessage() ).thenReturn( ircmsg );
+        asciiClass.onGenericMessage( event );
+        verify( event, times( 1 ) ).respondWith( expectedReply );
     }
 
     @Test
@@ -123,9 +138,9 @@ public class AsciiTest
                 + " |___/  \\__,_|  \\__, |  \\___|   |_| |_|  \\___/    \\_/\\_/    (_)   (_) \n"
                 + "                |___/                                                 \n";
 
-        when( event.getText() ).thenReturn( ircmsg );
-        asciiClass.ascii( event );
-        verify( event, times( 1 ) ).reply( expectedReply );
+        when( event.getMessage() ).thenReturn( ircmsg );
+        asciiClass.onGenericMessage( event );
+        verify( event, times( 1 ) ).respondWith( expectedReply );
     }
 
     @Test
@@ -146,9 +161,9 @@ public class AsciiTest
                 + "/____  >(____  / \\___  /  \\___  > |___|  / \\____/   \\/\\_/    |___|     |___|   \n"
                 + "     \\/      \\/ /_____/       \\/       \\/                    <___>     <___>   \n";
 
-        when( event.getText() ).thenReturn( ircmsg );
-        asciiClass.ascii( event );
-        verify( event, times( 1 ) ).reply( expectedReply );
+        when( event.getMessage() ).thenReturn( ircmsg );
+        asciiClass.onGenericMessage( event );
+        verify( event, times( 1 ) ).respondWith( expectedReply );
     }
 
     @Test
@@ -176,9 +191,9 @@ public class AsciiTest
                 + "  \\__,_|  \\__,_| |_| | .__/  |_| |___/  \\___| |_| |_| |_|  \\__, |    \\___| |_| |_|  \\__| (_)   |_____|  \\__| |_|\n"
                 + "                     |_|                                   |___/                                                \n";
 
-        when( event.getText() ).thenReturn( ircmsg );
-        asciiClass.ascii( event );
-        verify( event, times( 1 ) ).reply( expectedReply );
+        when( event.getMessage() ).thenReturn( ircmsg );
+        asciiClass.onGenericMessage( event );
+        verify( event, times( 1 ) ).respondWith( expectedReply );
     }
 
     @Test
@@ -215,9 +230,9 @@ public class AsciiTest
             + "               tanja              tengwar                 term                thick                 thin \n"
             + "          threepoint                ticks           ticksslant           tinker-toy            tombstone \n"
             + "                trek              tsalagi             twopoint              usaflag                weird \n";
-        when( event.getText() ).thenReturn( ircmsg );
-        asciiClass.asciifonts( event );
-        verify( event, times( 1 ) ).replyPrivately( expectedReply );
+        when( event.getMessage() ).thenReturn( ircmsg );
+        asciiClass.onGenericMessage( event );
+        verify( event, times( 1 ) ).respondPrivateMessage( expectedReply );
     }
 
 }

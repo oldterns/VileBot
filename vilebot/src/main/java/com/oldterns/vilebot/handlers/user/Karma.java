@@ -26,6 +26,7 @@ import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
 import org.pircbotx.hooks.types.GenericEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
+import org.pircbotx.output.OutputIRC;
 
 public class Karma
     extends ListenerAdapter
@@ -67,15 +68,24 @@ public class Karma
     public void onJoin( JoinEvent event ) // announce karma on join
     {
         String noun = BaseNick.toBaseNick( Objects.requireNonNull( event.getUser() ).getNick() );
-
+        OutputIRC outputQ = event.getBot().send();
+        String replyTarget = event.getChannel().getName();
         if ( !Ignore.getOnJoin().contains( noun ) )
-            replyWithRankAndKarma( noun, (GenericMessageEvent) event, false, false, true );
+            replyWithRankAndKarma( noun, outputQ, replyTarget, false, false, true );
     }
 
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {
         String text = event.getMessage();
+        OutputIRC outputQ = event.getBot().send();
+        String replyTarget;
+        if ( event instanceof PrivateMessageEvent )
+            replyTarget = event.getUser().getNick();
+        else if ( event instanceof MessageEvent )
+            replyTarget = ( (MessageEvent) event ).getChannel().getName();
+        else
+            return;
 
         Matcher incMatcher = incrementPattern.matcher( text );
         Matcher decMatcher = decrementPattern.matcher( text );
@@ -94,17 +104,17 @@ public class Karma
         if ( incOrDecMatcher.matches() )
             karmaIncOrDec( event, incOrDecMatcher );
         if ( specificMatcher.matches() )
-            specificKarmaQuery( event, specificMatcher );
+            specificKarmaQuery( event, outputQ, replyTarget, specificMatcher );
         if ( selfMatcher.matches() )
-            selfKarmaQuery( event, selfMatcher );
+            selfKarmaQuery( event, outputQ, replyTarget, selfMatcher );
         if ( rankNumberMatcher.matches() )
-            rankNumber( event, rankNumberMatcher );
+            rankNumber( event, outputQ, replyTarget, rankNumberMatcher );
         if ( totalKarmaMatcher.matches() )
             totalKarma( event );
         if ( topBottomThreeMatcher.matches() )
-            topBottomThree( event, topBottomThreeMatcher );
+            topBottomThree( event, outputQ, replyTarget, topBottomThreeMatcher );
         if ( unrankMatcher.matches() )
-            unrank( event, unrankMatcher );
+            unrank( event, outputQ, replyTarget, unrankMatcher );
     }
 
     private void karmaInc( GenericMessageEvent event, Matcher incMatcher )
@@ -286,7 +296,8 @@ public class Karma
     // }
     // }
 
-    private void specificKarmaQuery( GenericMessageEvent event, Matcher specificMatcher )
+    private void specificKarmaQuery( GenericMessageEvent event, OutputIRC outputQ, String replyTarget,
+                                     Matcher specificMatcher )
     {
         String mode = specificMatcher.group( 1 );
         String nickBlob = specificMatcher.group( 2 );
@@ -302,23 +313,24 @@ public class Karma
 
         for ( String nick : nicks )
         {
-            if ( !replyWithRankAndKarma( nick, event, reverse ) )
+            if ( !replyWithRankAndKarma( nick, outputQ, replyTarget, reverse ) )
                 event.respondWith( nick + " has no karma." );
         }
     }
 
-    private void selfKarmaQuery( GenericMessageEvent event, Matcher selfMatcher )
+    private void selfKarmaQuery( GenericMessageEvent event, OutputIRC outputQ, String replyTarget, Matcher selfMatcher )
     {
         String mode = selfMatcher.group( 1 );
         String noun = BaseNick.toBaseNick( event.getUser().getNick() );
 
         boolean reverse = "rev".equals( mode );
-        if ( !replyWithRankAndKarma( noun, event, reverse ) )
+        if ( !replyWithRankAndKarma( noun, outputQ, replyTarget, reverse ) )
             event.respondWith( noun + " has no karma." );
     }
 
     // @Override
-    private void rankNumber( GenericMessageEvent event, Matcher rankNumberMatcher )
+    private void rankNumber( GenericMessageEvent event, OutputIRC outputQ, String replyTarget,
+                             Matcher rankNumberMatcher )
     {
         // Matcher rankNumberMatcher = ranknPattern.matcher( event.getMessage() );
         //
@@ -336,7 +348,7 @@ public class Karma
             noun = KarmaDB.getRankNoun( Long.parseLong( place ) );
 
         if ( noun != null )
-            replyWithRankAndKarma( noun, event, reverse );
+            replyWithRankAndKarma( noun, outputQ, replyTarget, reverse );
         else
             event.respondWith( "No noun at that rank." );
         // }
@@ -353,7 +365,8 @@ public class Karma
     }
 
     // @Override
-    private void topBottomThree( GenericMessageEvent event, Matcher topBottomThreeMatcher )
+    private void topBottomThree( GenericMessageEvent event, OutputIRC outputQ, String replyTarget,
+                                 Matcher topBottomThreeMatcher )
     {
         // Matcher topBottomThreeMatcher = topBottomThreePattern.matcher( event.getMessage() );
         //
@@ -375,7 +388,7 @@ public class Karma
         {
             for ( String noun : nouns )
             {
-                replyWithRankAndKarma( noun, event, false, true );
+                replyWithRankAndKarma( noun, outputQ, replyTarget, false, true );
             }
         }
         else
@@ -386,7 +399,7 @@ public class Karma
     }
 
     // @Override
-    private void unrank( GenericMessageEvent event, Matcher unrankMatcher )
+    private void unrank( GenericMessageEvent event, OutputIRC outputQ, String replyTarget, Matcher unrankMatcher )
     {
         // Admin-only command: remove all of a user's karma.
         // Matcher matcher = removePattern.matcher( event.getMessage() );
@@ -396,7 +409,7 @@ public class Karma
         {
             String noun = BaseNick.toBaseNick( unrankMatcher.group( 1 ) );
 
-            if ( replyWithRankAndKarma( noun, event ) )
+            if ( replyWithRankAndKarma( noun, outputQ, replyTarget ) )
             {
                 event.respondWith( "Removing " + noun + "." );
                 KarmaDB.remNoun( noun );
@@ -408,24 +421,25 @@ public class Karma
         }
     }
 
-    private static boolean replyWithRankAndKarma( String noun, GenericEvent event )
+    private static boolean replyWithRankAndKarma( String noun, OutputIRC outputQ, String replyTarget )
     {
-        return replyWithRankAndKarma( noun, event, false );
+        return replyWithRankAndKarma( noun, outputQ, replyTarget, false );
     }
 
-    private static boolean replyWithRankAndKarma( String noun, GenericEvent event, boolean reverseOrder )
+    private static boolean replyWithRankAndKarma( String noun, OutputIRC outputQ, String replyTarget,
+                                                  boolean reverseOrder )
     {
-        return replyWithRankAndKarma( noun, event, reverseOrder, false );
+        return replyWithRankAndKarma( noun, outputQ, replyTarget, reverseOrder, false );
     }
 
-    private static boolean replyWithRankAndKarma( String noun, GenericEvent event, boolean reverseOrder,
-                                                  boolean obfuscateNick )
+    private static boolean replyWithRankAndKarma( String noun, OutputIRC outputQ, String replyTarget,
+                                                  boolean reverseOrder, boolean obfuscateNick )
     {
-        return replyWithRankAndKarma( noun, event, reverseOrder, obfuscateNick, false );
+        return replyWithRankAndKarma( noun, outputQ, replyTarget, reverseOrder, obfuscateNick, false );
     }
 
-    private static boolean replyWithRankAndKarma( String noun, GenericEvent event, boolean reverseOrder,
-                                                  boolean obfuscateNick, boolean useTitle )
+    private static boolean replyWithRankAndKarma( String noun, OutputIRC outputQ, String replyTarget,
+                                                  boolean reverseOrder, boolean obfuscateNick, boolean useTitle )
     {
         Integer nounRank;
         if ( reverseOrder )
@@ -464,9 +478,55 @@ public class Karma
             sb.append( nounKarma );
             sb.append( " points of karma." );
 
-            event.respond( sb.toString() );
+            outputQ.message( replyTarget, sb.toString() );
             return true;
         }
         return false;
     }
+
+    // private static boolean replyWithRankAndKarma( String noun, GenericEvent event, boolean reverseOrder,
+    // boolean obfuscateNick, boolean useTitle )
+    // {
+    // Integer nounRank;
+    // if ( reverseOrder )
+    // nounRank = KarmaDB.getNounRevRank( noun );
+    // else
+    // nounRank = KarmaDB.getNounRank( noun );
+    //
+    // Integer nounKarma = KarmaDB.getNounKarma( noun );
+    //
+    // if ( useTitle && ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
+    // {
+    // String title = ChurchDB.getDonorTitle( noun );
+    // if ( title.trim().length() > 0 )
+    // {
+    // noun = title;
+    // }
+    // }
+    //
+    // if ( nounKarma != null )
+    // {
+    // StringBuilder sb = new StringBuilder();
+    //
+    // sb.append( noun );
+    // if ( obfuscateNick )
+    // sb.reverse();
+    //
+    // sb.append( " is " );
+    // sb.append( "ranked at " );
+    //
+    // if ( reverseOrder )
+    // sb.append( "(reverse) " );
+    //
+    // sb.append( "#" );
+    // sb.append( nounRank );
+    // sb.append( " with " );
+    // sb.append( nounKarma );
+    // sb.append( " points of karma." );
+    //
+    // event.respond( sb.toString() );
+    // return true;
+    // }
+    // return false;
+    // }
 }

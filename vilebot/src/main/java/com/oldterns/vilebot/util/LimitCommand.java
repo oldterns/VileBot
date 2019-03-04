@@ -27,6 +27,16 @@ public class LimitCommand
         this.timePeriodSeconds = timePeriodSeconds;
     }
 
+    public int getMaxUses()
+    {
+        return maxUsesPerPeriod;
+    }
+
+    public int getPeriodSeconds()
+    {
+        return timePeriodSeconds;
+    }
+
     public String addUse( String user )
     {
         Timer timer = new Timer();

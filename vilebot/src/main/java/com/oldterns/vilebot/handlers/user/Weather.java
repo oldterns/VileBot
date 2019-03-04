@@ -203,7 +203,7 @@ public class Weather
         }
         else
         {
-            event.respond( "No weather feed available for " + locationCode );
+            event.respondWith( "No weather feed available for " + locationCode );
         }
         // }
     }

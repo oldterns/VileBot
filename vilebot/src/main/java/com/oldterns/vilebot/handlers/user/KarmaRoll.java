@@ -110,7 +110,7 @@ public class KarmaRoll
                     // The user that started a game cannot accept it
                     if ( currentGame.getFirstPlayerNick().equals( sender ) )
                     {
-                        event.respond( "You can't accept your own wager." );
+                        event.respondWith( "You can't accept your own wager." );
                     }
                     else
                     {

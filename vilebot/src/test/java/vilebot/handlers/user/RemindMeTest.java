@@ -14,11 +14,13 @@ import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import org.pircbotx.User;
+import org.pircbotx.hooks.events.MessageEvent;
 
 public class RemindMeTest
 {
 
-    ReceivePrivmsg event = mock( ReceivePrivmsg.class );
+    private MessageEvent event = mock( MessageEvent.class );
 
     private final String INVALID_TYPE_ERROR =
         "The time type given is not valid (use d for day, m for month, s for second)";
@@ -33,7 +35,9 @@ public class RemindMeTest
     @Before
     public void setSender()
     {
-        when( event.getSender() ).thenReturn( "jucookBot" );
+        User user = mock( User.class );
+        when( event.getUser() ).thenReturn( user );
+        when( user.getNick() ).thenReturn( "jucookBot" );
     }
 
     @Test
@@ -45,7 +49,7 @@ public class RemindMeTest
 
         createRemindMeWithTime( createMessage, 1, getTimerTime( time ) );
         TimeUnit.SECONDS.sleep( 7 );
-        verify( event, times( 1 ) ).replyPrivately( "This is your reminder that you should: test" );
+        verify( event, times( 1 ) ).respondPrivateMessage( "This is your reminder that you should: test" );
     }
 
     @Test
@@ -57,7 +61,7 @@ public class RemindMeTest
 
         createRemindMeWithTime( createMessage, 1, getTimerTime( time ) );
         TimeUnit.SECONDS.sleep( 7 );
-        verify( event, times( 1 ) ).replyPrivately( "This is your reminder that you should: test test" );
+        verify( event, times( 1 ) ).respondPrivateMessage( "This is your reminder that you should: test test" );
     }
 
     @Test
@@ -143,12 +147,12 @@ public class RemindMeTest
     {
         for ( int i = 0; i < invocations; i++ )
         {
-            when( event.getText() ).thenReturn( createMessage );
+            when( event.getMessage() ).thenReturn( createMessage );
 
             RemindMe remindMe = new RemindMe();
-            remindMe.doRemindMe( event );
+            remindMe.onGenericMessage( event );
         }
-        verify( event, times( invocations ) ).replyPrivately( "Created reminder for " + time.getTime() );
+        verify( event, times( invocations ) ).respondPrivateMessage( "Created reminder for " + time.getTime() );
     }
 
     private void createRemindMeWithTime( final String createMessage, final Integer invocations,
@@ -156,18 +160,18 @@ public class RemindMeTest
     {
         for ( int i = 0; i < invocations; i++ )
         {
-            when( event.getText() ).thenReturn( createMessage );
+            when( event.getMessage() ).thenReturn( createMessage );
 
             RemindMe remindMe = new RemindMe();
-            remindMe.doRemindMe( event );
+            remindMe.onGenericMessage( event );
         }
-        verify( event, times( invocations ) ).replyPrivately( failMessage );
+        verify( event, times( invocations ) ).respondPrivateMessage( failMessage );
     }
 
     private Calendar getTimerTime( final String time )
     {
         Calendar calendar = Calendar.getInstance();
-        Integer timeValue = new Integer( time.substring( 0, time.length() - 1 ) );
+        int timeValue = Integer.parseInt( time.substring( 0, time.length() - 1 ) );
         switch ( time.substring( time.length() - 1 ) )
         {
             case "d":
