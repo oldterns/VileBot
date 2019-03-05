@@ -1,8 +1,8 @@
 package vilebot.handlers.user;
 
 import com.oldterns.vilebot.handlers.user.TwitterCorrection;
+import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import static org.mockito.Mockito.*;
@@ -13,11 +13,15 @@ public class TwitterCorrectionTest
     private String correctResponse =
         "You seem to be using twitter addressing syntax. On IRC you would say this instead: ipun: message";
 
-    ArgumentCaptor<String> captor = ArgumentCaptor.forClass( String.class );
-
     private TwitterCorrection tester = new TwitterCorrection();
 
-    private MessageEvent event = mock( MessageEvent.class );
+    private MessageEvent event;
+
+    @Before
+    public void setup()
+    {
+        event = mock( MessageEvent.class );
+    }
 
     @Test
     public void validTwitterCorrectionTest1()

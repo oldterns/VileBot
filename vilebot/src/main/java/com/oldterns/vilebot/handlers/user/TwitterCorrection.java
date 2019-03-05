@@ -17,6 +17,7 @@ public class TwitterCorrection
 {
     private static final Pattern twitterSyntaxUsePattern = Pattern.compile( "(?:^|\\s+)[@](\\S+)(?:\\s|:|)" );
 
+    @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {
         String text = event.getMessage();
