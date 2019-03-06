@@ -84,7 +84,10 @@ public class Ascii
                 sb.append( "\n" );
             }
         }
-        event.respondPrivateMessage( sb.toString() );
+        for ( String line : sb.toString().split( "\n" ) )
+        {
+            event.respondPrivateMessage( line );
+        }
     }
 
     private void runAscii( GenericMessageEvent event, Matcher asciiMatch )
@@ -102,7 +105,10 @@ public class Ascii
             String message = asciiMatch.group( 2 );
             asciiArt = getAsciiArt( message );
         }
-        event.respondWith( asciiArt );
+        for ( String line : asciiArt.split( "\n" ) )
+        {
+            event.respondWith( line );
+        }
     }
 
     private static List<String> getAvailableFonts()

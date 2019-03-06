@@ -42,7 +42,10 @@ public class AsciiTest
             + "                                                                             \n";
         when( event.getMessage() ).thenReturn( ircmsg );
         asciiClass.onGenericMessage( event );
-        verify( event, times( 1 ) ).respondWith( expectedReply );
+        for ( String line : expectedReply.split( "\n" ) )
+        {
+            verify( event, times( 1 ) ).respondWith( line );
+        }
     }
 
     @Test
@@ -58,7 +61,10 @@ public class AsciiTest
 
         when( event.getMessage() ).thenReturn( ircmsg );
         asciiClass.onGenericMessage( event );
-        verify( event, times( 1 ) ).respondWith( expectedReply );
+        for ( String line : expectedReply.split( "\n" ) )
+        {
+            verify( event, times( 1 ) ).respondWith( line );
+        }
     }
 
     @Test
@@ -81,7 +87,10 @@ public class AsciiTest
 
         when( event.getMessage() ).thenReturn( ircmsg );
         asciiClass.onGenericMessage( event );
-        verify( event, times( 1 ) ).respondWith( expectedReply );
+        for ( String line : expectedReply.split( "\n" ) )
+        {
+            verify( event, times( 1 ) ).respondWith( line );
+        }
     }
 
     @Test
@@ -104,7 +113,10 @@ public class AsciiTest
 
         when( event.getMessage() ).thenReturn( ircmsg );
         asciiClass.onGenericMessage( event );
-        verify( event, times( 1 ) ).respondWith( expectedReply );
+        for ( String line : expectedReply.split( "\n" ) )
+        {
+            verify( event, times( 1 ) ).respondWith( line );
+        }
     }
 
     @Test
@@ -127,7 +139,10 @@ public class AsciiTest
 
         when( event.getMessage() ).thenReturn( ircmsg );
         asciiClass.onGenericMessage( event );
-        verify( event, times( 1 ) ).respondWith( expectedReply );
+        for ( String line : expectedReply.split( "\n" ) )
+        {
+            verify( event, times( 1 ) ).respondWith( line );
+        }
     }
 
     @Test
@@ -150,7 +165,10 @@ public class AsciiTest
 
         when( event.getMessage() ).thenReturn( ircmsg );
         asciiClass.onGenericMessage( event );
-        verify( event, times( 1 ) ).respondWith( expectedReply );
+        for ( String line : expectedReply.split( "\n" ) )
+        {
+            verify( event, times( 1 ) ).respondWith( line );
+        }
     }
 
     @Test
@@ -180,7 +198,10 @@ public class AsciiTest
 
         when( event.getMessage() ).thenReturn( ircmsg );
         asciiClass.onGenericMessage( event );
-        verify( event, times( 1 ) ).respondWith( expectedReply );
+        for ( String line : expectedReply.split( "\n" ) )
+        {
+            verify( event, times( 1 ) ).respondWith( line );
+        }
     }
 
     @Test
@@ -219,7 +240,10 @@ public class AsciiTest
             + "                trek              tsalagi             twopoint              usaflag                weird \n";
         when( event.getMessage() ).thenReturn( ircmsg );
         asciiClass.onGenericMessage( event );
-        verify( event, times( 1 ) ).respondPrivateMessage( expectedReply );
+        for ( String line : expectedReply.split( "\n" ) )
+        {
+            verify( event, times( 1 ) ).respondPrivateMessage( line );
+        }
     }
 
 }

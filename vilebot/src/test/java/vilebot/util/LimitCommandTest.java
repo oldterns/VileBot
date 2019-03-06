@@ -43,14 +43,15 @@ public class LimitCommandTest
     {
         String ircmsg = "!ascii #thefoobar";
         when( event.getMessage() ).thenReturn( ircmsg );
-
         int maxUses = asciiClass.limitCommand.getMaxUses();
-
         for ( int i = 0; i < maxUses + 1; i++ )
         {
             asciiClass.onGenericMessage( event );
         }
-        verify( event, times( maxUses ) ).respondWith( expectedReply );
+        for ( String line : expectedReply.split( "\n" ) )
+        {
+            verify( event, times( maxUses ) ).respondWith( line );
+        }
         verify( event, times( 1 ) ).respondWith( "jucook has the maximum uses" );
     }
 }
