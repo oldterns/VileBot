@@ -64,9 +64,8 @@ public class AnswerQuestion
         throws UnsupportedEncodingException
     {
         searchTerm = URLEncoder.encode( searchTerm, "UTF-8" );
-        String url = "http://api.wolframalpha.com/v2/query?input=" + searchTerm + "&appid=" + API_KEY
+        return "http://api.wolframalpha.com/v2/query?input=" + searchTerm + "&appid=" + API_KEY
             + "&format=plaintext&output=XML";
-        return url;
     }
 
     private String getContent( String url )

@@ -6,9 +6,9 @@ import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
+import org.apache.log4j.Logger;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
-import org.pmw.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,6 +24,9 @@ import java.util.regex.Pattern;
 public class Weather
     extends ListenerAdapter
 {
+
+    private static Logger logger = Logger.getLogger( Weather.class );
+
     private static final String LESS_NICK = "owilliams";
     static
     {
@@ -69,7 +72,7 @@ public class Weather
         }
         catch ( MalformedURLException e )
         {
-            Logger.error( e, "Error loading weather URLs" );
+            logger.error( "Error loading weather URLs" );
             throw new RuntimeException( e );
         }
     }
@@ -214,7 +217,8 @@ public class Weather
         }
         catch ( IllegalArgumentException | IOException | FeedException e )
         {
-            Logger.error( e, "Error opening RSS feed" );
+            logger.error( e.getMessage() );
+            logger.error( "Error opening RSS feed" );
         }
         return weather;
     }

@@ -84,16 +84,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>ca.szc.keratin</groupId>
-            <artifactId>keratin-bot</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.tinylog</groupId>
-            <artifactId>tinylog</artifactId>
-            <version>0.8</version>
-        </dependency>
-        <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
             <version>2.1.0</version>

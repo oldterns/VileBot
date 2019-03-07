@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.handlers.user;
 
-import ca.szc.keratin.bot.misc.Colors;
+import com.oldterns.vilebot.util.Colors;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 

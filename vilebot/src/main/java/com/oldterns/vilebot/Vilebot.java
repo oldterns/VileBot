@@ -1,14 +1,15 @@
-/**
- * Copyright (C) 2013 Oldterns
- *
- * This file may be modified and distributed under the terms
- * of the MIT license. See the LICENSE file for details.
+/*
+  Copyright (C) 2013 Oldterns
+
+  This file may be modified and distributed under the terms
+  of the MIT license. See the LICENSE file for details.
  */
 package com.oldterns.vilebot;
 
 import com.oldterns.vilebot.handlers.admin.*;
 import com.oldterns.vilebot.handlers.user.Help;
 import com.oldterns.vilebot.handlers.user.*;
+import com.oldterns.vilebot.handlers.user.Ops;
 import com.oldterns.vilebot.util.BaseNick;
 import org.apache.log4j.Logger;
 import org.pircbotx.Configuration;
@@ -76,12 +77,7 @@ public class Vilebot
 
             Configuration botConfiguration =
                 new Configuration.Builder().setName( ircNick ).setLogin( ircUser ).setRealName( ircRealName ).addServer( ircServerAddress,
-                                                                                                                         ircPort ).addAutoJoinChannel( ircChannel ).setAutoReconnect( true ).addListener( new Vilebot() ).addListener( new AdminManagement() ).addListener( new AdminPing() ).addListener( new Auth() ).addListener( new GetLog() ).addListener( new com.oldterns.vilebot.handlers.admin.Help() )
-                                           // .addListener(new NickChange())
-                                           // .addListener(new com.oldterns.vilebot.handlers.admin.Ops())
-                                           .addListener( new Quit() ).addListener( new AnswerQuestion() ).addListener( new Ascii() ).addListener( new ChatLogger() ).addListener( new Church() ).addListener( new Countdown() ).addListener( new Decide() ).addListener( new Excuses() ).addListener( new Fortune() ).addListener( new GetInfoOn() ).addListener( new Help() ).addListener( new ImageToAscii() ).addListener( new Inspiration() ).addListener( new Jaziz() ).addListener( new Jokes() ).addListener( new Karma() ).addListener( new KarmaRoll() ).addListener( new LastMessageSed() ).addListener( new LastSeen() ).addListener( new Markov() ).addListener( new Omgword() )
-                                           // .addListener(new Ops())
-                                           .addListener( new QuotesAndFacts() ).addListener( new RemindMe() ).addListener( new RockPaperScissors() ).addListener( new Trivia() ).addListener( new Ttc() ).addListener( new TwitterCorrection() ).addListener( new UrlTitleAnnouncer() ).addListener( new UrlTweetAnnouncer() ).addListener( new Userlists() ).addListener( new UserPing() ).addListener( new Weather() ).buildConfiguration();
+                                                                                                                         ircPort ).addAutoJoinChannel( ircChannel ).setAutoReconnect( true ).addListener( new Vilebot() ).addListener( new AdminManagement() ).addListener( new AdminPing() ).addListener( new Auth() ).addListener( new GetLog() ).addListener( new com.oldterns.vilebot.handlers.admin.Help() ).addListener( new NickChange() ).addListener( new com.oldterns.vilebot.handlers.admin.Ops() ).addListener( new Quit() ).addListener( new AnswerQuestion() ).addListener( new Ascii() ).addListener( new ChatLogger() ).addListener( new Church() ).addListener( new Countdown() ).addListener( new Decide() ).addListener( new Excuses() ).addListener( new Fortune() ).addListener( new GetInfoOn() ).addListener( new Help() ).addListener( new ImageToAscii() ).addListener( new Inspiration() ).addListener( new Jaziz() ).addListener( new Jokes() ).addListener( new Kaomoji() ).addListener( new Karma() ).addListener( new KarmaRoll() ).addListener( new LastMessageSed() ).addListener( new LastSeen() ).addListener( new Markov() ).addListener( new Omgword() ).addListener( new Ops() ).addListener( new QuotesAndFacts() ).addListener( new RemindMe() ).addListener( new RockPaperScissors() ).addListener( new Trivia() ).addListener( new Ttc() ).addListener( new TwitterCorrection() ).addListener( new UrlTitleAnnouncer() ).addListener( new UrlTweetAnnouncer() ).addListener( new Userlists() ).addListener( new UserPing() ).addListener( new Weather() ).buildConfiguration();
 
             botManager.addBot( botConfiguration );
         }
