@@ -6,19 +6,28 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import com.google.gson.Gson;
 import com.oldterns.vilebot.db.ChurchDB;
 import com.oldterns.vilebot.db.QuoteFactDB;
 import com.oldterns.vilebot.util.BaseNick;
 import com.oldterns.vilebot.util.Ignore;
 import com.oldterns.vilebot.util.MangleNicks;
 import com.oldterns.vilebot.util.StringUtil;
+import org.apache.commons.text.StringEscapeUtils;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.JoinEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -46,6 +55,12 @@ public class QuotesAndFacts
     private static final Pattern searchPattern = Pattern.compile( "^!(fact|quote)search (" + nounPattern + ") (.*)$" );
 
     private static final Random random = new Random();
+
+    // cache fact and quote dump links
+    private Map<String, String> dumpCache = new HashMap<>();
+
+    // update cache when new quotes/facts added
+    private Map<String, Integer> dumpSize = new HashMap<>();
 
     @Override
     public void onJoin( final JoinEvent event ) // announce fact or quote on join
@@ -126,16 +141,44 @@ public class QuotesAndFacts
         String mode = dumpMatcher.group( 1 );
         String queried = BaseNick.toBaseNick( dumpMatcher.group( 2 ) );
 
-        if ( "fact".equals( mode ) )
+        if ( mode.equals( "fact" ) )
         {
             Set<String> allFacts = QuoteFactDB.getFacts( queried );
             if ( allFacts.isEmpty() )
             {
-                event.respondPrivateMessage( queried + " has no facts." );
+                event.respondWith( queried + " has no facts." );
             }
-            for ( String fact : allFacts )
+            else
             {
-                event.respondPrivateMessage( formatFactReply( queried, fact ) );
+                String dumpKey = "fact" + queried;
+                String response;
+                if ( allFacts.size() != dumpSize.getOrDefault( dumpKey, 0 ) )
+                {
+                    StringBuilder sb = new StringBuilder();
+                    for ( String fact : allFacts )
+                    {
+                        sb.append( formatFactReply( queried, StringEscapeUtils.escapeJson( fact ) ) ).append( "\\n" );
+                    }
+                    try
+                    {
+                        String title = queried + "'s facts";
+                        String pasteLink = dumpToPastebin( title, sb.toString() );
+                        dumpCache.put( dumpKey, pasteLink );
+                        dumpSize.put( dumpKey, allFacts.size() );
+                        response = "factdump for " + queried + ": " + pasteLink;
+                    }
+                    catch ( Exception e )
+                    {
+                        e.printStackTrace();
+                        response = "Error creating pastebin link";
+                    }
+                }
+                else
+                {
+                    String pasteLink = dumpCache.get( dumpKey );
+                    response = "factdump for " + queried + ": " + pasteLink;
+                }
+                event.respondWith( response );
             }
         }
         else
@@ -143,13 +186,67 @@ public class QuotesAndFacts
             Set<String> allQuotes = QuoteFactDB.getQuotes( queried );
             if ( allQuotes.isEmpty() )
             {
-                event.respondPrivateMessage( queried + " has no quotes." );
+                event.respondWith( queried + " has no quotes." );
             }
-            for ( String quote : allQuotes )
+            else
             {
-                event.respondPrivateMessage( formatFactReply( queried, quote ) );
+                String dumpKey = "quote" + queried;
+                String response;
+                if ( allQuotes.size() != dumpSize.getOrDefault( dumpKey, 0 ) )
+                {
+                    StringBuilder sb = new StringBuilder();
+                    for ( String quote : allQuotes )
+                    {
+                        sb.append( StringEscapeUtils.escapeJson( quote ) ).append( "\\n" );
+                    }
+                    try
+                    {
+                        String title = queried + "'s quotes";
+                        String pasteLink = dumpToPastebin( title, sb.toString() );
+                        dumpCache.put( dumpKey, pasteLink );
+                        dumpSize.put( dumpKey, allQuotes.size() );
+                        response = "quotedump for " + queried + ": " + pasteLink;
+                    }
+                    catch ( Exception e )
+                    {
+                        e.printStackTrace();
+                        response = "Error creating pastebin link";
+                    }
+                }
+                else
+                {
+                    String pasteLink = dumpCache.get( dumpKey );
+                    response = "quotedump for " + queried + ": " + pasteLink;
+                }
+                event.respondWith( response );
             }
         }
+    }
+
+    private String dumpToPastebin( String title, String contents )
+        throws Exception
+    {
+        URL url = new URL( "https://paste.fedoraproject.org/api/paste/submit" );
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setDoOutput( true );
+        conn.setRequestMethod( "POST" );
+        conn.setRequestProperty( "Content-Type", "application/json" );
+        String input = "{\"title\": \" " + title + "\"," + " \"contents\": \"" + contents + "\"}";
+
+        OutputStream os = conn.getOutputStream();
+        os.write( input.getBytes() );
+        os.flush();
+
+        BufferedReader br = new BufferedReader( new InputStreamReader( conn.getInputStream() ) );
+        StringBuilder response = new StringBuilder();
+        String line;
+        while ( ( line = br.readLine() ) != null )
+        {
+            response.append( line );
+        }
+        Gson gson = new Gson();
+        Paste paste = gson.fromJson( response.toString(), Paste.class );
+        return paste.url;
     }
 
     private void factQuoteRandomDump( GenericMessageEvent event, Matcher factQuoteRandomDumpMatcher )
@@ -216,11 +313,11 @@ public class QuotesAndFacts
             Long factsLength = QuoteFactDB.getFactsLength( queried );
             if ( factsLength == 0 )
             {
-                event.respondPrivateMessage( queried + " has no facts." );
+                event.respondWith( queried + " has no facts." );
             }
             else
             {
-                event.respondPrivateMessage( queried + " has " + factsLength + " facts." );
+                event.respondWith( queried + " has " + factsLength + " facts." );
             }
         }
         else
@@ -228,11 +325,11 @@ public class QuotesAndFacts
             Long quotesLength = QuoteFactDB.getQuotesLength( queried );
             if ( quotesLength == 0 )
             {
-                event.respondPrivateMessage( queried + " has no quotes." );
+                event.respondWith( queried + " has no quotes." );
             }
             else
             {
-                event.respondPrivateMessage( queried + " has " + quotesLength + " quotes." );
+                event.respondWith( queried + " has " + quotesLength + " quotes." );
             }
         }
     }
@@ -541,5 +638,38 @@ public class QuotesAndFacts
         }
 
         return input.substring( st, len );
+    }
+
+    class Paste
+    {
+        /* response fields on success */
+        public String[] attachments;
+
+        public String contents;
+
+        public int expiry_time;
+
+        public boolean is_active;
+
+        public boolean is_password_protected;
+
+        public String language;
+
+        public String paste_id_repr;
+
+        public int post_time;
+
+        public String title;
+
+        public String url;
+
+        public int views;
+
+        /* response fields on failure */
+        public String failure;
+
+        public String message;
+
+        public boolean success;
     }
 }

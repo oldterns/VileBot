@@ -6,5 +6,6 @@ keratin-irc
 .project
 .classpath
 *.iml
+.attach_pid*
 .idea/
 development-control.sh
