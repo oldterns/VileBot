@@ -1,10 +1,12 @@
-/**
- * Copyright (C) 2013 Oldterns
- *
- * This file may be modified and distributed under the terms
- * of the MIT license. See the LICENSE file for details.
- */
 package com.oldterns.vilebot.handlers.user;
+
+import com.oldterns.vilebot.db.LastSeenDB;
+import com.oldterns.vilebot.util.BaseNick;
+import com.oldterns.vilebot.util.Ignore;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.JoinEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+import org.pircbotx.output.OutputIRC;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -12,86 +14,51 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-import com.oldterns.vilebot.db.LastSeenDB;
-import com.oldterns.vilebot.util.BaseNick;
-import com.oldterns.vilebot.util.Ignore;
-
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.KeratinBot;
-import ca.szc.keratin.bot.annotation.AssignedBot;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
-import ca.szc.keratin.core.event.message.recieve.ReceivePart;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import ca.szc.keratin.core.event.message.recieve.ReceiveQuit;
-
-@HandlerContainer
 public class LastSeen
+    extends ListenerAdapter
 {
-    @AssignedBot
-    private KeratinBot bot;
 
     private static TimeZone timeZone = TimeZone.getTimeZone( "America/Toronto" );
 
     private static DateFormat dateFormat = makeDateFormat();
 
-    @Handler
-    private void longTimeNoSee( ReceiveJoin event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String joiner = BaseNick.toBaseNick( event.getJoiner() );
+        String userNick = BaseNick.toBaseNick( event.getUser().getNick() );
+        String botNick = event.getBot().getNick();
 
-        if ( !bot.getNick().equals( joiner ) && !Ignore.getOnJoin().contains( joiner ) )
+        if ( !botNick.equals( userNick ) )
         {
-            long lastSeen = LastSeenDB.getLastSeenTime( joiner );
-            long now = System.currentTimeMillis();
-            long timeAgo = now - lastSeen;
+            LastSeenDB.updateLastSeenTime( userNick );
+        }
 
-            long daysAgo = TimeUnit.MILLISECONDS.toDays( timeAgo );
-
-            if ( daysAgo > 30 )
-            {
-                StringBuilder sb = new StringBuilder();
-
-                sb.append( "Hi " );
-                sb.append( event.getJoiner() );
-                sb.append( "! I last saw you " );
-                sb.append( daysAgo );
-                sb.append( " days ago at " );
-                sb.append( dateFormat.format( new Date( lastSeen ) ) );
-                sb.append( ". Long time, no see." );
-
-                event.reply( sb.toString() );
-            }
-
-            LastSeenDB.updateLastSeenTime( joiner );
+        if ( event instanceof JoinEvent && !botNick.equals( userNick ) && !Ignore.getOnJoin().contains( userNick ) )
+        {
+            longTimeNoSee( (JoinEvent) event, userNick );
         }
     }
 
-    @Handler
-    private void updateLastSeenOnPrivmsg( ReceivePrivmsg event )
+    private void longTimeNoSee( JoinEvent event, String joiner )
     {
-        String nick = BaseNick.toBaseNick( event.getSender() );
+        OutputIRC outputQ = event.getBot().send();
+        String replyTarget = event.getChannel().getName();
 
-        if ( !bot.getNick().equals( nick ) )
-            LastSeenDB.updateLastSeenTime( nick );
-    }
+        long lastSeen = LastSeenDB.getLastSeenTime( joiner );
+        long now = System.currentTimeMillis();
+        long timeAgo = now - lastSeen;
 
-    @Handler
-    private void updateLastSeenOnPart( ReceivePart event )
-    {
-        String nick = BaseNick.toBaseNick( event.getParter() );
+        long daysAgo = TimeUnit.MILLISECONDS.toDays( timeAgo );
 
-        if ( !bot.getNick().equals( nick ) )
-            LastSeenDB.updateLastSeenTime( nick );
-    }
+        if ( daysAgo > 30 )
+        {
 
-    @Handler
-    private void updateLastSeenOnQuit( ReceiveQuit event )
-    {
-        String nick = BaseNick.toBaseNick( event.getQuitter() );
+            String str = "Hi " + joiner + "! I last saw you " + daysAgo + " days ago at "
+                + dateFormat.format( new Date( lastSeen ) ) + ". Long time, no see.";
+            outputQ.message( replyTarget, str );
+        }
 
-        if ( !bot.getNick().equals( nick ) )
-            LastSeenDB.updateLastSeenTime( nick );
+        LastSeenDB.updateLastSeenTime( joiner );
     }
 
     private static DateFormat makeDateFormat()

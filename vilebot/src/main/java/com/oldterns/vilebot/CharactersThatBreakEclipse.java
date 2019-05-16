@@ -6,7 +6,7 @@
  */
 package com.oldterns.vilebot;
 
-import ca.szc.keratin.bot.misc.Colors;
+import com.oldterns.vilebot.util.Colors;
 
 /**
  * Class to contain characters and strings that cause the Eclipse line spacing to break if viewed directly.

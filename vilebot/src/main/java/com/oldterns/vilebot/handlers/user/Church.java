@@ -1,5 +1,6 @@
 package com.oldterns.vilebot.handlers.user;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,15 +9,14 @@ import com.oldterns.vilebot.db.KarmaDB;
 import com.oldterns.vilebot.db.ChurchDB;
 import com.oldterns.vilebot.util.BaseNick;
 
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.interfaces.Replyable;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@HandlerContainer
 public class Church
+    extends ListenerAdapter
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
@@ -40,157 +40,171 @@ public class Church
 
     private static VoteEvent currentVote = null;
 
-    @Handler
-    private void donateToChurch( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        Matcher matcher = donatePattern.matcher( event.getText() );
-        if ( matcher.matches() )
-        {
-            if ( currentVote != null )
-            {
-                event.reply( "There is an ongoing vote, you cannot donate at this time." );
-                return;
-            }
+        String text = event.getMessage();
 
-            String rawDonationAmount = matcher.group( 1 );
-            String donor = BaseNick.toBaseNick( event.getSender() );
-            Integer donationAmount = Integer.parseInt( rawDonationAmount );
-            Integer donorKarma = KarmaDB.getNounKarma( donor );
-            donorKarma = donorKarma == null ? 0 : donorKarma;
-            if ( donationAmount <= 0 )
+        Matcher donateToChurchMatcher = donatePattern.matcher( text );
+        Matcher viewChurchTotalMatcher = churchTotalPattern.matcher( text );
+        Matcher viewTopDonorsMatcher = topDonorsPattern.matcher( text );
+        Matcher setTitleMatcher = setTitlesPattern.matcher( text );
+        Matcher inquisitMatcher = inquisitPattern.matcher( text );
+        Matcher matcherAye = topDonorsAyePattern.matcher( event.getMessage() );
+        Matcher matcherNay = topDonorsNayPattern.matcher( event.getMessage() );
+
+        if ( donateToChurchMatcher.matches() )
+            donateToChurch( event, donateToChurchMatcher );
+        if ( viewChurchTotalMatcher.matches() )
+            viewChurchTotal( event );
+        if ( viewTopDonorsMatcher.matches() )
+            viewTopDonors( event );
+        if ( setTitleMatcher.matches() )
+            setTitle( event, setTitleMatcher );
+        if ( inquisitMatcher.matches() )
+            inquisit( event, inquisitMatcher );
+        if ( matcherAye.matches() || matcherNay.matches() )
+            inquisitDecision( event, matcherAye, matcherNay );
+    }
+
+    private void donateToChurch( GenericMessageEvent event, Matcher matcher )
+    {
+        if ( currentVote != null )
+        {
+            event.respondWith( "There is an ongoing vote, you cannot donate at this time." );
+            return;
+        }
+
+        String rawDonationAmount = matcher.group( 1 );
+        String donor = BaseNick.toBaseNick( event.getUser().getNick() );
+        Integer donationAmount = Integer.parseInt( rawDonationAmount );
+        Integer donorKarma = KarmaDB.getNounKarma( donor );
+        donorKarma = donorKarma == null ? 0 : donorKarma;
+        if ( donationAmount <= 0 )
+        {
+            event.respondWith( "You cannot donate a non-positive number, imbecile." );
+        }
+        else if ( donorKarma <= 0 || donorKarma < donationAmount )
+        {
+            event.respondWith( "You have insufficient karma to donate." );
+        }
+        else
+        {
+            ChurchDB.modDonorKarma( donor, donationAmount );
+            KarmaDB.modNounKarma( donor, -1 * donationAmount );
+            Integer churchDonorKarma = ChurchDB.getDonorKarma( donor );
+            if ( churchDonorKarma != null && churchDonorKarma - donationAmount <= 0 )
             {
-                event.reply( "You cannot donate a non-positive number, imbecile." );
+                ChurchDB.modDonorTitle( donor, " " );
             }
-            else if ( donorKarma <= 0 || donorKarma < donationAmount )
-            {
-                event.reply( "You have insufficient karma to donate." );
-            }
-            else
-            {
-                ChurchDB.modDonorKarma( donor, donationAmount );
-                KarmaDB.modNounKarma( donor, -1 * donationAmount );
-                if ( ChurchDB.getDonorKarma( donor ) - donationAmount <= 0 )
-                {
-                    ChurchDB.modDonorTitle( donor, " " );
-                }
-                event.reply( "Thank you for your donation of " + donationAmount + " " + donor + "!" );
-            }
+            event.respondWith( "Thank you for your donation of " + donationAmount + " " + donor + "!" );
         }
     }
 
-    @Handler
-    private void viewChurchTotal( ReceivePrivmsg event )
+    private void viewChurchTotal( GenericMessageEvent event )
     {
-        Matcher matcher = churchTotalPattern.matcher( event.getText() );
-        if ( matcher.matches() )
-        {
-            long totalDonations = ChurchDB.getTotalDonations();
-            long churchTotal = totalDonations + ChurchDB.getTotalNonDonations();
-            event.reply( "The church coffers contains " + churchTotal + ", of which " + totalDonations
-                + " was contributed by its loyal believers." );
-        }
+        long totalDonations = ChurchDB.getTotalDonations();
+        long churchTotal = totalDonations + ChurchDB.getTotalNonDonations();
+        event.respondWith( "The church coffers contains " + churchTotal + ", of which " + totalDonations
+            + " was contributed by its loyal believers." );
     }
 
-    @Handler
-    private void viewTopDonors( ReceivePrivmsg event )
+    // @Handler
+    private void viewTopDonors( GenericMessageEvent event )
     {
-        Matcher matcher = topDonorsPattern.matcher( event.getText() );
-        if ( matcher.matches() )
+        // Matcher matcher = topDonorsPattern.matcher( event.getMessage() );
+        // if ( matcher.matches() )
+        // {
+        Set<String> nouns;
+        nouns = ChurchDB.getDonorsByRanks( 0, 3 );
+        if ( nouns != null && nouns.size() > 0 )
         {
-            Set<String> nouns = null;
-            nouns = ChurchDB.getDonorsByRanks( 0, 3 );
-            if ( nouns != null && nouns.size() > 0 )
+            event.respondWith( "NICK           AMOUNT    TITLE" );
+            for ( String noun : nouns )
             {
-                event.reply( "NICK           AMOUNT    TITLE" );
-                for ( String noun : nouns )
-                {
-                    replyWithRankAndDonationAmount( noun, event );
-                }
-            }
-            else
-            {
-                event.reply( "The church does not have enough followers yet." );
+                replyWithRankAndDonationAmount( noun, event );
             }
         }
-    }
-
-    @Handler
-    private void setTitle( ReceivePrivmsg event )
-    {
-        Matcher matcher = setTitlesPattern.matcher( event.getText() );
-        if ( matcher.matches() )
+        else
         {
-            String donor = BaseNick.toBaseNick( event.getSender() );
-            if ( ChurchDB.getDonorRank( donor ) > 4 )
-            {
-                event.reply( "You must be a top donor to set your title." );
-                return;
-            }
-
-            String newTitle = matcher.group( 1 );
-            if ( newTitle.length() > 40 )
-            {
-                newTitle = newTitle.substring( 0, 39 );
-            }
-
-            String oldTitle = ChurchDB.getDonorTitle( donor );
-            ChurchDB.modDonorTitle( donor, newTitle );
-            event.reply( donor + " is now to be referred to as " + newTitle + " instead of " + oldTitle + "." );
+            event.respondWith( "The church does not have enough followers yet." );
         }
+        // }
     }
 
-    @Handler
-    private void inquisit( ReceivePrivmsg event )
+    // @Handler
+    private void setTitle( GenericMessageEvent event, Matcher matcher )
     {
-        Matcher matcher = inquisitPattern.matcher( event.getText() );
-        if ( matcher.matches() )
+        // Matcher matcher = setTitlesPattern.matcher( event.getMessage() );
+        // if ( matcher.matches() )
+        // {
+        String donor = BaseNick.toBaseNick( event.getUser().getNick() );
+        Integer donorRank = ChurchDB.getDonorRank( donor );
+        if ( donorRank != null && donorRank > 4 )
         {
-            if ( currentVote != null )
-            {
-                event.reply( "There is an ongoing inquisition against " + currentVote.getDecsionTarget()
-                    + ". Please use !aye or !nay to decide their fate" );
-                return;
-            }
-
-            String donor = BaseNick.toBaseNick( event.getSender() );
-            Integer donorRank = ChurchDB.getDonorRank( donor );
-            if ( donorRank == null || donorRank > 4 )
-            {
-                event.reply( "You must be a top donor to start an inquisition." );
-                return;
-            }
-
-            String membersToPing = "";
-            Set<String> nouns = ChurchDB.getDonorsByRanks( 0, 3 );
-            if ( nouns != null && nouns.size() > 3 )
-            {
-                for ( String noun : nouns )
-                {
-                    membersToPing += noun + " ";
-                }
-            }
-            else
-            {
-                event.reply( "There are not enough members of the church to invoke a vote" );
-                return;
-            }
-
-            String inquisitedNick = BaseNick.toBaseNick( matcher.group( 1 ) );
-            Integer nounKarma = ChurchDB.getDonorKarma( inquisitedNick );
-            if ( nounKarma == null || nounKarma == 0 )
-            {
-                event.reply( "You cannot start an inquisition against someone who has no donation value." );
-                return;
-            }
-
-            event.reply( "An inquisition has started against " + inquisitedNick
-                + ". Please cast your votes with !aye or !nay" );
-            event.reply( membersToPing );
-            startInquisitionVote( event, inquisitedNick, donorRank );
+            event.respondWith( "You must be a top donor to set your title." );
+            return;
         }
+
+        String newTitle = matcher.group( 1 );
+        if ( newTitle.length() > 40 )
+        {
+            newTitle = newTitle.substring( 0, 39 );
+        }
+
+        String oldTitle = ChurchDB.getDonorTitle( donor );
+        ChurchDB.modDonorTitle( donor, newTitle );
+        event.respondWith( donor + " is now to be referred to as " + newTitle + " instead of " + oldTitle + "." );
+        // }
     }
 
-    private synchronized void startInquisitionVote( ReceivePrivmsg event, String inquisitedNick, int donorRank )
+    private void inquisit( GenericMessageEvent event, Matcher matcher )
+    {
+        if ( currentVote != null )
+        {
+            event.respondWith( "There is an ongoing inquisition against " + currentVote.getDecisionTarget()
+                + ". Please use !aye or !nay to decide their fate" );
+            return;
+        }
+
+        String donor = BaseNick.toBaseNick( event.getUser().getNick() );
+        Integer donorRank = ChurchDB.getDonorRank( donor );
+        if ( donorRank == null || donorRank > 4 )
+        {
+            event.respondWith( "You must be a top donor to start an inquisition." );
+            return;
+        }
+
+        StringBuilder membersToPing = new StringBuilder();
+        Set<String> nouns = ChurchDB.getDonorsByRanks( 0, 3 );
+        if ( nouns != null && nouns.size() > 3 )
+        {
+            for ( String noun : nouns )
+            {
+                membersToPing.append( noun ).append( " " );
+            }
+        }
+        else
+        {
+            event.respondWith( "There are not enough members of the church to invoke a vote" );
+            return;
+        }
+
+        String inquisitedNick = BaseNick.toBaseNick( matcher.group( 1 ) );
+        Integer nounKarma = ChurchDB.getDonorKarma( inquisitedNick );
+        if ( nounKarma == null || nounKarma == 0 )
+        {
+            event.respondWith( "You cannot start an inquisition against someone who has no donation value." );
+            return;
+        }
+
+        event.respondWith( "An inquisition has started against " + inquisitedNick
+            + ". Please cast your votes with !aye or !nay" );
+        event.respondWith( membersToPing.toString() );
+        startInquisitionVote( event, inquisitedNick, donorRank );
+    }
+
+    private synchronized void startInquisitionVote( GenericMessageEvent event, String inquisitedNick, int donorRank )
     {
         currentVote = new VoteEvent();
         currentVote.setDecisionTarget( inquisitedNick );
@@ -198,87 +212,80 @@ public class Church
         startTimer( event );
     }
 
-    @Handler
-    public void inquisitDecision( ReceivePrivmsg event )
+    private void inquisitDecision( GenericMessageEvent event, Matcher matcherAye, Matcher matcherNay )
     {
-        Matcher matcherAye = topDonorsAyePattern.matcher( event.getText() );
-        Matcher matcherNay = topDonorsNayPattern.matcher( event.getText() );
-        if ( matcherAye.matches() || matcherNay.matches() )
+        if ( currentVote == null )
         {
-            if ( currentVote == null )
-            {
-                event.reply( "There is no ongoing vote." );
-                return;
-            }
-
-            String donor = BaseNick.toBaseNick( event.getSender() );
-            Integer donorRank = ChurchDB.getDonorRank( donor );
-            if ( donorRank == null || donorRank > 4 )
-            {
-                event.reply( "You must be a top donor to vote." );
-                return;
-            }
-
-            if ( matcherAye.matches() )
-            {
-                currentVote.updateVoteAye( donorRank );
-            }
-            else if ( matcherNay.matches() )
-            {
-                currentVote.updateVoteNay( donorRank );
-            }
-
-            String currentChoices = "";
-            int i = 1;
-            Set<String> nouns = ChurchDB.getDonorsByRanks( 0, 3 );
-            for ( String noun : nouns )
-            {
-                currentChoices += noun + " (" + currentVote.getDonorVote( i++ ) + ") ";
-            }
-            event.reply( currentChoices );
+            event.respondWith( "There is no ongoing vote." );
+            return;
         }
+
+        String donor = BaseNick.toBaseNick( event.getUser().getNick() );
+        Integer donorRank = ChurchDB.getDonorRank( donor );
+        if ( donorRank == null || donorRank > 4 )
+        {
+            event.respondWith( "You must be a top donor to vote." );
+            return;
+        }
+
+        if ( matcherAye.matches() )
+        {
+            currentVote.updateVoteAye( donorRank );
+        }
+        else if ( matcherNay.matches() )
+        {
+            currentVote.updateVoteNay( donorRank );
+        }
+
+        StringBuilder currentChoices = new StringBuilder();
+        int i = 1;
+        Set<String> nouns = ChurchDB.getDonorsByRanks( 0, 3 );
+        for ( String noun : Objects.requireNonNull( nouns ) )
+        {
+            currentChoices.append( noun ).append( " (" ).append( currentVote.getDonorVote( i++ ) ).append( ") " );
+        }
+        event.respondWith( currentChoices.toString() );
     }
 
-    private void startTimer( final ReceivePrivmsg event )
+    private void startTimer( final GenericMessageEvent event )
     {
-        timer.submit( new Runnable()
-        {
-            @Override
-            public void run()
+        timer.submit( () -> {
+            try
             {
-                try
-                {
-                    Thread.sleep( TIMEOUT );
-                    timeoutTimer( event );
-                }
-                catch ( InterruptedException e )
-                {
-                    e.printStackTrace();
-                }
+                Thread.sleep( TIMEOUT );
+                timeoutTimer( event );
+            }
+            catch ( InterruptedException e )
+            {
+                e.printStackTrace();
             }
         } );
     }
 
-    private void timeoutTimer( ReceivePrivmsg event )
+    private void timeoutTimer( GenericMessageEvent event )
     {
         String message = "Voting is now finished\n";
         if ( currentVote.isDecisionYes() )
         {
-            message += "The vote to inquisit " + currentVote.getDecsionTarget() + " has passed. "
-                + currentVote.getDecsionTarget() + " will be stripped of their karma.";
-            ChurchDB.modNonDonorKarma( ChurchDB.getDonorKarma( currentVote.getDecsionTarget() ) );
-            ChurchDB.removeDonor( currentVote.getDecsionTarget() );
+            message += "The vote to inquisit " + currentVote.getDecisionTarget() + " has passed. "
+                + currentVote.getDecisionTarget() + " will be stripped of their karma.";
+            Integer donorKarma = ChurchDB.getDonorKarma( currentVote.getDecisionTarget() );
+            if ( donorKarma != null )
+            {
+                ChurchDB.modNonDonorKarma( donorKarma );
+                ChurchDB.removeDonor( currentVote.getDecisionTarget() );
+            }
         }
         else
         {
-            message += "The vote to inquisit " + currentVote.getDecsionTarget() + " has failed. Nothing will happen.";
+            message += "The vote to inquisit " + currentVote.getDecisionTarget() + " has failed. Nothing will happen.";
         }
 
-        event.reply( message );
+        event.respondWith( message );
         currentVote = null;
     }
 
-    private static boolean replyWithRankAndDonationAmount( String noun, Replyable event )
+    private static void replyWithRankAndDonationAmount( String noun, GenericMessageEvent event )
     {
         Integer nounKarma = ChurchDB.getDonorKarma( noun );
         String nounTitle = ChurchDB.getDonorTitle( noun );
@@ -307,10 +314,8 @@ public class Church
             }
 
             String spaces_second = String.format( "%" + spaceLength + "s", "" );
-            event.reply( nounString + spaces_first + nounKarma.toString() + spaces_second + nounTitle );
-            return true;
+            event.respondWith( nounString + spaces_first + nounKarma.toString() + spaces_second + nounTitle );
         }
-        return false;
     }
 
     private static class VoteEvent
@@ -319,7 +324,7 @@ public class Church
 
         private String decisionTarget;
 
-        public VoteEvent()
+        VoteEvent()
         {
             topDonorDecisions = new boolean[4];
             for ( int i = 0; i < 4; i++ )
@@ -329,22 +334,22 @@ public class Church
             decisionTarget = null;
         }
 
-        public void updateVoteAye( int donorRank )
+        void updateVoteAye( int donorRank )
         {
             topDonorDecisions[donorRank - 1] = true;
         }
 
-        public void updateVoteNay( int donorRank )
+        void updateVoteNay( int donorRank )
         {
             topDonorDecisions[donorRank - 1] = false;
         }
 
-        public boolean getDonorVote( int donorRank )
+        boolean getDonorVote( int donorRank )
         {
             return topDonorDecisions[donorRank - 1];
         }
 
-        public boolean isDecisionYes()
+        boolean isDecisionYes()
         {
             int totalValue = 0;
             if ( topDonorDecisions[0] )
@@ -355,18 +360,15 @@ public class Church
                 totalValue += 3;
             if ( topDonorDecisions[3] )
                 totalValue += 1;
-            if ( totalValue > 6 )
-                return true;
-            else
-                return false;
+            return totalValue > 6;
         }
 
-        public void setDecisionTarget( String target )
+        void setDecisionTarget( String target )
         {
             decisionTarget = target;
         }
 
-        public String getDecsionTarget()
+        String getDecisionTarget()
         {
             return decisionTarget;
         }

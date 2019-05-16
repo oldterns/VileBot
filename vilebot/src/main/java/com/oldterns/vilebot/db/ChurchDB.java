@@ -98,7 +98,7 @@ public class ChurchDB
             return null;
         }
 
-        return Integer.valueOf( Long.valueOf( Math.round( karma ) ).intValue() );
+        return Long.valueOf( Math.round( karma ) ).intValue();
     }
 
     /**
@@ -124,7 +124,7 @@ public class ChurchDB
             return null;
         }
 
-        return Integer.valueOf( rank.intValue() + 1 );
+        return rank.intValue() + 1;
     }
 
     /**

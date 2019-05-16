@@ -1,5 +1,9 @@
 package com.oldterns.vilebot.handlers.user;
 
+import com.oldterns.vilebot.Vilebot;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -10,17 +14,12 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.oldterns.vilebot.Vilebot;
-
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import net.engio.mbassy.listener.Handler;
-
 /**
  * Created by ipun on 15/05/16.
  */
-@HandlerContainer
+
 public class Inspiration
+    extends ListenerAdapter
 {
     private static final Pattern FORTUNE_PATTERN = Pattern.compile( "^!inspiration(.*)" );
 
@@ -32,10 +31,10 @@ public class Inspiration
 
     private List<String> inspirationIndex = loadInspirationIndex();
 
-    @Handler
-    public void inspiration( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher inspirationMatcher = FORTUNE_PATTERN.matcher( text );
         try
         {
@@ -56,13 +55,13 @@ public class Inspiration
         }
     }
 
-    private void inspirationReply( ReceivePrivmsg event )
+    private void inspirationReply( GenericMessageEvent event )
     {
         int index = Integer.parseInt( inspirationIndex.get( new Random().nextInt( inspirationIndex.size() - 1 ) ) );
         String line = inspiration.get( index );
         while ( !line.matches( "%" ) )
         {
-            event.reply( line );
+            event.respondWith( line );
             line = inspiration.get( ++index );
         }
     }
@@ -71,13 +70,8 @@ public class Inspiration
     {
         try
         {
-            ArrayList<String> inspirations = new ArrayList<>();
             List<String> lines = Files.readAllLines( Paths.get( FORTUNE_LIST_PATH ), Charset.forName( "UTF-8" ) );
-            for ( String line : lines )
-            {
-                inspirations.add( line );
-            }
-            return inspirations;
+            return new ArrayList<>( lines );
         }
         catch ( Exception e )
         {

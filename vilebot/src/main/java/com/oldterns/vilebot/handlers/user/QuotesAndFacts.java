@@ -6,32 +6,28 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import com.oldterns.vilebot.db.ChurchDB;
+import com.oldterns.vilebot.db.QuoteFactDB;
+import com.oldterns.vilebot.util.BaseNick;
+import com.oldterns.vilebot.util.Ignore;
+import com.oldterns.vilebot.util.MangleNicks;
+import com.oldterns.vilebot.util.StringUtil;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.JoinEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import com.oldterns.vilebot.db.ChurchDB;
-import com.oldterns.vilebot.db.QuoteFactDB;
-import com.oldterns.vilebot.handlers.user.Jaziz;
-import com.oldterns.vilebot.util.BaseNick;
-import com.oldterns.vilebot.util.Ignore;
-import com.oldterns.vilebot.util.MangleNicks;
-import com.oldterns.vilebot.util.StringUtil;
-
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.KeratinBot;
-import ca.szc.keratin.bot.annotation.AssignedBot;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-
-@HandlerContainer
 public class QuotesAndFacts
+    extends ListenerAdapter
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
@@ -51,315 +47,321 @@ public class QuotesAndFacts
 
     private static final Random random = new Random();
 
-    @AssignedBot
-    private KeratinBot bot;
-
-    @Handler
-    private void factQuoteAdd( ReceivePrivmsg event )
+    @Override
+    public void onJoin( final JoinEvent event ) // announce fact or quote on join
     {
-        Matcher matcher = addPattern.matcher( event.getText() );
-
-        if ( matcher.matches() )
+        String baseNick = BaseNick.toBaseNick( Objects.requireNonNull( event.getUser() ).getNick() );
+        if ( !Ignore.getOnJoin().contains( baseNick ) )
         {
-            String mode = matcher.group( 1 );
-            String noun = BaseNick.toBaseNick( matcher.group( 2 ) );
-            String text = matcher.group( 3 );
-            String sender = BaseNick.toBaseNick( event.getSender() );
-
-            if ( !sender.equals( noun ) )
+            if ( random.nextBoolean() )
             {
-                text = trimChars( text, " '\"" );
-
-                if ( "fact".equals( mode ) )
-                {
-                    QuoteFactDB.addFact( noun, text );
-                    event.reply( formatFactReply( noun, text ) );
-                }
-                else
-                {
-                    QuoteFactDB.addQuote( noun, text );
-                    event.reply( formatQuoteReply( noun, text ) );
-                }
+                if ( !replyWithQuote( baseNick, event, false ) )
+                    replyWithFact( baseNick, event, false );
             }
             else
             {
-                event.reply( StringUtil.capitalizeFirstLetter( mode )
-                    + "s from yourself are both terrible and uninteresting." );
+                if ( !replyWithFact( baseNick, event, false ) )
+                    replyWithQuote( baseNick, event, false );
             }
         }
     }
 
-    @Handler
-    private void factQuoteDump( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        Matcher matcher = dumpPattern.matcher( event.getText() );
+        String text = event.getMessage();
 
-        if ( matcher.matches() )
+        Matcher addMatcher = addPattern.matcher( text );
+        Matcher dumpMatcher = dumpPattern.matcher( text );
+        Matcher factQuoteRandomDumpMatcher = randomPattern.matcher( text );
+        Matcher factQuoteNumMatcher = numPattern.matcher( text );
+        Matcher queryMatcher = queryPattern.matcher( text );
+        Matcher searchMatcher = searchPattern.matcher( text );
+
+        if ( addMatcher.matches() )
+            factQuoteAdd( event, addMatcher );
+        if ( dumpMatcher.matches() )
+            factQuoteDump( event, dumpMatcher );
+        if ( factQuoteRandomDumpMatcher.matches() )
+            factQuoteRandomDump( event, factQuoteRandomDumpMatcher );
+        if ( factQuoteNumMatcher.matches() )
+            factQuoteNum( event, factQuoteNumMatcher );
+        if ( queryMatcher.matches() )
+            factQuoteQuery( event, queryMatcher );
+        if ( searchMatcher.matches() )
+            factQuoteSearch( event, searchMatcher );
+    }
+
+    private void factQuoteAdd( GenericMessageEvent event, Matcher addMatcher )
+    {
+        String mode = addMatcher.group( 1 );
+        String noun = BaseNick.toBaseNick( addMatcher.group( 2 ) );
+        String text = addMatcher.group( 3 );
+        String sender = BaseNick.toBaseNick( event.getUser().getNick() );
+
+        if ( !sender.equals( noun ) )
         {
-            String mode = matcher.group( 1 );
-            String queried = BaseNick.toBaseNick( matcher.group( 2 ) );
+            text = trimChars( text, " '\"" );
 
             if ( "fact".equals( mode ) )
+            {
+                QuoteFactDB.addFact( noun, text );
+                event.respondWith( formatFactReply( noun, text ) );
+            }
+            else
+            {
+                QuoteFactDB.addQuote( noun, text );
+                event.respondWith( formatQuoteReply( noun, text ) );
+            }
+        }
+        else
+        {
+            event.respondWith( StringUtil.capitalizeFirstLetter( mode )
+                + "s from yourself are both terrible and uninteresting." );
+        }
+    }
+
+    private void factQuoteDump( GenericMessageEvent event, Matcher dumpMatcher )
+    {
+        String mode = dumpMatcher.group( 1 );
+        String queried = BaseNick.toBaseNick( dumpMatcher.group( 2 ) );
+
+        if ( "fact".equals( mode ) )
+        {
+            Set<String> allFacts = QuoteFactDB.getFacts( queried );
+            if ( allFacts.isEmpty() )
+            {
+                event.respondPrivateMessage( queried + " has no facts." );
+            }
+            for ( String fact : allFacts )
+            {
+                event.respondPrivateMessage( formatFactReply( queried, fact ) );
+            }
+        }
+        else
+        {
+            Set<String> allQuotes = QuoteFactDB.getQuotes( queried );
+            if ( allQuotes.isEmpty() )
+            {
+                event.respondPrivateMessage( queried + " has no quotes." );
+            }
+            for ( String quote : allQuotes )
+            {
+                event.respondPrivateMessage( formatFactReply( queried, quote ) );
+            }
+        }
+    }
+
+    private void factQuoteRandomDump( GenericMessageEvent event, Matcher factQuoteRandomDumpMatcher )
+    {
+        String mode = factQuoteRandomDumpMatcher.group( 1 );
+        String queried = BaseNick.toBaseNick( factQuoteRandomDumpMatcher.group( 2 ) );
+
+        if ( "fact".equals( mode ) )
+        {
+            Long factsLength = QuoteFactDB.getFactsLength( queried );
+            if ( factsLength == 0 )
+            {
+                event.respondPrivateMessage( queried + " has no facts." );
+            }
+            else if ( factsLength <= 5 )
             {
                 Set<String> allFacts = QuoteFactDB.getFacts( queried );
-                if ( allFacts.isEmpty() )
-                {
-                    event.replyPrivately( queried + " has no facts." );
-                }
                 for ( String fact : allFacts )
                 {
-                    event.replyPrivately( formatFactReply( queried, fact ) );
+                    event.respondPrivateMessage( formatFactReply( queried, fact ) );
                 }
             }
             else
+            {
+                List<String> randomFacts = QuoteFactDB.getRandFacts( queried );
+                for ( String fact : randomFacts )
+                {
+                    event.respondPrivateMessage( formatFactReply( queried, fact ) );
+                }
+            }
+        }
+        else
+        {
+            Long quotesLength = QuoteFactDB.getQuotesLength( queried );
+            if ( quotesLength == 0 )
+            {
+                event.respondPrivateMessage( queried + " has no quotes." );
+            }
+            else if ( quotesLength <= 5 )
             {
                 Set<String> allQuotes = QuoteFactDB.getQuotes( queried );
-                if ( allQuotes.isEmpty() )
-                {
-                    event.replyPrivately( queried + " has no quotes." );
-                }
                 for ( String quote : allQuotes )
                 {
-                    event.replyPrivately( formatFactReply( queried, quote ) );
-                }
-            }
-        }
-    }
-
-    @Handler
-    private void factQuoteRandomDump( ReceivePrivmsg event )
-    {
-        Matcher matcher = randomPattern.matcher( event.getText() );
-
-        if ( matcher.matches() )
-        {
-            String mode = matcher.group( 1 );
-            String queried = BaseNick.toBaseNick( matcher.group( 2 ) );
-
-            if ( "fact".equals( mode ) )
-            {
-                Long factsLength = QuoteFactDB.getFactsLength( queried );
-                if ( factsLength == 0 )
-                {
-                    event.replyPrivately( queried + " has no facts." );
-                }
-                else if ( factsLength <= 5 )
-                {
-                    Set<String> allFacts = QuoteFactDB.getFacts( queried );
-                    for ( String fact : allFacts )
-                    {
-                        event.replyPrivately( formatFactReply( queried, fact ) );
-                    }
-                }
-                else
-                {
-                    List<String> randomFacts = QuoteFactDB.getRandFacts( queried );
-                    for ( String fact : randomFacts )
-                    {
-                        event.replyPrivately( formatFactReply( queried, fact ) );
-                    }
+                    event.respondPrivateMessage( formatQuoteReply( queried, quote ) );
                 }
             }
             else
             {
-                Long quotesLength = QuoteFactDB.getQuotesLength( queried );
-                if ( quotesLength == 0 )
+                List<String> randomQuote = QuoteFactDB.getRandQuotes( queried );
+                for ( String quote : randomQuote )
                 {
-                    event.replyPrivately( queried + " has no quotes." );
-                }
-                else if ( quotesLength <= 5 )
-                {
-                    Set<String> allQuotes = QuoteFactDB.getQuotes( queried );
-                    for ( String quote : allQuotes )
-                    {
-                        event.replyPrivately( formatQuoteReply( queried, quote ) );
-                    }
-                }
-                else
-                {
-                    List<String> randomQuote = QuoteFactDB.getRandQuotes( queried );
-                    for ( String quote : randomQuote )
-                    {
-                        event.replyPrivately( formatQuoteReply( queried, quote ) );
-                    }
+                    event.respondPrivateMessage( formatQuoteReply( queried, quote ) );
                 }
             }
         }
     }
 
-    @Handler
-    private void factQuoteNum( ReceivePrivmsg event )
+    private void factQuoteNum( GenericMessageEvent event, Matcher factQuoteNumMatcher )
     {
-        Matcher matcher = numPattern.matcher( event.getText() );
-
-        if ( matcher.matches() )
+        String mode = factQuoteNumMatcher.group( 1 );
+        String queried = BaseNick.toBaseNick( factQuoteNumMatcher.group( 2 ) );
+        if ( "fact".equals( mode ) )
         {
-            String mode = matcher.group( 1 );
-            String queried = BaseNick.toBaseNick( matcher.group( 2 ) );
-            if ( "fact".equals( mode ) )
+            Long factsLength = QuoteFactDB.getFactsLength( queried );
+            if ( factsLength == 0 )
             {
-                Long factsLength = QuoteFactDB.getFactsLength( queried );
-                if ( factsLength == 0 )
-                {
-                    event.replyPrivately( queried + " has no facts." );
-                }
-                else
-                {
-                    event.replyPrivately( queried + " has " + factsLength + " facts." );
-                }
+                event.respondPrivateMessage( queried + " has no facts." );
             }
             else
             {
-                Long quotesLength = QuoteFactDB.getQuotesLength( queried );
-                if ( quotesLength == 0 )
-                {
-                    event.replyPrivately( queried + " has no quotes." );
-                }
-                else
-                {
-                    event.replyPrivately( queried + " has " + quotesLength + " quotes." );
-                }
+                event.respondPrivateMessage( queried + " has " + factsLength + " facts." );
             }
         }
-    }
-
-    @Handler
-    private void factQuoteQuery( ReceivePrivmsg event )
-    {
-        Matcher matcher = queryPattern.matcher( event.getText() );
-
-        if ( matcher.matches() )
+        else
         {
-            String mode = matcher.group( 1 );
-            String noun = BaseNick.toBaseNick( matcher.group( 2 ) );
-
-            // check if quote/fact needs to be piped to jaziz
-            boolean jaziz = event.getText().lastIndexOf( "!jaziz" ) >= 0;
-
-            if ( "fact".equals( mode ) )
+            Long quotesLength = QuoteFactDB.getQuotesLength( queried );
+            if ( quotesLength == 0 )
             {
-                if ( !replyWithFact( noun, event, jaziz ) )
-                {
-                    event.reply( noun + " has no facts." );
-                }
+                event.respondPrivateMessage( queried + " has no quotes." );
             }
             else
             {
-                if ( !replyWithQuote( noun, event, jaziz ) )
-                {
-                    event.reply( noun + " has no quotes." );
-                }
+                event.respondPrivateMessage( queried + " has " + quotesLength + " quotes." );
             }
         }
     }
 
-    @Handler
-    private void factQuoteSearch( ReceivePrivmsg event )
+    private void factQuoteQuery( GenericMessageEvent event, Matcher queryMatcher )
     {
-        Matcher matcher = searchPattern.matcher( event.getText() );
+        String mode = queryMatcher.group( 1 );
+        String noun = BaseNick.toBaseNick( queryMatcher.group( 2 ) );
 
-        if ( matcher.matches() )
+        // check if quote/fact needs to be piped to jaziz
+        boolean jaziz = event.getMessage().lastIndexOf( "!jaziz" ) >= 0;
+
+        if ( "fact".equals( mode ) )
         {
-            String mode = matcher.group( 1 );
-            String noun = BaseNick.toBaseNick( matcher.group( 2 ) );
-            String regex = matcher.group( 3 );
-
-            // check if quote/fact needs to be piped to jaziz
-            int jazizIdx = regex.lastIndexOf( "!jaziz" );
-            boolean jaziz = jazizIdx >= 0;
-            if ( jaziz )
+            if ( !replyWithFact( noun, event, jaziz ) )
             {
-                regex = regex.substring( 0, jazizIdx - 1 );
+                event.respondWith( noun + " has no facts." );
             }
-
-            try
+        }
+        else
+        {
+            if ( !replyWithQuote( noun, event, jaziz ) )
             {
-                // Case insensitive added automatically, use (?-i) in a message to reenable case sensitivity
-                Pattern pattern = Pattern.compile( "(?i)" + regex );
+                event.respondWith( noun + " has no quotes." );
+            }
+        }
+    }
 
-                if ( "fact".equals( mode ) )
+    private void factQuoteSearch( GenericMessageEvent event, Matcher searchMatcher )
+    {
+        String mode = searchMatcher.group( 1 );
+        String noun = BaseNick.toBaseNick( searchMatcher.group( 2 ) );
+        String regex = searchMatcher.group( 3 );
+
+        // check if quote/fact needs to be piped to jaziz
+        int jazizIdx = regex.lastIndexOf( "!jaziz" );
+        boolean jaziz = jazizIdx >= 0;
+        if ( jaziz )
+        {
+            regex = regex.substring( 0, jazizIdx - 1 );
+        }
+
+        try
+        {
+            // Case insensitive added automatically, use (?-i) in a message to re-enable case sensitivity
+            Pattern pattern = Pattern.compile( "(?i)" + regex );
+
+            if ( "fact".equals( mode ) )
+            {
+                Set<String> texts = QuoteFactDB.getFacts( noun );
+                if ( texts != null )
                 {
-                    Set<String> texts = QuoteFactDB.getFacts( noun );
-                    if ( texts != null )
+                    String randomMatch = regexSetSearch( texts, pattern );
+                    if ( randomMatch != null )
                     {
-                        String randomMatch = regexSetSearch( texts, pattern );
-                        if ( randomMatch != null )
+                        randomMatch = MangleNicks.mangleNicks( event, randomMatch );
+                        if ( jaziz )
                         {
-                            randomMatch = MangleNicks.mangleNicks( bot, event, randomMatch );
-                            if ( jaziz )
+                            try
                             {
-                                try
-                                {
-                                    event.reply( formatFactReply( noun, Jaziz.jazizify( randomMatch ) ) );
-                                }
-                                catch ( Exception e )
-                                {
-                                    event.reply( "eeeh" );
-                                    e.printStackTrace();
-                                }
+                                event.respondWith( formatFactReply( noun, Jaziz.jazizify( randomMatch ) ) );
                             }
-                            else
+                            catch ( Exception e )
                             {
-                                event.reply( formatFactReply( noun, randomMatch ) );
+                                event.respondWith( "eeeh" );
+                                e.printStackTrace();
                             }
                         }
                         else
                         {
-                            event.reply( noun + " has no matching facts." );
+                            event.respondWith( formatFactReply( noun, randomMatch ) );
                         }
                     }
                     else
                     {
-                        event.reply( noun + " has no facts." );
+                        event.respondWith( noun + " has no matching facts." );
                     }
                 }
                 else
                 {
-                    Set<String> texts = QuoteFactDB.getQuotes( noun );
-                    if ( texts != null )
+                    event.respondWith( noun + " has no facts." );
+                }
+            }
+            else
+            {
+                Set<String> texts = QuoteFactDB.getQuotes( noun );
+                if ( texts != null )
+                {
+                    String randomMatch = regexSetSearch( texts, pattern );
+                    if ( randomMatch != null )
                     {
-                        String randomMatch = regexSetSearch( texts, pattern );
-                        if ( randomMatch != null )
+                        randomMatch = MangleNicks.mangleNicks( event, randomMatch );
+                        if ( jaziz )
                         {
-                            randomMatch = MangleNicks.mangleNicks( bot, event, randomMatch );
-                            if ( jaziz )
+                            try
                             {
-                                try
-                                {
-                                    event.reply( formatQuoteReply( noun, Jaziz.jazizify( randomMatch ) ) );
-                                }
-                                catch ( Exception e )
-                                {
-                                    event.reply( "eeeh" );
-                                    e.printStackTrace();
-                                }
+                                event.respondWith( formatQuoteReply( noun, Jaziz.jazizify( randomMatch ) ) );
                             }
-                            else
+                            catch ( Exception e )
                             {
-                                event.reply( formatQuoteReply( noun, randomMatch ) );
+                                event.respondWith( "eeeh" );
+                                e.printStackTrace();
                             }
                         }
                         else
                         {
-                            event.reply( noun + " has no matching quotes." );
+                            event.respondWith( formatQuoteReply( noun, randomMatch ) );
                         }
                     }
                     else
                     {
-                        event.reply( noun + " has no quotes." );
+                        event.respondWith( noun + " has no matching quotes." );
                     }
                 }
+                else
+                {
+                    event.respondWith( noun + " has no quotes." );
+                }
             }
-            catch ( PatternSyntaxException e )
-            {
-                event.reply( "Syntax error in regex pattern" );
-            }
+        }
+        catch ( PatternSyntaxException e )
+        {
+            event.respondWith( "Syntax error in regex pattern" );
         }
     }
 
     private static String regexSetSearch( Set<String> texts, Pattern pattern )
     {
-        List<String> matchingTexts = new LinkedList<String>();
+        List<String> matchingTexts = new LinkedList<>();
 
         for ( String text : texts )
         {
@@ -382,34 +384,14 @@ public class QuotesAndFacts
         }
     }
 
-    @Handler
-    private void announceFactOrQuoteOnJoin( ReceiveJoin event )
-    {
-        String baseNick = BaseNick.toBaseNick( event.getJoiner() );
-
-        if ( !Ignore.getOnJoin().contains( baseNick ) )
-        {
-            if ( random.nextBoolean() )
-            {
-                if ( !replyWithQuote( baseNick, event, false ) )
-                    replyWithFact( baseNick, event, false );
-            }
-            else
-            {
-                if ( !replyWithFact( baseNick, event, false ) )
-                    replyWithQuote( baseNick, event, false );
-            }
-        }
-    }
-
-    private boolean replyWithFact( String noun, ReceivePrivmsg event, boolean jaziz )
+    private boolean replyWithFact( String noun, GenericMessageEvent event, boolean jaziz )
     {
         String replyText = getReplyFact( noun, jaziz );
         if ( replyText != null )
         {
-            replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = MangleNicks.mangleNicks( event, replyText );
             replyText = formatFactReply( getTitle( noun ), replyText );
-            event.reply( replyText );
+            event.respondWith( replyText );
             return true;
         }
         else
@@ -418,14 +400,14 @@ public class QuotesAndFacts
         }
     }
 
-    private boolean replyWithFact( String noun, ReceiveJoin event, boolean jaziz )
+    private boolean replyWithFact( String noun, JoinEvent event, boolean jaziz )
     {
         String replyText = getReplyFact( noun, jaziz );
         if ( replyText != null )
         {
-            replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = MangleNicks.mangleNicks( event, replyText );
             replyText = formatFactReply( getTitle( noun ), replyText );
-            event.reply( replyText );
+            event.getBot().send().message( event.getChannel().getName(), replyText );
             return true;
         }
         else
@@ -439,7 +421,7 @@ public class QuotesAndFacts
         String text = QuoteFactDB.getRandFact( noun );
         if ( text == null )
         {
-            return text;
+            return null;
         }
         if ( jaziz )
         {
@@ -461,14 +443,14 @@ public class QuotesAndFacts
         return noun + " " + fact;
     }
 
-    private boolean replyWithQuote( String noun, ReceivePrivmsg event, boolean jaziz )
+    private boolean replyWithQuote( String noun, GenericMessageEvent event, boolean jaziz )
     {
         String replyText = getReplyQuote( noun, jaziz );
         if ( replyText != null )
         {
-            replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = MangleNicks.mangleNicks( event, replyText );
             replyText = formatQuoteReply( getTitle( noun ), replyText );
-            event.reply( replyText );
+            event.respondWith( replyText );
             return true;
         }
         else
@@ -477,14 +459,14 @@ public class QuotesAndFacts
         }
     }
 
-    private boolean replyWithQuote( String noun, ReceiveJoin event, boolean jaziz )
+    private boolean replyWithQuote( String noun, JoinEvent event, boolean jaziz )
     {
         String replyText = getReplyQuote( noun, jaziz );
         if ( replyText != null )
         {
-            replyText = MangleNicks.mangleNicks( bot, event, replyText );
+            replyText = MangleNicks.mangleNicks( event, replyText );
             replyText = formatQuoteReply( getTitle( noun ), replyText );
-            event.reply( replyText );
+            event.getBot().send().message( event.getChannel().getName(), replyText );
             return true;
         }
         else
@@ -539,7 +521,6 @@ public class QuotesAndFacts
      * @param input The string to process
      * @param charsToRemove All characters to remove, treated as a set
      * @return A copy of the input String with the characters removed
-     * @see String.trim()
      */
     private String trimChars( String input, String charsToRemove )
     {
@@ -559,6 +540,6 @@ public class QuotesAndFacts
             len--;
         }
 
-        return new String( input.substring( st, len ) );
+        return input.substring( st, len );
     }
 }

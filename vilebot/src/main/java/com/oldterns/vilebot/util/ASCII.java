@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.util;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /*Copyright (c) 2011 Aravind Rao
@@ -22,7 +22,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 public final class ASCII
 {
-    boolean negative;
+    private boolean negative;
 
     public ASCII()
     {

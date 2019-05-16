@@ -6,39 +6,30 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import ca.szc.keratin.bot.KeratinBot;
-import ca.szc.keratin.bot.annotation.AssignedBot;
 import com.oldterns.vilebot.Vilebot;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
-import twitter4j.auth.AccessToken;
 import twitter4j.conf.ConfigurationBuilder;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import net.engio.mbassy.listener.Handler;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Will grab the text from a tweet given the static tweet URL. To enable, add the following entries to vilebot.conf:
  * consumerKey consumerSecret accessToken accessTokenSecret Where all of the above are created at
  * https://apps.twitter.com
  */
-@HandlerContainer
+
 public class UrlTweetAnnouncer
+    extends ListenerAdapter
 {
 
     private static final Pattern urlPattern =
@@ -56,24 +47,21 @@ public class UrlTweetAnnouncer
 
     private final String accessTokenSecret = cfg.get( "accessTokenSecret" ); // may be known as 'Access token secret'
 
-    @AssignedBot
-    private KeratinBot bot;
-
-    @Handler
-    public void urlAnnouncer( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        Matcher urlMatcher = urlPattern.matcher( event.getText() );
+        Matcher urlMatcher = urlPattern.matcher( event.getMessage() );
 
         if ( urlMatcher.find() )
         {
             if ( consumerKey == null || consumerSecret == null || accessToken == null || accessTokenSecret == null )
             {
-                event.reply( "Sorry, I can't read that tweet because my maintainer is a moron. And I wouldn't want to read it, anyway." );
+                event.respondWith( "Sorry, I can't read that tweet because my maintainer is a moron. And I wouldn't want to read it, anyway." );
                 return;
             }
 
-            String title = scrapeURLHTMLTitle( urlMatcher.group( 1 ) );
-            event.reply( "' " + title + " '" );
+            String title = scrapeURLHTMLTitle( event, urlMatcher.group( 1 ) );
+            event.respondWith( "' " + title + " '" );
         }
     }
 
@@ -83,7 +71,7 @@ public class UrlTweetAnnouncer
      * @param url http tweet String
      * @return String of text which represents the tweet. Empty if error.
      */
-    private String scrapeURLHTMLTitle( String url )
+    private String scrapeURLHTMLTitle( GenericMessageEvent event, String url )
     {
         String text = "";
 
@@ -98,16 +86,15 @@ public class UrlTweetAnnouncer
         }
 
         // split the url into pieces, change the request based on what we have
-        String parts[] = url.split( "/" );
+        String[] parts = url.split( "/" );
         int userPosition = 0;
         long tweetID = 0;
         for ( int i = 0; i < parts.length; i++ )
         {
-
-            if ( parts[i].toString().equals( "twitter.com" ) )
+            if ( parts[i].equals( "twitter.com" ) )
                 userPosition = i + 1;
-            if ( parts[i].toString().equals( "status" ) || parts[i].toString().equals( "statuses" ) )
-                tweetID = Long.valueOf( parts[i + 1].toString() ).longValue();
+            if ( parts[i].equals( "status" ) || parts[i].equals( "statuses" ) )
+                tweetID = Long.valueOf( parts[i + 1] );
         }
         if ( userPosition == 0 )
             return text;
@@ -137,7 +124,7 @@ public class UrlTweetAnnouncer
             }
             catch ( TwitterException x )
             {
-                return bot.getNick()
+                return event.getBot().getNick()
                     + ": Until my maintainer fixes the API Key, this is the only tweet you're gonna see. U mad, bro?";
             }
         }

@@ -1,19 +1,19 @@
 package com.oldterns.vilebot.handlers.user;
 
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.db.KarmaDB;
 import com.oldterns.vilebot.util.BaseNick;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
-import net.engio.mbassy.listener.Handler;
 import org.jsoup.Jsoup;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 import twitter4j.JSONArray;
 import twitter4j.JSONObject;
 
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.*;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -22,8 +22,9 @@ import java.util.regex.Pattern;
 /**
  * Created by eunderhi on 25/07/16. Simple Jeopardy implementation.
  */
-@HandlerContainer
+
 public class Trivia
+    extends ListenerAdapter
 {
 
     private static final Pattern questionPattern = Pattern.compile( "^!jeopardy" );
@@ -36,13 +37,13 @@ public class Trivia
 
     private static final long TIMEOUT = 30000L;
 
-    public static final String RED = "\u000304";
+    private static final String RED = "\u000304";
 
-    public static final String RESET = "\u000f";
+    private static final String RESET = "\u000f";
 
-    public static final String BLUE = "\u000302";
+    private static final String BLUE = "\u000302";
 
-    public static final String GREEN = "\u000303";
+    private static final String GREEN = "\u000303";
 
     private static ExecutorService timer = Executors.newScheduledThreadPool( 1 );
 
@@ -52,10 +53,10 @@ public class Trivia
 
     private static final String WELCOME_STRING = "Welcome to Bot Jeopardy!";
 
-    @Handler
-    public void doTrivia( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher questionMatcher = questionPattern.matcher( text );
         Matcher answerMatcher = answerPattern.matcher( text );
 
@@ -73,63 +74,57 @@ public class Trivia
         }
         catch ( Exception e )
         {
-            event.reply( "I don't feel like playing." );
+            event.respondWith( "I don't feel like playing." );
             e.printStackTrace();
         }
     }
 
-    private boolean shouldStartGame( ReceivePrivmsg event )
+    private boolean shouldStartGame( GenericMessageEvent event )
     {
-        String actualChannel = event.getChannel();
-
-        if ( JEOPARDY_CHANNEL.equals( actualChannel ) )
+        if ( event instanceof MessageEvent
+            && ( (MessageEvent) event ).getChannel().getName().equals( JEOPARDY_CHANNEL ) )
         {
             return true;
         }
-        event.reply( "To play jeopardy join: " + JEOPARDY_CHANNEL );
+        event.respondWith( "To play jeopardy join: " + JEOPARDY_CHANNEL );
         return false;
     }
 
-    private synchronized void startGame( ReceivePrivmsg event )
+    private synchronized void startGame( GenericMessageEvent event )
         throws Exception
     {
         if ( currentGame != null )
         {
-            event.reply( currentGame.getAlreadyPlayingString() );
+            event.respondWith( currentGame.getAlreadyPlayingString() );
         }
         else
         {
             currentGame = new TriviaGame();
-            event.reply( WELCOME_STRING );
-            event.reply( currentGame.getIntroString() );
+            event.respondWith( WELCOME_STRING );
+            event.respondWith( currentGame.getIntroString() );
             startTimer( event );
         }
     }
 
-    private void startTimer( final ReceivePrivmsg event )
+    private void startTimer( final GenericMessageEvent event )
     {
-        timer.submit( new Runnable()
-        {
-            @Override
-            public void run()
+        timer.submit( () -> {
+            try
             {
-                try
-                {
-                    Thread.sleep( TIMEOUT );
-                    timeoutTimer( event );
-                }
-                catch ( InterruptedException e )
-                {
-                    e.printStackTrace();
-                }
+                Thread.sleep( TIMEOUT );
+                timeoutTimer( event );
+            }
+            catch ( InterruptedException e )
+            {
+                e.printStackTrace();
             }
         } );
     }
 
-    private void timeoutTimer( ReceivePrivmsg event )
+    private void timeoutTimer( GenericMessageEvent event )
     {
         String message = currentGame.getTimeoutString();
-        event.reply( message );
+        event.respondWith( message );
         currentGame = null;
     }
 
@@ -139,28 +134,29 @@ public class Trivia
         timer = Executors.newFixedThreadPool( 1 );
     }
 
-    private synchronized void finishGame( ReceivePrivmsg event, String answer )
+    private synchronized void finishGame( GenericMessageEvent event, String answer )
     {
-        String answerer = BaseNick.toBaseNick( event.getSender() );
+        String answerer = BaseNick.toBaseNick( event.getUser().getNick() );
         if ( currentGame != null )
         {
             if ( currentGame.isCorrect( answer ) )
             {
                 stopTimer();
-                event.reply( String.format( "Congrats %s, you win %d karma!", answerer, currentGame.getStakes() ) );
+                event.respondWith( String.format( "Congrats %s, you win %d karma!", answerer,
+                                                  currentGame.getStakes() ) );
                 KarmaDB.modNounKarma( answerer, currentGame.getStakes() );
                 currentGame = null;
             }
             else
             {
-                event.reply( String.format( "Sorry %s! That is incorrect, you lose %d karma.", answerer,
-                                            currentGame.getStakes() ) );
+                event.respondWith( String.format( "Sorry %s! That is incorrect, you lose %d karma.", answerer,
+                                                  currentGame.getStakes() ) );
                 KarmaDB.modNounKarma( answerer, -1 * currentGame.getStakes() );
             }
         }
         else
         {
-            event.reply( "No active game. Start a new one with !jeopardy" );
+            event.respondWith( "No active game. Start a new one with !jeopardy" );
         }
     }
 
@@ -177,7 +173,7 @@ public class Trivia
 
         private static final String API_URL = "http://jservice.io/api/random";
 
-        public TriviaGame()
+        TriviaGame()
             throws Exception
         {
             JSONObject triviaJSON = getQuestionJSON();
@@ -207,17 +203,17 @@ public class Trivia
             return 5;
         }
 
-        public String getQuestion()
+        String getQuestion()
         {
             return question;
         }
 
-        public String getAnswer()
+        String getAnswer()
         {
             return answer;
         }
 
-        public int getStakes()
+        int getStakes()
         {
             return stakes;
         }
@@ -245,20 +241,20 @@ public class Trivia
         private String getQuestionBlurb()
         {
             return String.format( "Your category is: %s\nFor %s karma:\n%s", RED + category + RESET,
-                                  GREEN + String.valueOf( stakes ) + RESET, BLUE + question + RESET );
+                                  GREEN + stakes + RESET, BLUE + question + RESET );
         }
 
-        public String getIntroString()
+        String getIntroString()
         {
             return getQuestionBlurb() + "\n30 seconds on the clock.";
         }
 
-        public String getAlreadyPlayingString()
+        String getAlreadyPlayingString()
         {
             return "A game is already in session!\n" + getQuestionBlurb();
         }
 
-        public String getTimeoutString()
+        String getTimeoutString()
         {
             return String.format( "Your 30 seconds is up! The answer we were looking for was:\n%s",
                                   BLUE + answer + RESET );

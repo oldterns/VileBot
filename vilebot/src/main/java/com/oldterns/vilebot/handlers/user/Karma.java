@@ -1,38 +1,30 @@
-/**
- * Copyright (C) 2013 Oldterns
- *
- * This file may be modified and distributed under the terms
- * of the MIT license. See the LICENSE file for details.
- */
 package com.oldterns.vilebot.handlers.user;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.db.ChurchDB;
 import com.oldterns.vilebot.db.GroupDB;
 import com.oldterns.vilebot.db.KarmaDB;
 import com.oldterns.vilebot.util.BaseNick;
 import com.oldterns.vilebot.util.Ignore;
-
 import com.oldterns.vilebot.util.Sessions;
-import net.engio.mbassy.listener.Handler;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.JoinEvent;
+import org.pircbotx.hooks.events.MessageEvent;
+import org.pircbotx.hooks.events.PrivateMessageEvent;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+import org.pircbotx.output.OutputIRC;
 
-import ca.szc.keratin.bot.KeratinBot;
-import ca.szc.keratin.bot.annotation.AssignedBot;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.interfaces.Replyable;
-import ca.szc.keratin.core.event.message.recieve.ReceiveJoin;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import com.oldterns.vilebot.Vilebot;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-@HandlerContainer
 public class Karma
+    extends ListenerAdapter
 {
     private static final Pattern nounPattern = Pattern.compile( "\\S+" );
 
@@ -64,164 +56,184 @@ public class Karma
 
     private static final Pattern totalPattern = Pattern.compile( "^!total" );
 
-    @AssignedBot
-    private KeratinBot bot;
-
-    @Handler
-    private void announceKarmaOnJoin( ReceiveJoin event )
+    @Override
+    public void onJoin( JoinEvent event ) // announce karma on join
     {
-        String noun = BaseNick.toBaseNick( event.getJoiner() );
-
+        String noun = BaseNick.toBaseNick( Objects.requireNonNull( event.getUser() ).getNick() );
+        OutputIRC outputQ = event.getBot().send();
+        String replyTarget = event.getChannel().getName();
         if ( !Ignore.getOnJoin().contains( noun ) )
-            replyWithRankAndKarma( noun, event, false, false, true );
+            replyWithRankAndKarma( noun, outputQ, replyTarget, false, false, true );
     }
 
-    @Handler
-    private void karmaInc( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        // Match any string that has at least one word that ends with ++
-        Matcher incMatcher = incrementPattern.matcher( event.getText() );
+        String text = event.getMessage();
+        OutputIRC outputQ = event.getBot().send();
+        String replyTarget;
+        if ( event instanceof PrivateMessageEvent )
+            replyTarget = event.getUser().getNick();
+        else if ( event instanceof MessageEvent )
+            replyTarget = ( (MessageEvent) event ).getChannel().getName();
+        else
+            return;
+
+        Matcher incMatcher = incrementPattern.matcher( text );
+        Matcher decMatcher = decrementPattern.matcher( text );
+        Matcher incOrDecMatcher = incOrDecPattern.matcher( text );
+        Matcher specificMatcher = karmaQueryPattern.matcher( text );
+        Matcher selfMatcher = selfKarmaQueryPattern.matcher( text );
+        Matcher rankNumberMatcher = ranknPattern.matcher( text );
+        Matcher totalKarmaMatcher = totalPattern.matcher( text );
+        Matcher topBottomThreeMatcher = topBottomThreePattern.matcher( text );
+        Matcher unrankMatcher = removePattern.matcher( text );
 
         if ( incMatcher.matches() )
-        {
-            if ( isPrivate( event ) )
-            {
-                KarmaDB.modNounKarma( event.getSender(), -1 );
-                return;
-            }
-            // Prevent users from increasing karma outside of #TheFoobar
-            if ( !event.getChannel().matches( Vilebot.getConfig().get( "ircChannel1" ) ) )
-            {
-                event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
-                    + " to give or receive karma." );
-                return;
-            }
-
-            // If one match is found, take the entire text of the message (group(0)) and check each word
-            // This is needed in the case that only part of the message is karma events (ie "wow anestico++")
-            String wordBlob = incMatcher.group( 0 );
-            String sender = BaseNick.toBaseNick( event.getSender() );
-
-            Set<String> nicks = new HashSet<String>();
-            Matcher nickMatcher = incBlobPattern.matcher( wordBlob );
-            while ( nickMatcher.find() )
-            {
-                nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
-            }
-
-            boolean insult = false;
-
-            for ( String nick : nicks )
-            {
-                if ( !nick.equals( sender ) )
-                    KarmaDB.modNounKarma( nick, 1 );
-                else
-                    insult = true;
-            }
-
-            if ( insult )
-                // TODO insult generator?
-                event.reply( "I think I'm supposed to insult you now." );
-        }
-    }
-
-    @Handler
-    private void karmaDec( ReceivePrivmsg event )
-    {
-        // Match any string that has at least one word that ends with --
-        Matcher decMatcher = decrementPattern.matcher( event.getText() );
-
+            karmaInc( event, incMatcher );
         if ( decMatcher.matches() )
-        {
-            if ( isPrivate( event ) )
-            {
-                KarmaDB.modNounKarma( event.getSender(), -1 );
-                return;
-            }
-            // Prevent users from decreasing karma outside of #TheFoobar
-            if ( !event.getChannel().matches( Vilebot.getConfig().get( "ircChannel1" ) ) )
-            {
-                event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
-                    + " to give or receive karma." );
-                return;
-            }
-            // If one match is found, take the entire text of the message (group(0)) and check each word
-            String wordBlob = decMatcher.group( 0 );
-
-            List<String> nicks = new LinkedList<String>();
-            Matcher nickMatcher = decBlobPattern.matcher( wordBlob );
-            while ( nickMatcher.find() )
-            {
-                nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
-            }
-
-            boolean insult = false;
-
-            for ( String nick : nicks )
-            {
-                if ( !nick.equals( bot.getNick() ) )
-                    KarmaDB.modNounKarma( nick, -1 );
-                else
-                    insult = true;
-            }
-
-            if ( insult )
-                // TODO insult generator?
-                event.reply( "I think I'm supposed to insult you now." );
-        }
-    }
-
-    @Handler
-    private void karmaIncOrDec( ReceivePrivmsg event )
-    {
-        // Match any string that has at least one word that ends with ++
-        Matcher incOrDecMatcher = incOrDecPattern.matcher( event.getText() );
-
+            karmaDec( event, decMatcher );
         if ( incOrDecMatcher.matches() )
-        {
-            if ( isPrivate( event ) )
-            {
-                KarmaDB.modNounKarma( event.getSender(), -1 );
-                return;
-            }
-
-            // Prevent users from increasing karma outside of #TheFoobar
-            if ( !event.getChannel().matches( Vilebot.getConfig().get( "ircChannel1" ) ) )
-            {
-                event.reply( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
-                    + " to give or receive karma." );
-                return;
-            }
-
-            // If one match is found, take the entire text of the message (group(0)) and check each word
-            // This is needed in the case that only part of the message is karma events (ie "wow anestico++")
-            String wordBlob = incOrDecMatcher.group( 0 );
-            String sender = BaseNick.toBaseNick( event.getSender() );
-
-            Set<String> nicks = new HashSet<String>();
-            Matcher nickMatcher = incOrDecBlobPattern.matcher( wordBlob );
-            while ( nickMatcher.find() )
-            {
-                nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
-            }
-
-            boolean insult = false;
-
-            for ( String nick : nicks )
-            {
-                if ( !nick.equals( sender ) )
-                    decideIncOrDec( event, nick );
-                else
-                    insult = true;
-            }
-
-            if ( insult )
-                // TODO insult generator?
-                event.reply( "I think I'm supposed to insult you now." );
-        }
+            karmaIncOrDec( event, incOrDecMatcher );
+        if ( specificMatcher.matches() )
+            specificKarmaQuery( event, outputQ, replyTarget, specificMatcher );
+        if ( selfMatcher.matches() )
+            selfKarmaQuery( event, outputQ, replyTarget, selfMatcher );
+        if ( rankNumberMatcher.matches() )
+            rankNumber( event, outputQ, replyTarget, rankNumberMatcher );
+        if ( totalKarmaMatcher.matches() )
+            totalKarma( event );
+        if ( topBottomThreeMatcher.matches() )
+            topBottomThree( event, outputQ, replyTarget, topBottomThreeMatcher );
+        if ( unrankMatcher.matches() )
+            unrank( event, outputQ, replyTarget, unrankMatcher );
     }
 
-    private void decideIncOrDec( ReceivePrivmsg event, String nick )
+    private void karmaInc( GenericMessageEvent event, Matcher incMatcher )
+    {
+        if ( isPrivate( event ) )
+        {
+            KarmaDB.modNounKarma( Objects.requireNonNull( event.getUser() ).getNick(), -1 );
+            return;
+        }
+        // Prevent users from increasing karma outside of #TheFoobar
+        if ( !( (MessageEvent) event ).getChannel().getName().equals( Vilebot.getConfig().get( "ircChannel1" ) ) )
+        {
+            event.respondWith( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
+                + " to give or receive karma." );
+            return;
+        }
+
+        // If one match is found, take the entire text of the message (group(0)) and check each word
+        // This is needed in the case that only part of the message is karma events (ie "wow anestico++")
+        String wordBlob = incMatcher.group( 0 );
+        String sender = BaseNick.toBaseNick( Objects.requireNonNull( event.getUser() ).getNick() );
+
+        Set<String> nicks = new HashSet<>();
+        Matcher nickMatcher = incBlobPattern.matcher( wordBlob );
+        while ( nickMatcher.find() )
+        {
+            nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
+        }
+
+        boolean insult = false;
+
+        for ( String nick : nicks )
+        {
+            if ( !nick.equals( sender ) )
+                KarmaDB.modNounKarma( nick, 1 );
+            else
+                insult = true;
+        }
+
+        if ( insult )
+            // TODO insult generator?
+            event.respondWith( "I think I'm supposed to insult you now." );
+    }
+
+    private void karmaDec( GenericMessageEvent event, Matcher decMatcher )
+    {
+        if ( isPrivate( event ) )
+        {
+            KarmaDB.modNounKarma( Objects.requireNonNull( event.getUser() ).getNick(), -1 );
+            return;
+        }
+        // Prevent users from decreasing karma outside of #TheFoobar
+        if ( !( (MessageEvent) event ).getChannel().getName().equals( Vilebot.getConfig().get( "ircChannel1" ) ) )
+        {
+            event.respondWith( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
+                + " to give or receive karma." );
+            return;
+        }
+        // If one match is found, take the entire text of the message (group(0)) and check each word
+        String wordBlob = decMatcher.group( 0 );
+
+        List<String> nicks = new LinkedList<>();
+        Matcher nickMatcher = decBlobPattern.matcher( wordBlob );
+        while ( nickMatcher.find() )
+        {
+            nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
+        }
+
+        boolean insult = false;
+        String botNick = event.getBot().getNick();
+        for ( String nick : nicks )
+        {
+            if ( !nick.equals( botNick ) )
+                KarmaDB.modNounKarma( nick, -1 );
+            else
+                insult = true;
+        }
+
+        if ( insult )
+            // TODO insult generator?
+            event.respondWith( "I think I'm supposed to insult you now." );
+    }
+
+    private void karmaIncOrDec( GenericMessageEvent event, Matcher incOrDecMatcher )
+    {
+        if ( isPrivate( event ) )
+        {
+            KarmaDB.modNounKarma( Objects.requireNonNull( event.getUser() ).getNick(), -1 );
+            return;
+        }
+
+        // Prevent users from increasing karma outside of #TheFoobar
+        if ( !( (MessageEvent) event ).getChannel().getName().equals( Vilebot.getConfig().get( "ircChannel1" ) ) )
+        {
+            event.respondWith( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
+                + " to give or receive karma." );
+            return;
+        }
+
+        // If one match is found, take the entire text of the message (group(0)) and check each word
+        // This is needed in the case that only part of the message is karma events (ie "wow anestico++")
+        String wordBlob = incOrDecMatcher.group( 0 );
+        String sender = BaseNick.toBaseNick( Objects.requireNonNull( event.getUser() ).getNick() );
+
+        Set<String> nicks = new HashSet<>();
+        Matcher nickMatcher = incOrDecBlobPattern.matcher( wordBlob );
+        while ( nickMatcher.find() )
+        {
+            nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
+        }
+
+        boolean insult = false;
+
+        for ( String nick : nicks )
+        {
+            if ( !nick.equals( sender ) )
+                decideIncOrDec( event, nick );
+            else
+                insult = true;
+        }
+
+        if ( insult )
+            // TODO insult generator?
+            event.respondWith( "I think I'm supposed to insult you now." );
+    }
+
+    private void decideIncOrDec( GenericMessageEvent event, String nick )
     {
         int karma = 0;
         Random rand = new Random();
@@ -232,169 +244,141 @@ public class Karma
         String reply = nick + " had their karma ";
         reply += karma == 1 ? "increased" : "decreased";
         reply += " by 1";
-        event.reply( reply );
+        event.respondWith( reply );
         KarmaDB.modNounKarma( nick, karma );
     }
 
-    private boolean isPrivate( ReceivePrivmsg event )
+    private boolean isPrivate( GenericMessageEvent event )
     {
-        try
-        {
-            bot.getChannel( event.getChannel() ).getNicks();
-        }
-        catch ( Exception e )
-        {
-            return true;
-        }
-        return false;
+        return event instanceof PrivateMessageEvent;
     }
 
-    @Handler
-    private void karmaQuery( ReceivePrivmsg event )
+    private void specificKarmaQuery( GenericMessageEvent event, OutputIRC outputQ, String replyTarget,
+                                     Matcher specificMatcher )
     {
-        Matcher specificMatcher = karmaQueryPattern.matcher( event.getText() );
-        Matcher selfMatcher = selfKarmaQueryPattern.matcher( event.getText() );
+        String mode = specificMatcher.group( 1 );
+        String nickBlob = specificMatcher.group( 2 );
 
-        if ( specificMatcher.matches() )
+        List<String> nicks = new LinkedList<>();
+        Matcher nickMatcher = nickBlobPattern.matcher( nickBlob );
+        while ( nickMatcher.find() )
         {
-            String mode = specificMatcher.group( 1 );
-            String nickBlob = specificMatcher.group( 2 );
-
-            List<String> nicks = new LinkedList<String>();
-            Matcher nickMatcher = nickBlobPattern.matcher( nickBlob );
-            while ( nickMatcher.find() )
-            {
-                nicks.add( nickMatcher.group( 1 ) );
-            }
-
-            boolean reverse = "rev".equals( mode );
-
-            for ( String nick : nicks )
-            {
-                if ( !replyWithRankAndKarma( nick, event, reverse ) )
-                    event.reply( nick + " has no karma." );
-            }
+            nicks.add( nickMatcher.group( 1 ) );
         }
-        else if ( selfMatcher.matches() )
-        {
-            String mode = selfMatcher.group( 1 );
-            String noun = BaseNick.toBaseNick( event.getSender() );
 
-            boolean reverse = "rev".equals( mode );
-            if ( !replyWithRankAndKarma( noun, event, reverse ) )
-                event.reply( noun + " has no karma." );
+        boolean reverse = "rev".equals( mode );
+
+        for ( String nick : nicks )
+        {
+            if ( !replyWithRankAndKarma( nick, outputQ, replyTarget, reverse ) )
+                event.respondWith( nick + " has no karma." );
         }
     }
 
-    @Handler
-    private void rankNumber( ReceivePrivmsg event )
+    private void selfKarmaQuery( GenericMessageEvent event, OutputIRC outputQ, String replyTarget, Matcher selfMatcher )
     {
-        Matcher matcher = ranknPattern.matcher( event.getText() );
+        String mode = selfMatcher.group( 1 );
+        String noun = BaseNick.toBaseNick( event.getUser().getNick() );
 
-        if ( matcher.matches() )
+        boolean reverse = "rev".equals( mode );
+        if ( !replyWithRankAndKarma( noun, outputQ, replyTarget, reverse ) )
+            event.respondWith( noun + " has no karma." );
+    }
+
+    private void rankNumber( GenericMessageEvent event, OutputIRC outputQ, String replyTarget,
+                             Matcher rankNumberMatcher )
+    {
+        String mode = rankNumberMatcher.group( 1 );
+        String place = rankNumberMatcher.group( 2 );
+
+        boolean reverse = "rev".equals( mode );
+
+        String noun;
+        if ( reverse )
+            noun = KarmaDB.getRevRankNoun( Long.parseLong( place ) );
+        else
+            noun = KarmaDB.getRankNoun( Long.parseLong( place ) );
+
+        if ( noun != null )
+            replyWithRankAndKarma( noun, outputQ, replyTarget, reverse );
+        else
+            event.respondWith( "No noun at that rank." );
+    }
+
+    private void totalKarma( GenericMessageEvent event )
+    {
+        event.respondWith( "" + KarmaDB.getTotalKarma() );
+    }
+
+    private void topBottomThree( GenericMessageEvent event, OutputIRC outputQ, String replyTarget,
+                                 Matcher topBottomThreeMatcher )
+    {
+        String mode = topBottomThreeMatcher.group( 1 );
+
+        Set<String> nouns = null;
+        if ( "top".equals( mode ) )
         {
-            String mode = matcher.group( 1 );
-            String place = matcher.group( 2 );
+            nouns = KarmaDB.getRankNouns( 0, 2 );
+        }
+        else if ( "bottom".equals( mode ) )
+        {
+            nouns = KarmaDB.getRevRankNouns( 0, 2 );
+        }
 
-            boolean reverse = "rev".equals( mode );
-
-            String noun;
-            if ( reverse )
-                noun = KarmaDB.getRevRankNoun( Long.parseLong( place ) );
-            else
-                noun = KarmaDB.getRankNoun( Long.parseLong( place ) );
-
-            if ( noun != null )
-                replyWithRankAndKarma( noun, event, reverse );
-            else
-                event.reply( "No noun at that rank." );
+        if ( nouns != null && nouns.size() > 0 )
+        {
+            for ( String noun : nouns )
+            {
+                replyWithRankAndKarma( noun, outputQ, replyTarget, false, true );
+            }
+        }
+        else
+        {
+            event.respondWith( "No nouns at ranks 1 to 3." );
         }
     }
 
-    @Handler
-    private void totalKarma( ReceivePrivmsg event )
-    {
-        Matcher matcher = totalPattern.matcher( event.getText() );
-        if ( matcher.matches() )
-        {
-            event.reply( "" + KarmaDB.getTotalKarma() );
-        }
-    }
-
-    @Handler
-    private void topBottomThree( ReceivePrivmsg event )
-    {
-        Matcher matcher = topBottomThreePattern.matcher( event.getText() );
-
-        if ( matcher.matches() )
-        {
-            String mode = matcher.group( 1 );
-
-            Set<String> nouns = null;
-            if ( "top".equals( mode ) )
-            {
-                nouns = KarmaDB.getRankNouns( 0, 2 );
-            }
-            else if ( "bottom".equals( mode ) )
-            {
-                nouns = KarmaDB.getRevRankNouns( 0, 2 );
-            }
-
-            if ( nouns != null && nouns.size() > 0 )
-            {
-                for ( String noun : nouns )
-                {
-                    replyWithRankAndKarma( noun, event, false, true );
-                }
-            }
-            else
-            {
-                event.reply( "No nouns at ranks 1 to 3." );
-            }
-        }
-    }
-
-    @Handler
-    private void unrank( ReceivePrivmsg event )
+    private void unrank( GenericMessageEvent event, OutputIRC outputQ, String replyTarget, Matcher unrankMatcher )
     {
         // Admin-only command: remove all of a user's karma.
-        Matcher matcher = removePattern.matcher( event.getText() );
-        String username = Sessions.getSession( event.getSender() );
+        // Matcher matcher = removePattern.matcher( event.getMessage() );
+        String username = Sessions.getSession( event.getUser().getNick() );
 
-        if ( matcher.matches() && GroupDB.isAdmin( username ) )
+        if ( GroupDB.isAdmin( username ) )
         {
-            String noun = BaseNick.toBaseNick( matcher.group( 1 ) );
+            String noun = BaseNick.toBaseNick( unrankMatcher.group( 1 ) );
 
-            if ( replyWithRankAndKarma( noun, event ) )
+            if ( replyWithRankAndKarma( noun, outputQ, replyTarget ) )
             {
-                event.reply( "Removing " + noun + "." );
+                event.respondWith( "Removing " + noun + "." );
                 KarmaDB.remNoun( noun );
             }
             else
             {
-                event.reply( noun + " isn't ranked." );
+                event.respondWith( noun + " isn't ranked." );
             }
         }
     }
 
-    private static boolean replyWithRankAndKarma( String noun, Replyable event )
+    private static boolean replyWithRankAndKarma( String noun, OutputIRC outputQ, String replyTarget )
     {
-        return replyWithRankAndKarma( noun, event, false );
+        return replyWithRankAndKarma( noun, outputQ, replyTarget, false );
     }
 
-    private static boolean replyWithRankAndKarma( String noun, Replyable event, boolean reverseOrder )
+    private static boolean replyWithRankAndKarma( String noun, OutputIRC outputQ, String replyTarget,
+                                                  boolean reverseOrder )
     {
-        return replyWithRankAndKarma( noun, event, reverseOrder, false );
+        return replyWithRankAndKarma( noun, outputQ, replyTarget, reverseOrder, false );
     }
 
-    private static boolean replyWithRankAndKarma( String noun, Replyable event, boolean reverseOrder,
-                                                  boolean obfuscateNick )
+    private static boolean replyWithRankAndKarma( String noun, OutputIRC outputQ, String replyTarget,
+                                                  boolean reverseOrder, boolean obfuscateNick )
     {
-        return replyWithRankAndKarma( noun, event, reverseOrder, obfuscateNick, false );
+        return replyWithRankAndKarma( noun, outputQ, replyTarget, reverseOrder, obfuscateNick, false );
     }
 
-    private static boolean replyWithRankAndKarma( String noun, Replyable event, boolean reverseOrder,
-                                                  boolean obfuscateNick, boolean useTitle )
+    private static boolean replyWithRankAndKarma( String noun, OutputIRC outputQ, String replyTarget,
+                                                  boolean reverseOrder, boolean obfuscateNick, boolean useTitle )
     {
         Integer nounRank;
         if ( reverseOrder )
@@ -433,7 +417,7 @@ public class Karma
             sb.append( nounKarma );
             sb.append( " points of karma." );
 
-            event.reply( sb.toString() );
+            outputQ.message( replyTarget, sb.toString() );
             return true;
         }
         return false;

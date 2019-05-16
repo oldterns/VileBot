@@ -33,7 +33,7 @@ public class ConfMap
      */
     public static interface ConfParser
     {
-        public Set<Entry<String, String>> parse( BufferedReader reader )
+        Set<Entry<String, String>> parse( BufferedReader reader )
             throws IOException;
     }
 
@@ -60,9 +60,9 @@ public class ConfMap
         public Set<Entry<String, String>> parse( BufferedReader reader )
             throws IOException
         {
-            LinkedHashSet<Entry<String, String>> entrySet = new LinkedHashSet<Entry<String, String>>();
+            LinkedHashSet<Entry<String, String>> entrySet = new LinkedHashSet<>();
 
-            String line = null;
+            String line;
             while ( ( line = reader.readLine() ) != null )
             {
                 Matcher matcher = linePattern.matcher( line );
@@ -72,7 +72,7 @@ public class ConfMap
                     String key = matcher.group( 1 );
                     String value = matcher.group( 2 );
 
-                    entrySet.add( new SimpleEntry<String, String>( key, value ) );
+                    entrySet.add( new SimpleEntry<>( key, value ) );
                 }
             }
 

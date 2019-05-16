@@ -3,21 +3,10 @@
 
 ## Setup
 
-### Clone keratin-irc
-
-    git clone https://github.com/ASzc/keratin-irc.git
-
 ### Create config file
 
     cp cfg/vilebot.conf.example cfg/vilebot.conf
     $EDITOR vilebot/cfg/vilebot.conf
-
-### Formatting
-
-Maven checks if VileBot's code follows maven eclipse codestyle and fails the build if it does not.
-To format your code, run the following maven command in vilebot:
-
-    mvn formatter:format
 
 ### Eclipse import
 
@@ -45,7 +34,7 @@ redis-server is run with the local config file automatically by server-control.s
 
 ### ASCII Fonts
 
-Download fonts for !ascii command
+Download fonts for `!ascii` command
 
     cd vilebot
     ./download-fonts.sh

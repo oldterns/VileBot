@@ -1,10 +1,14 @@
-/**
- * Copyright (C) 2013 Oldterns
- *
- * This file may be modified and distributed under the terms
- * of the MIT license. See the LICENSE file for details.
- */
 package com.oldterns.vilebot.handlers.user;
+
+import com.oldterns.vilebot.util.Ignore;
+import com.sun.syndication.feed.synd.SyndEntry;
+import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.io.FeedException;
+import com.sun.syndication.io.SyndFeedInput;
+import com.sun.syndication.io.XmlReader;
+import org.apache.log4j.Logger;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -17,25 +21,12 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.pmw.tinylog.Logger;
-
-import net.engio.mbassy.listener.Handler;
-
-import ca.szc.keratin.bot.KeratinBot;
-import ca.szc.keratin.bot.annotation.AssignedBot;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-
-import com.oldterns.vilebot.util.Ignore;
-import com.sun.syndication.feed.synd.SyndEntry;
-import com.sun.syndication.feed.synd.SyndFeed;
-import com.sun.syndication.io.FeedException;
-import com.sun.syndication.io.SyndFeedInput;
-import com.sun.syndication.io.XmlReader;
-
-@HandlerContainer
 public class Weather
+    extends ListenerAdapter
 {
+
+    private static Logger logger = Logger.getLogger( Weather.class );
+
     private static final String LESS_NICK = "owilliams";
     static
     {
@@ -44,7 +35,7 @@ public class Weather
 
     private static final String defaultLocation = "ytz";
 
-    private static final HashMap<String, URL> weatherFeedsByIataCode = new LinkedHashMap<String, URL>();
+    private static final HashMap<String, URL> weatherFeedsByIataCode = new LinkedHashMap<>();
     static
     {
         try
@@ -81,132 +72,125 @@ public class Weather
         }
         catch ( MalformedURLException e )
         {
-            Logger.error( e, "Error loading weather URLs" );
+            logger.error( "Error loading weather URLs" );
             throw new RuntimeException( e );
         }
     }
 
-    private static HashMap<String, WeatherData> weatherDataByIataCode = new HashMap<String, WeatherData>();
+    private static HashMap<String, WeatherData> weatherDataByIataCode = new HashMap<>();
 
     private static final long weatherDataCacheTime = 1000 * 60 * 30;
 
-    private static final Pattern weatherPattern = Pattern.compile( "!(less|more|)weather(?: ([a-zA-Z]{3,3})|)" );
+    private static final Pattern weatherPattern = Pattern.compile( "!(less|more|)weather(?: ([a-zA-Z]{3})|)" );
 
-    private static final Pattern forecastPattern = Pattern.compile( "!forecast(?: ([a-zA-Z]{3,3})|)" );
+    private static final Pattern forecastPattern = Pattern.compile( "!forecast(?: ([a-zA-Z]{3})|)" );
 
-    @AssignedBot
-    private KeratinBot bot;
-
-    @Handler
-    private void forecastWeather( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
-        Matcher matcher = forecastPattern.matcher( text );
-        if ( matcher.matches() )
-        {
-            String locationCode = matcher.group( 1 ); // The IATA code
-            if ( locationCode == null )
-            {
-                locationCode = defaultLocation;
-            }
-            locationCode = locationCode.toLowerCase();
+        String text = event.getMessage();
 
-            if ( weatherFeedsByIataCode.containsKey( locationCode ) )
+        Matcher forecastMatcher = forecastPattern.matcher( text );
+        Matcher weatherMatcher = weatherPattern.matcher( text );
+
+        if ( forecastMatcher.matches() )
+            forecastWeather( event, forecastMatcher );
+        if ( weatherMatcher.matches() )
+            currentWeather( event, weatherMatcher );
+    }
+
+    private void forecastWeather( GenericMessageEvent event, Matcher matcher )
+    {
+        String locationCode = matcher.group( 1 ); // The IATA code
+        if ( locationCode == null )
+        {
+            locationCode = defaultLocation;
+        }
+        locationCode = locationCode.toLowerCase();
+
+        if ( weatherFeedsByIataCode.containsKey( locationCode ) )
+        {
+            WeatherData weather = getWeatherFor( locationCode );
+            if ( weather == null )
             {
-                WeatherData weather = getWeatherFor( locationCode );
-                if ( weather == null )
+                event.respondWith( "Error reading weather feed for " + locationCode );
+            }
+            else
+            {
+                StringBuilder sb = new StringBuilder();
+                for ( Entry<String, String> forecastDay : weather.getForecast().entrySet() )
                 {
-                    event.reply( "Error reading weather feed for " + locationCode );
+                    sb.append( "[" );
+                    sb.append( forecastDay.getKey() );
+                    sb.append( ": " );
+                    sb.append( forecastDay.getValue() );
+                    sb.append( "] " );
                 }
-                else
-                {
-                    StringBuilder sb = new StringBuilder();
-                    for ( Entry<String, String> forecastDay : weather.getForecast().entrySet() )
-                    {
-                        sb.append( "[" );
-                        sb.append( forecastDay.getKey() );
-                        sb.append( ": " );
-                        sb.append( forecastDay.getValue() );
-                        sb.append( "] " );
-                    }
-                    event.reply( sb.toString() );
-                }
+                event.respondWith( sb.toString() );
             }
         }
     }
 
-    @Handler
-    private void currentWeather( ReceivePrivmsg event )
+    private void currentWeather( GenericMessageEvent event, Matcher matcher )
     {
-        String text = event.getText();
-        Matcher matcher = weatherPattern.matcher( text );
-
-        if ( matcher.matches() )
+        String modifier = matcher.group( 1 ); // Either less or more or null
+        String locationCode = matcher.group( 2 ); // The IATA code
+        if ( locationCode == null )
         {
-            String modifier = matcher.group( 1 ); // Either less or more or null
-            String locationCode = matcher.group( 2 ); // The IATA code
-            if ( locationCode == null )
+            locationCode = defaultLocation;
+        }
+        locationCode = locationCode.toLowerCase();
+
+        if ( weatherFeedsByIataCode.containsKey( locationCode ) )
+        {
+            WeatherData weather = getWeatherFor( locationCode );
+            if ( weather == null )
             {
-                locationCode = defaultLocation;
-            }
-            locationCode = locationCode.toLowerCase();
-
-            if ( weatherFeedsByIataCode.containsKey( locationCode ) )
-            {
-                WeatherData weather = getWeatherFor( locationCode );
-                if ( weather == null )
-                {
-                    event.reply( "Error reading weather feed for " + locationCode );
-                }
-                else
-                {
-                    if ( !"less".equals( modifier ) )
-                    {
-                        for ( String alert : weather.getAlerts() )
-                        {
-                            event.reply( alert );
-                        }
-                    }
-
-                    LinkedHashMap<String, String> currentConditions = weather.getCurrentConditions();
-                    if ( "".equals( modifier ) )
-                    {
-                        StringBuilder sb = new StringBuilder();
-
-                        sb.append( currentConditions.get( "Condition" ) );
-                        sb.append( ", Temperature: " );
-                        sb.append( currentConditions.get( "Temperature" ) );
-                        sb.append( ", Humidity: " );
-                        sb.append( currentConditions.get( "Humidity" ) );
-                        sb.append( " - " );
-                        sb.append( currentConditions.get( "Observed at" ) );
-
-                        event.reply( sb.toString() );
-                    }
-                    else if ( "less".equals( modifier ) )
-                    {
-                        bot.sendPrivmsgAs( LESS_NICK, event.getChannel(),
-                                           "IT'S " + currentConditions.get( "Condition" ).toUpperCase() );
-                    }
-                    else if ( "more".equals( modifier ) )
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        for ( Entry<String, String> condition : currentConditions.entrySet() )
-                        {
-                            sb.append( "[" );
-                            sb.append( condition.getKey() );
-                            sb.append( ": " );
-                            sb.append( condition.getValue() );
-                            sb.append( "] " );
-                        }
-                        event.reply( sb.toString() );
-                    }
-                }
+                event.respondWith( "Error reading weather feed for " + locationCode );
             }
             else
             {
-                event.replyDirectly( "No weather feed available for " + locationCode );
+                if ( !"less".equals( modifier ) )
+                {
+                    for ( String alert : weather.getAlerts() )
+                    {
+                        event.respondWith( alert );
+                    }
+                }
+
+                LinkedHashMap<String, String> currentConditions = weather.getCurrentConditions();
+                if ( "".equals( modifier ) )
+                {
+
+                    String sb = currentConditions.get( "Condition" ) + ", Temperature: "
+                        + currentConditions.get( "Temperature" ) + ", Humidity: " + currentConditions.get( "Humidity" )
+                        + " - " + currentConditions.get( "Observed at" );
+                    event.respondWith( sb );
+                }
+                else if ( "less".equals( modifier ) )
+                {
+                    // bot.sendPrivmsgAs( LESS_NICK, event.getChannel(),
+                    // "IT'S " + currentConditions.get( "Condition" ).toUpperCase() );
+                    event.respondWith( "IT'S " + currentConditions.get( "Condition" ).toUpperCase() );
+                }
+                else if ( "more".equals( modifier ) )
+                {
+                    StringBuilder sb = new StringBuilder();
+                    for ( Entry<String, String> condition : currentConditions.entrySet() )
+                    {
+                        sb.append( "[" );
+                        sb.append( condition.getKey() );
+                        sb.append( ": " );
+                        sb.append( condition.getValue() );
+                        sb.append( "] " );
+                    }
+                    event.respondWith( sb.toString() );
+                }
             }
+        }
+        else
+        {
+            event.respondWith( "No weather feed available for " + locationCode );
         }
     }
 
@@ -233,7 +217,8 @@ public class Weather
         }
         catch ( IllegalArgumentException | IOException | FeedException e )
         {
-            Logger.error( e, "Error opening RSS feed" );
+            logger.error( e.getMessage() );
+            logger.error( "Error opening RSS feed" );
         }
         return weather;
     }
@@ -243,11 +228,11 @@ public class Weather
      */
     private class WeatherData
     {
-        private final Pattern alertIDPattern = Pattern.compile( ".*_w[0-9]+:[0-9]{14,14}$" );
+        private final Pattern alertIDPattern = Pattern.compile( ".*_w[0-9]+:[0-9]{14}$" );
 
-        private final Pattern currentConditionsIDPattern = Pattern.compile( ".*_cc:[0-9]{14,14}$" );
+        private final Pattern currentConditionsIDPattern = Pattern.compile( ".*_cc:[0-9]{14}$" );
 
-        private final Pattern forecastIDPattern = Pattern.compile( ".*_fc[0-9]:[0-9]{14,14}$" );
+        private final Pattern forecastIDPattern = Pattern.compile( ".*_fc[0-9]:[0-9]{14}$" );
 
         private final LinkedList<String> alerts;
 
@@ -257,20 +242,18 @@ public class Weather
 
         private final Date creationTime;
 
-        public WeatherData( URL feedSource )
+        WeatherData( URL feedSource )
             throws IOException, IllegalArgumentException, FeedException
         {
-            alerts = new LinkedList<String>();
-            forecast = new LinkedHashMap<String, String>();
-            currentConditions = new LinkedHashMap<String, String>();
+            alerts = new LinkedList<>();
+            forecast = new LinkedHashMap<>();
+            currentConditions = new LinkedHashMap<>();
             creationTime = new Date();
 
             try ( XmlReader reader = new XmlReader( feedSource ) )
             {
                 SyndFeedInput input = new SyndFeedInput();
                 SyndFeed feed = input.build( reader );
-
-                // System.out.println( feed );
 
                 for ( Object rawEntry : feed.getEntries() )
                 {
@@ -309,22 +292,22 @@ public class Weather
             }
         }
 
-        public LinkedList<String> getAlerts()
+        LinkedList<String> getAlerts()
         {
             return alerts;
         }
 
-        public LinkedHashMap<String, String> getCurrentConditions()
+        LinkedHashMap<String, String> getCurrentConditions()
         {
             return currentConditions;
         }
 
-        public LinkedHashMap<String, String> getForecast()
+        LinkedHashMap<String, String> getForecast()
         {
             return forecast;
         }
 
-        public Date getCreationDate()
+        Date getCreationDate()
         {
             return creationTime;
         }

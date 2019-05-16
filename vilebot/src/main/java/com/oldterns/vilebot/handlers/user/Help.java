@@ -6,15 +6,14 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-
-@HandlerContainer
 public class Help
+    extends ListenerAdapter
 {
     private static final Pattern helpPattern = Pattern.compile( "!help" );
 
@@ -23,15 +22,15 @@ public class Help
     /**
      * Reply to user !help command with help info
      */
-    @Handler
-    private void userHelp( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher matcher = helpPattern.matcher( text );
 
         if ( matcher.matches() )
         {
-            event.replyPrivately( helpMessage );
+            event.respondPrivateMessage( helpMessage );
         }
     }
 

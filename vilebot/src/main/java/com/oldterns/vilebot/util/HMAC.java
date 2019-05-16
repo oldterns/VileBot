@@ -1,21 +1,23 @@
-/**
- * Copyright (C) 2013 Oldterns
- *
- * This file may be modified and distributed under the terms
- * of the MIT license. See the LICENSE file for details.
+/*
+  Copyright (C) 2013 Oldterns
+
+  This file may be modified and distributed under the terms
+  of the MIT license. See the LICENSE file for details.
  */
 package com.oldterns.vilebot.util;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import org.apache.log4j.Logger;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.pmw.tinylog.Logger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 public class HMAC
 {
+
+    private static Logger logger = Logger.getLogger( HMAC.class );
+
     /**
      * Generate an HMAC signature from message and key, using the SHA2 512 bit hash algo.
      * 
@@ -31,7 +33,8 @@ public class HMAC
         }
         catch ( NoSuchAlgorithmException e )
         {
-            Logger.error( e, "Hash algorithim unsupported" );
+            logger.error( e.getMessage() );
+            logger.error( "Hash algorithim unsupported" );
         }
         return null;
     }
@@ -54,11 +57,12 @@ public class HMAC
             mac.init( secret );
 
             byte[] digest = mac.doFinal( message.getBytes() );
-            return new String( bytesToHex( digest ) );
+            return bytesToHex( digest );
         }
         catch ( InvalidKeyException e )
         {
-            Logger.error( e, "Can't init Mac instance with key" );
+            logger.error( e.getMessage() );
+            logger.error( "Can't init Mac instance with key" );
         }
         return null;
     }

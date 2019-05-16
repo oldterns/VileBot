@@ -6,35 +6,30 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-
-@HandlerContainer
 public class TwitterCorrection
+    extends ListenerAdapter
 {
     private static final Pattern twitterSyntaxUsePattern = Pattern.compile( "(?:^|\\s+)[@](\\S+)(?:\\s|:|)" );
 
-    @Handler
-    public void twitterBeGone( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher matcher = twitterSyntaxUsePattern.matcher( text );
 
         if ( matcher.find() )
         {
             String word = matcher.group( 1 );
 
-            StringBuilder sb = new StringBuilder();
-
-            sb.append( "You seem to be using twitter addressing syntax. On IRC you would say this instead: " );
-            sb.append( word.replaceAll( "[^A-Za-z0-9]$", "" ) );
-            sb.append( ": message" );
-
-            event.replyDirectly( sb.toString() );
+            String sb = "You seem to be using twitter addressing syntax. On IRC you would say this instead: "
+                + word.replaceAll( "[^A-Za-z0-9]$", "" ) + ": message";
+            event.respond( sb );
         }
     }
 }

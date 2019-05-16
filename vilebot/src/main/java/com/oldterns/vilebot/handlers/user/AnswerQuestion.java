@@ -1,9 +1,8 @@
 package com.oldterns.vilebot.handlers.user;
 
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
 import com.oldterns.vilebot.Vilebot;
-import net.engio.mbassy.listener.Handler;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -12,19 +11,15 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by eunderhi on 13/08/15.
- */
-
-@HandlerContainer
 public class AnswerQuestion
+    extends ListenerAdapter
 {
 
     private static final Pattern questionPattern = Pattern.compile( "^!(tellme)\\s(.+)$" );
@@ -33,29 +28,31 @@ public class AnswerQuestion
 
     private static final int MAX_RESPONSE = 500;
 
-    @Handler
-    public void tellMe( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
-        Matcher matcher = questionPattern.matcher( text );
+        String text = event.getMessage();
+        Matcher tellMeMatcher = questionPattern.matcher( text );
 
-        if ( matcher.matches() )
-        {
-            String question = matcher.group( 2 );
-            String answer = getAnswer( question );
-            answer = truncate( answer );
-            event.reply( answer );
-        }
+        if ( tellMeMatcher.matches() )
+            tellMe( event, tellMeMatcher );
     }
 
-    String getAnswer( String searchTerm )
+    private void tellMe( GenericMessageEvent event, Matcher matcher )
+    {
+        String question = matcher.group( 2 );
+        String answer = getAnswer( question );
+        answer = truncate( answer );
+        event.respondWith( answer );
+    }
+
+    private String getAnswer( String searchTerm )
     {
         try
         {
             String url = makeURL( searchTerm );
             String response = getContent( url );
-            String answer = parseResponse( response );
-            return answer;
+            return parseResponse( response );
         }
         catch ( Exception e )
         {
@@ -63,16 +60,15 @@ public class AnswerQuestion
         }
     }
 
-    String makeURL( String searchTerm )
+    private String makeURL( String searchTerm )
         throws UnsupportedEncodingException
     {
         searchTerm = URLEncoder.encode( searchTerm, "UTF-8" );
-        String url = "http://api.wolframalpha.com/v2/query?input=" + searchTerm + "&appid=" + API_KEY
+        return "http://api.wolframalpha.com/v2/query?input=" + searchTerm + "&appid=" + API_KEY
             + "&format=plaintext&output=XML";
-        return url;
     }
 
-    String getContent( String url )
+    private String getContent( String url )
     {
         String content = null;
         URLConnection connection;
@@ -90,7 +86,7 @@ public class AnswerQuestion
         return content;
     }
 
-    String parseResponse( String response )
+    private String parseResponse( String response )
         throws Exception
     {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();

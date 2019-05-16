@@ -6,18 +6,17 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.engio.mbassy.listener.Handler;
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-
-@HandlerContainer
 public class Decide
+    extends ListenerAdapter
 {
     private static final Pattern choicePattern = Pattern.compile( "(?:(.+?)(?:\\s*\\|\\s*|\\s*$))" );
 
@@ -26,10 +25,10 @@ public class Decide
 
     private static final Random random = new Random();
 
-    @Handler
-    private void decideOMatic( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        String text = event.getText();
+        String text = event.getMessage();
         Matcher matcher = decidePattern.matcher( text );
 
         if ( matcher.matches() )
@@ -82,7 +81,7 @@ public class Decide
 
             sb.append( ". Go do that now." );
 
-            event.reply( sb.toString() );
+            event.respondWith( sb.toString() );
         }
     }
 }

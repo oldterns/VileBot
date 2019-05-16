@@ -6,24 +6,22 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
+
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-
-import net.engio.mbassy.listener.Handler;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
 /**
  * Will find the HTML title of HTTP(S) pages from certain domains. Generally it's only worth adding trustworthy domains
  * that don't include titles in the URL for SEO.
  */
-@HandlerContainer
+
 public class UrlTitleAnnouncer
+    extends ListenerAdapter
 {
 
     private static final Pattern urlPattern =
@@ -31,15 +29,15 @@ public class UrlTitleAnnouncer
 
     private static final Pattern titlePattern = Pattern.compile( "<title>(.*)</title>" );
 
-    @Handler
-    public void urlAnnouncer( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        Matcher urlMatcher = urlPattern.matcher( event.getText() );
+        Matcher urlMatcher = urlPattern.matcher( event.getMessage() );
 
         if ( urlMatcher.find() )
         {
             String title = scrapeURLHTMLTitle( urlMatcher.group( 1 ) );
-            event.reply( "'" + title + "'" );
+            event.respondWith( "'" + title + "'" );
         }
     }
 

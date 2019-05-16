@@ -1,48 +1,44 @@
 package com.oldterns.vilebot.handlers.user;
 
-import ca.szc.keratin.bot.annotation.HandlerContainer;
-import ca.szc.keratin.core.event.message.recieve.ReceivePrivmsg;
-import com.oldterns.vilebot.Vilebot;
-import net.engio.mbassy.listener.Handler;
-import twitter4j.JSONArray;
-import twitter4j.JSONException;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 import twitter4j.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.*;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Created by ltulloch on 07/24/18.
  */
-@HandlerContainer
 public class Kaomoji
+    extends ListenerAdapter
 {
 
-    public static final String API_URL = "https://jckcthbrt.stdlib.com/kaomoji/?search=";
+    private static final String API_URL = "https://jckcthbrt.stdlib.com/kaomoji/?search=";
 
-    public static final String API_FORMAT = "/json";
+    private static final String API_FORMAT = "/json";
 
     private static final Pattern kaomojiPattern = Pattern.compile( "^!kaomoji (.+)" );
 
-    @Handler
-    public void kaomoji( ReceivePrivmsg event )
+    @Override
+    public void onGenericMessage( final GenericMessageEvent event )
     {
-        Matcher questionMatcher = kaomojiPattern.matcher( event.getText() );
+        Matcher questionMatcher = kaomojiPattern.matcher( event.getMessage() );
         if ( questionMatcher.matches() )
         {
             String message = questionMatcher.group( 1 );
             try
             {
                 message = kaomojiify( message );
-                event.reply( message );
+                event.respondWith( message );
             }
             catch ( Exception e )
             {
-                event.reply( "ⓃⒶⓃⒾ(☉൧ ಠ ꐦ)" );
+                event.respondWith( "ⓃⒶⓃⒾ(☉൧ ಠ ꐦ)" );
                 e.printStackTrace();
             }
         }
@@ -57,30 +53,26 @@ public class Kaomoji
         {
             return "ⓃⒶⓃⒾ(☉൧ ಠ ꐦ)";
         }
-        if ( words.length >= 1 )
+        switch ( words[0] )
         {
-            if ( words[0].equals( "wat" ) )
-            {
+            case "wat":
                 words[0] = "confused";
-            }
-
-            else if ( words[0].equals( "nsfw" ) || words[0].equals( "wtf" ) )
-            {
+                break;
+            case "nsfw":
+            case "wtf":
                 kaomoji = "ⓃⒶⓃⒾ(☉൧ ಠ ꐦ)";
-            }
-            else if ( words[0].equals( "vilebot" ) )
-            {
+                break;
+            case "vilebot":
                 kaomoji = "( ͡° ͜ʖ ͡° )";
-            }
-            else
-            {
+                break;
+            default:
                 kaomoji = getKaomoji( words[0] );
-            }
+                break;
+        }
 
-            if ( kaomoji.isEmpty() )
-            {
-                kaomoji = "щ(ಥдಥщ)";
-            }
+        if ( kaomoji.isEmpty() )
+        {
+            kaomoji = "щ(ಥдಥщ)";
         }
         return kaomoji;
     }
