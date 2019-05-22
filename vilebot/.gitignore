@@ -2,5 +2,5 @@
 /db/
 /db-backups/
 /log/
-/cfg/vilebot.conf
+/cfg/vilebot*.conf
 /files/fonts/
