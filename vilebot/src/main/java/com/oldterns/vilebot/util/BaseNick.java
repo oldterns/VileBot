@@ -14,11 +14,11 @@ import java.util.regex.Pattern;
 public class BaseNick
 {
     // This would grab the leading x out of a nick that actually contains it
-    private static Pattern nickPattern = Pattern.compile( "^(?:x|)([a-zA-Z0-9]+)(?:\\p{Punct}+[a-zA-Z0-9]*|)$" );
+    private static Pattern nickPattern = Pattern.compile( "(?:x|)([a-zA-Z0-9]+)(?:\\p{Punct}+[a-zA-Z0-9]*|)" );
 
     private static String primaryBotNick;
 
-    private static Set<String> allBotNicks = new HashSet<String>();
+    private static Set<String> allBotNicks = new HashSet<>();
 
     public static String toBaseNick( String nick )
     {
@@ -30,7 +30,7 @@ public class BaseNick
         {
             Matcher nickMatcher = nickPattern.matcher( nick );
 
-            if ( nickMatcher.matches() )
+            if ( nickMatcher.find() )
             {
                 return nickMatcher.group( 1 );
             }
