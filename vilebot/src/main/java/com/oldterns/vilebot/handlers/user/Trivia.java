@@ -13,6 +13,8 @@ import twitter4j.JSONObject;
 
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -95,13 +97,19 @@ public class Trivia
     {
         if ( currentGame != null )
         {
-            event.respondWith( currentGame.getAlreadyPlayingString() );
+            for ( String msg : currentGame.getAlreadyPlayingString() )
+            {
+                event.respondWith( msg );
+            }
         }
         else
         {
             currentGame = new TriviaGame();
             event.respondWith( WELCOME_STRING );
-            event.respondWith( currentGame.getIntroString() );
+            for ( String msg : currentGame.getIntroString() )
+            {
+                event.respondWith( msg );
+            }
             startTimer( event );
         }
     }
@@ -123,8 +131,10 @@ public class Trivia
 
     private void timeoutTimer( GenericMessageEvent event )
     {
-        String message = currentGame.getTimeoutString();
-        event.respondWith( message );
+        for ( String msg : currentGame.getTimeoutString() )
+        {
+            event.respondWith( msg );
+        }
         currentGame = null;
     }
 
@@ -238,26 +248,36 @@ public class Trivia
                                                                                                                                                              "" );
         }
 
-        private String getQuestionBlurb()
+        private List<String> getQuestionBlurb()
         {
-            return String.format( "Your category is: %s\nFor %s karma:\n%s", RED + category + RESET,
-                                  GREEN + stakes + RESET, BLUE + question + RESET );
+            List<String> questionBlurb = new ArrayList<>();
+            questionBlurb.add( "Your category is: " + RED + category + RESET );
+            questionBlurb.add( "For " + GREEN + stakes + RESET + " karma:" );
+            questionBlurb.add( BLUE + question + RESET );
+            return questionBlurb;
         }
 
-        String getIntroString()
+        List<String> getIntroString()
         {
-            return getQuestionBlurb() + "\n30 seconds on the clock.";
+            List<String> introString = new ArrayList<>( getQuestionBlurb() );
+            introString.add( "30 seconds on the clock." );
+            return introString;
         }
 
-        String getAlreadyPlayingString()
+        List<String> getAlreadyPlayingString()
         {
-            return "A game is already in session!\n" + getQuestionBlurb();
+            List<String> alreadyPlayingString = new ArrayList<>();
+            alreadyPlayingString.add( "A game is already in session!" );
+            alreadyPlayingString.addAll( getQuestionBlurb() );
+            return alreadyPlayingString;
         }
 
-        String getTimeoutString()
+        List<String> getTimeoutString()
         {
-            return String.format( "Your 30 seconds is up! The answer we were looking for was:\n%s",
-                                  BLUE + answer + RESET );
+            List<String> timeoutString = new ArrayList<>();
+            timeoutString.add( "Your 30 seconds is up! The answer we were looking for was:" );
+            timeoutString.add( BLUE + answer + RESET );
+            return timeoutString;
         }
 
         private String getQuestionContent()

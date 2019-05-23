@@ -87,7 +87,10 @@ public class Omgword
         else
         {
             currentGame = new OmgwordGame();
-            event.respondWith( currentGame.getIntroString() );
+            for ( String msg : currentGame.getIntroString() )
+            {
+                event.respondWith( msg );
+            }
             startTimer( event );
         }
     }
@@ -173,7 +176,7 @@ public class Omgword
             return "A game is already in progress! Your word is: " + scrambled;
         }
 
-        String getIntroString()
+        String[] getIntroString()
         {
             word = "";
             int index = random.nextInt( words.size() - 1 );
@@ -185,7 +188,8 @@ public class Omgword
                 shuffleArray( chars );
                 scrambled = new String( chars );
             }
-            return "Welcome to omgword!\nFor " + getStakes() + " karma:\n" + scrambled + "\n30 seconds on the clock.";
+            return new String[] { "Welcome to omgword!", "For " + getStakes() + " karma:", scrambled,
+                "30 seconds on the clock." };
         }
 
         boolean isCorrect( String answer )

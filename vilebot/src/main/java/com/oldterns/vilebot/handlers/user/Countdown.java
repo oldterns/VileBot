@@ -5,6 +5,7 @@ import bsh.Interpreter;
 import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.db.KarmaDB;
 import com.oldterns.vilebot.util.BaseNick;
+import org.apache.commons.lang3.ArrayUtils;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
@@ -155,15 +156,19 @@ public class Countdown
             return questionNumbers;
         }
 
-        private String getCountdownIntro()
+        private List<String> getCountdownIntro()
         {
-            return GREEN + "Welcome to Countdown!\n" + RESET + getQuestion() + "\nGood luck! You have 45 seconds.\n";
+            List<String> countdownIntro = new ArrayList<>();
+            countdownIntro.add( GREEN + "Welcome to Countdown!" + RESET );
+            countdownIntro.addAll( Arrays.asList( getQuestion() ) );
+            countdownIntro.add( "Good luck! You have 45 seconds." );
+            return countdownIntro;
         }
 
-        private String getQuestion()
+        private String[] getQuestion()
         {
-            return "Your numbers are: \n" + RED + getQuestionNumbers() + RESET + "\nYour target is: \n" + RED
-                + getTargetNumber() + RESET;
+            return new String[] { "Your numbers are:", RED + getQuestionNumbers().toString() + RESET, "Your target is:",
+                RED + getTargetNumber() + RESET };
         }
 
         private void shuffleNumbers()
@@ -210,7 +215,7 @@ public class Countdown
         private boolean hasCorrectNumbers( String answer )
         {
             String[] numList = answer.replaceAll( "[^\\d]+", " " ).trim().split( " " );
-            List<Integer> questionNums = new ArrayList<Integer>( getQuestionNumbers() );
+            List<Integer> questionNums = new ArrayList<>( getQuestionNumbers() );
             for ( String num : numList )
             {
                 int number = Integer.valueOf( num );
@@ -226,9 +231,9 @@ public class Countdown
             return true;
         }
 
-        private String alreadyPlaying()
+        private String[] alreadyPlaying()
         {
-            return "A current game is already in progress.\n" + getQuestion();
+            return ArrayUtils.addAll( new String[] { "A current game is already in progress." }, getQuestion() );
         }
     }
 
@@ -250,7 +255,10 @@ public class Countdown
         }
         else if ( rulesMatcher.matches() )
         {
-            event.respondPrivateMessage( getRules() );
+            for ( String line : getRules() )
+            {
+                event.respondPrivateMessage( line );
+            }
         }
     }
 
@@ -322,12 +330,19 @@ public class Countdown
         if ( currGame == null )
         {
             currGame = new CountdownGame();
-            event.respondWith( currGame.getCountdownIntro() + getSubmissionRuleString( event ) );
+            for ( String line : currGame.getCountdownIntro() )
+            {
+                event.respondWith( line );
+            }
+            event.respondWith( getSubmissionRuleString( event ) );
             startTimer( event );
         }
         else
         {
-            event.respondWith( currGame.alreadyPlaying() );
+            for ( String line : currGame.alreadyPlaying() )
+            {
+                event.respondWith( line );
+            }
         }
     }
 
@@ -346,12 +361,12 @@ public class Countdown
                         currGame.setSubmission( contestant, submission, contestantAnswer );
                         if ( isPrivate( event ) )
                         {
-                            event.respondWith( String.format( "Your submission of %s has been recieved!",
+                            event.respondWith( String.format( "Your submission of %s has been received!",
                                                               submission ) );
                         }
                         else
                         {
-                            event.respondWith( String.format( "%s's submission recieved!", contestant ) );
+                            event.respondWith( String.format( "%s's submission received!", contestant ) );
                         }
                     }
                     else
@@ -401,24 +416,24 @@ public class Countdown
     {
         stopTimer();
         Set<String> keys = currGame.submissions.keySet();
-        event.respondWith( String.format( "Your time is up! The target number was %s \n",
+        event.respondWith( String.format( "Your time is up! The target number was %s",
                                           RED + currGame.getTargetNumber() + RESET ) );
         if ( !keys.isEmpty() )
         {
-            event.respondWith( "The final submissions are: \n" );
+            event.respondWith( "The final submissions are:" );
             for ( String key : keys )
             {
-                event.respondWith( key + ", with " + currGame.getSubmissionAndAnswer( key ) + "\n" );
+                event.respondWith( key + ", with " + currGame.getSubmissionAndAnswer( key ) );
             }
             Set<String> winners = currGame.winners.keySet();
             if ( !winners.isEmpty() )
             {
                 int karmaAwarded;
-                event.respondWith( "The winners are : \n" );
+                event.respondWith( "The winners are :" );
                 for ( String winner : winners )
                 {
                     karmaAwarded = currGame.karmaAwarded( winner );
-                    event.respondWith( winner + " awarded " + GREEN + karmaAwarded + RESET + " karma \n" );
+                    event.respondWith( winner + " awarded " + GREEN + karmaAwarded + RESET + " karma" );
                     KarmaDB.modNounKarma( winner, karmaAwarded );
                 }
             }
@@ -445,21 +460,21 @@ public class Countdown
         return ( Math.abs( targetNumber - contestantAnswer ) >= ANSWER_THRESHOLD );
     }
 
-    private String getRules()
+    private String[] getRules()
     {
-        return RED + "COUNTDOWN RULES: \n" + RESET
-            + "1) Get as close as you can to the target number using only the numbers given. \n" + RED
-            + "TIP: You do not have to use all the numbers. \n" + RESET
-            + "2) Answer with !solution <your answer> . Make sure to only use valid characters, "
-            + "such as numbers and + - * / ( ) . \n" + "Breaking Rule 2 will subject you to a loss of " + INVALID_STAKE
-            + " karma. \n" + "3) The closer you are to the target number, the more karma you will get (max. 10). \n"
-            + RED + "TIP: If you are over/under " + ANSWER_THRESHOLD + "you will be penalized " + INVALID_STAKE
-            + " karma. \n" + RESET + "4) Use /msg Countdownb0t !solution <your answer> for your answers. ";
+        return new String[] { " " + RED + "COUNTDOWN RULES:" + RESET,
+            "1) Get as close as you can to the target number using only the numbers given.",
+            RED + "TIP: You do not have to use all the numbers." + RESET,
+            "2) Answer with !solution <your answer> . Make sure to only use valid characters, such as numbers and + - * / ( ) . ",
+            "Breaking Rule 2 will subject you to a loss of " + INVALID_STAKE + " karma.",
+            "3) The closer you are to the target number, the more karma you will get (max. 10).",
+            RED + "TIP: If you are over/under " + ANSWER_THRESHOLD + "you will be penalized " + INVALID_STAKE
+                + " karma." + RESET,
+            "4) Use /msg Countdownb0t !solution <your answer> for your answers." };
     }
 
     private String getSubmissionRuleString( GenericMessageEvent event )
     {
-        return RED + "Use \" /msg " + RESET + event.getBot().getNick() + RED + " !solution < answer > \" to submit."
-            + RESET;
+        return RED + "Use \" /msg " + RESET + event.getBot().getNick() + RED + " !solution < answer > \" to submit." + RESET;
     }
 }
