@@ -106,6 +106,7 @@ public class Help
         sb.append( " { !remindme <message> <time><d/m/s> }" );
         sb.append( " { !ascii [<font>] <message> }" );
         sb.append( " { !asciifonts }" );
+        sb.append( " { !news [<category>] }" );
         sb.append( "\n" );
         sb.append( "  Userlists:" );
         sb.append( " { !list <listname> }" );
