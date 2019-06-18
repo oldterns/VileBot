@@ -85,13 +85,22 @@ public class News
 
     private static final Pattern NEWS_PATTERN = Pattern.compile( "^!news(?: ([a-zA-Z]{2,})|)" );
 
+    private static final Pattern NEWS_HELP_PATTERN = Pattern.compile( "^!news help" );
+
+    private static final String helpMessage = generateHelpMessage();
+
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
     {
         String text = event.getMessage();
         Matcher matcher = NEWS_PATTERN.matcher( text );
+        Matcher helpMatcher = NEWS_HELP_PATTERN.matcher( text );
 
-        if ( matcher.matches() )
+        if ( helpMatcher.matches() )
+        {
+            event.respondPrivateMessage( helpMessage );
+        }
+        else if ( matcher.matches() )
         {
             currentNews( event, matcher );
         }
@@ -139,4 +148,55 @@ public class News
             event.respondWith( entries.get( i ).getTitle() + " -> " + entries.get( i ).getLink() );
         }
     }
+
+    private static String generateHelpMessage()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append( " News Categories (example: !news toronto):" );
+        sb.append( "\n" );
+        sb.append( "  General News:" );
+        sb.append( " { top }" );
+        sb.append( " { world }" );
+        sb.append( " { canada }" );
+        sb.append( " { politics }" );
+        sb.append( " { business }" );
+        sb.append( " { health }" );
+        sb.append( " { arts }" );
+        sb.append( " { tech }" );
+        sb.append( " { indigenous }" );
+        sb.append( "\n" );
+        sb.append( "  Sports News:" );
+        sb.append( " { sports }" );
+        sb.append( " { mlb }" );
+        sb.append( " { nba }" );
+        sb.append( " { cfl }" );
+        sb.append( " { nfl }" );
+        sb.append( " { nhl }" );
+        sb.append( " { soccer }" );
+        sb.append( "\n" );
+        sb.append( "  Regional News:" );
+        sb.append( " { bc }" );
+        sb.append( " { kamloops }" );
+        sb.append( " { calgary }" );
+        sb.append( " { edmonton }" );
+        sb.append( " { saskatchewan }" );
+        sb.append( " { saskatoon }" );
+        sb.append( " { manitoba }" );
+        sb.append( " { thunderbay }" );
+        sb.append( " { sudbury }" );
+        sb.append( " { windsor }" );
+        sb.append( " { london }" );
+        sb.append( " { waterloo }" );
+        sb.append( " { toronto }" );
+        sb.append( " { hamilton }" );
+        sb.append( " { montreal }" );
+        sb.append( " { nb }" );
+        sb.append( " { pei }" );
+        sb.append( " { ns }" );
+        sb.append( " { newfoundland }" );
+        sb.append( " { north }" );
+        return sb.toString();
+    }
+
 }
