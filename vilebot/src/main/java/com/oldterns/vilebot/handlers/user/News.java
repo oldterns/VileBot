@@ -69,7 +69,7 @@ public class News
             newsFeedsByCategory.put( "waterloo", new URL( "https://rss.cbc.ca/lineup/canada-kitchenerwaterloo.xml" ) );
             newsFeedsByCategory.put( "toronto", new URL( "https://rss.cbc.ca/lineup/canada-toronto.xml" ) );
             newsFeedsByCategory.put( "hamilton", new URL( "https://rss.cbc.ca/lineup/canada-hamiltonnews.xml" ) );
-            newsFeedsByCategory.put( "montreal", new URL( "http://rss.cbc.ca/lineup/canada-montreal.xml" ) );
+            newsFeedsByCategory.put( "montreal", new URL( "https://rss.cbc.ca/lineup/canada-montreal.xml" ) );
             newsFeedsByCategory.put( "nb", new URL( "https://rss.cbc.ca/lineup/canada-newbrunswick.xml" ) );
             newsFeedsByCategory.put( "pei", new URL( "https://rss.cbc.ca/lineup/canada-pei.xml" ) );
             newsFeedsByCategory.put( "ns", new URL( "https://rss.cbc.ca/lineup/canada-novascotia.xml" ) );
