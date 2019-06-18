@@ -126,8 +126,10 @@ public class News
         }
         catch ( FeedException | IOException e )
         {
+            String errorMsg = "Error opening RSS feed";
             logger.error( e.getMessage() );
-            logger.error( "Error opening RSS feed" );
+            logger.error( errorMsg );
+            event.respondWith( errorMsg );
         }
 
         List<SyndEntry> entries = feed.getEntries();
