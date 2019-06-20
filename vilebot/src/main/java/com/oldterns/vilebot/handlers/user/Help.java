@@ -107,6 +107,7 @@ public class Help
         sb.append( " { !ascii [<font>] <message> }" );
         sb.append( " { !asciifonts }" );
         sb.append( " { !news [<category>] }" );
+        sb.append( " { !fakenews [<category>] }" );
         sb.append( "\n" );
         sb.append( "  Userlists:" );
         sb.append( " { !list <listname> }" );

@@ -41,7 +41,7 @@ public class NewsTest
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append( " News Categories (example: !news toronto):" );
+        sb.append( "News Categories (example: !news toronto):" );
         sb.append( "\n" );
         sb.append( "  General News:" );
         sb.append( " { top }" );
@@ -89,7 +89,7 @@ public class NewsTest
         when( event.getMessage() ).thenReturn( ircmsg );
         newsClass.onGenericMessage( event );
 
-        for( String line : expectedReply.split( "\n" ) )
+        for ( String line : expectedReply.split( "\n" ) )
         {
             verify( event, times( 1 ) ).respondPrivateMessage( line );
         }

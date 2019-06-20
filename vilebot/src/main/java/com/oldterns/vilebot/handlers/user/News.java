@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 Newterns
+ * Copyright (C) 2019 Oldterns
  *
  * This file may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
@@ -7,32 +7,23 @@
 
 package com.oldterns.vilebot.handlers.user;
 
-import com.sun.syndication.feed.synd.SyndEntry;
-import com.sun.syndication.feed.synd.SyndFeed;
-import com.sun.syndication.io.FeedException;
-import com.sun.syndication.io.SyndFeedInput;
-import com.sun.syndication.io.XmlReader;
+import com.oldterns.vilebot.util.NewsParser;
 import org.apache.log4j.Logger;
-import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class News
-    extends ListenerAdapter
+    extends NewsParser
 {
-    public static final int NUM_HEADLINES = 5;
-
     private static Logger logger = Logger.getLogger( News.class );
 
-    private static final String defaultCategory = "toronto";
+    private static final String DEFAULT_CATEGORY = "toronto";
 
     private static final HashMap<String, URL> newsFeedsByCategory = new LinkedHashMap<>();
     static
@@ -87,7 +78,7 @@ public class News
 
     private static final Pattern NEWS_HELP_PATTERN = Pattern.compile( "^!news help" );
 
-    private static final String helpMessage = generateHelpMessage();
+    private final String HELP_MESSAGE = generateHelpMessage();
 
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
@@ -98,62 +89,23 @@ public class News
 
         if ( helpMatcher.matches() )
         {
-            event.respondPrivateMessage( helpMessage );
+            for ( String line : HELP_MESSAGE.split( "\n" ) )
+            {
+                event.respondPrivateMessage( line );
+            }
         }
         else if ( matcher.matches() )
         {
-            currentNews( event, matcher );
+            currentNews( event, matcher, newsFeedsByCategory, DEFAULT_CATEGORY, logger );
         }
     }
 
-    private void currentNews( GenericMessageEvent event, Matcher matcher )
-    {
-        String category = matcher.group( 1 ); // The news category
-        if ( category == null )
-        {
-            category = defaultCategory;
-        }
-        category = category.toLowerCase();
-
-        if ( newsFeedsByCategory.containsKey( category ) )
-        {
-            printHeadlines( event, category );
-        }
-        else
-        {
-            event.respondWith( "No news feed available for " + category );
-        }
-    }
-
-    private void printHeadlines( GenericMessageEvent event, String category )
-    {
-        SyndFeedInput input = new SyndFeedInput();
-        SyndFeed feed = null;
-        try
-        {
-            feed = input.build( new XmlReader( newsFeedsByCategory.get( category ) ) );
-        }
-        catch ( FeedException | IOException e )
-        {
-            String errorMsg = "Error opening RSS feed";
-            logger.error( e.getMessage() );
-            logger.error( errorMsg );
-            event.respondWith( errorMsg );
-        }
-
-        List<SyndEntry> entries = feed.getEntries();
-
-        for ( int i = 0; i < NUM_HEADLINES; i++ )
-        {
-            event.respondWith( entries.get( i ).getTitle() + " -> " + entries.get( i ).getLink() );
-        }
-    }
-
-    private static String generateHelpMessage()
+    @Override
+    protected String generateHelpMessage()
     {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( " News Categories (example: !news toronto):" );
+        sb.append( "News Categories (example: !news toronto):" );
         sb.append( "\n" );
         sb.append( "  General News:" );
         sb.append( " { top }" );
