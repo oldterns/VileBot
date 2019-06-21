@@ -107,47 +107,12 @@ public class News
 
         sb.append( "News Categories (example: !news toronto):" );
         sb.append( "\n" );
-        sb.append( "  General News:" );
-        sb.append( " { top }" );
-        sb.append( " { world }" );
-        sb.append( " { canada }" );
-        sb.append( " { politics }" );
-        sb.append( " { business }" );
-        sb.append( " { health }" );
-        sb.append( " { arts }" );
-        sb.append( " { tech }" );
-        sb.append( " { indigenous }" );
-        sb.append( "\n" );
-        sb.append( "  Sports News:" );
-        sb.append( " { sports }" );
-        sb.append( " { mlb }" );
-        sb.append( " { nba }" );
-        sb.append( " { cfl }" );
-        sb.append( " { nfl }" );
-        sb.append( " { nhl }" );
-        sb.append( " { soccer }" );
-        sb.append( "\n" );
-        sb.append( "  Regional News:" );
-        sb.append( " { bc }" );
-        sb.append( " { kamloops }" );
-        sb.append( " { calgary }" );
-        sb.append( " { edmonton }" );
-        sb.append( " { saskatchewan }" );
-        sb.append( " { saskatoon }" );
-        sb.append( " { manitoba }" );
-        sb.append( " { thunderbay }" );
-        sb.append( " { sudbury }" );
-        sb.append( " { windsor }" );
-        sb.append( " { london }" );
-        sb.append( " { waterloo }" );
-        sb.append( " { toronto }" );
-        sb.append( " { hamilton }" );
-        sb.append( " { montreal }" );
-        sb.append( " { nb }" );
-        sb.append( " { pei }" );
-        sb.append( " { ns }" );
-        sb.append( " { newfoundland }" );
-        sb.append( " { north }" );
+
+        for ( String category : newsFeedsByCategory.keySet() )
+        {
+            sb.append( " { " + category + " }" );
+        }
+
         return sb.toString();
     }
 

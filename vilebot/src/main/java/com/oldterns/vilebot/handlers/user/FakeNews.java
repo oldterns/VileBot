@@ -62,8 +62,6 @@ public class FakeNews
 
         if ( helpMatcher.matches() )
         {
-            event.respondWith( "Check your DMs fam" );
-
             for ( String line : HELP_MESSAGE.split( "\n" ) )
             {
                 event.respondPrivateMessage( line );
@@ -82,15 +80,12 @@ public class FakeNews
 
         sb.append( "Fake News Categories (example: !fakenews canada):" );
         sb.append( "\n" );
-        sb.append( " { canada }" );
-        sb.append( " { usa }" );
-        sb.append( " { belgium }" );
-        sb.append( " { france }" );
-        sb.append( " { russia }" );
-        sb.append( " { serbia }" );
-        sb.append( " { venezuela }" );
-        sb.append( " { newzealand }" );
-        sb.append( " { india }" );
+
+        for ( String category : fakeNewsFeedsByCategory.keySet() )
+        {
+            sb.append( " { " + category + " }" );
+        }
+
         return sb.toString();
     }
 
