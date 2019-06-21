@@ -7,6 +7,7 @@
 
 package vilebot.handlers.user;
 
+import com.oldterns.vilebot.handlers.user.FakeNews;
 import com.oldterns.vilebot.handlers.user.News;
 
 import org.junit.Before;
@@ -17,9 +18,9 @@ import org.pircbotx.hooks.events.MessageEvent;
 
 import static org.mockito.Mockito.*;
 
-public class NewsTest
+public class FakeNewsTest
 {
-    private News newsClass = new News();
+    private FakeNews fakeNewsClass = new FakeNews();
 
     private MessageEvent event;
 
@@ -37,51 +38,25 @@ public class NewsTest
     @Test
     public void helpMsgTest()
     {
-        String ircmsg = "!news help";
+        String ircmsg = "!fakenews help";
 
         StringBuilder sb = new StringBuilder();
-        sb.append( "News Categories (example: !news toronto):" );
+
+        sb.append( "Fake News Categories (example: !fakenews canada):" );
         sb.append( "\n" );
-        sb.append( " { top }" );
-        sb.append( " { world }" );
         sb.append( " { canada }" );
-        sb.append( " { politics }" );
-        sb.append( " { business }" );
-        sb.append( " { health }" );
-        sb.append( " { arts }" );
-        sb.append( " { tech }" );
-        sb.append( " { indigenous }" );
-        sb.append( " { sports }" );
-        sb.append( " { mlb }" );
-        sb.append( " { nba }" );
-        sb.append( " { cfl }" );
-        sb.append( " { nfl }" );
-        sb.append( " { nhl }" );
-        sb.append( " { soccer }" );
-        sb.append( " { bc }" );
-        sb.append( " { kamloops }" );
-        sb.append( " { calgary }" );
-        sb.append( " { edmonton }" );
-        sb.append( " { saskatchewan }" );
-        sb.append( " { saskatoon }" );
-        sb.append( " { manitoba }" );
-        sb.append( " { thunderbay }" );
-        sb.append( " { sudbury }" );
-        sb.append( " { windsor }" );
-        sb.append( " { london }" );
-        sb.append( " { waterloo }" );
-        sb.append( " { toronto }" );
-        sb.append( " { hamilton }" );
-        sb.append( " { montreal }" );
-        sb.append( " { nb }" );
-        sb.append( " { pei }" );
-        sb.append( " { ns }" );
-        sb.append( " { newfoundland }" );
-        sb.append( " { north }" );
+        sb.append( " { usa }" );
+        sb.append( " { belgium }" );
+        sb.append( " { france }" );
+        sb.append( " { india }" );
+        sb.append( " { russia }" );
+        sb.append( " { serbia }" );
+        sb.append( " { venezuela }" );
+        sb.append( " { newzealand }" );
 
         String expectedReply = sb.toString();
         when( event.getMessage() ).thenReturn( ircmsg );
-        newsClass.onGenericMessage( event );
+        fakeNewsClass.onGenericMessage( event );
 
         for ( String line : expectedReply.split( "\n" ) )
         {
@@ -92,11 +67,11 @@ public class NewsTest
     @Test
     public void invalidCategoryTest()
     {
-        String ircmsg = "!news invalid";
+        String ircmsg = "!fakenews invalid";
 
         String expectedReply = "No news feed available for invalid";
         when( event.getMessage() ).thenReturn( ircmsg );
-        newsClass.onGenericMessage( event );
+        fakeNewsClass.onGenericMessage( event );
 
         verify( event, times( 1 ) ).respondWith( expectedReply );
     }
@@ -104,10 +79,10 @@ public class NewsTest
     @Test
     public void defaultCommand()
     {
-        String ircmsg = "!news";
+        String ircmsg = "!fakenews";
 
         when( event.getMessage() ).thenReturn( ircmsg );
-        newsClass.onGenericMessage( event );
+        fakeNewsClass.onGenericMessage( event );
 
         verify( event, times( 5 ) ).respondWith( notNull() );
     }
@@ -115,10 +90,10 @@ public class NewsTest
     @Test
     public void validCommand()
     {
-        String ircmsg = "!news business";
+        String ircmsg = "!fakenews russia";
 
         when( event.getMessage() ).thenReturn( ircmsg );
-        newsClass.onGenericMessage( event );
+        fakeNewsClass.onGenericMessage( event );
 
         verify( event, times( 5 ) ).respondWith( notNull() );
     }
