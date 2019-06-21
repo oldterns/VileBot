@@ -8,7 +8,6 @@
 package vilebot.handlers.user;
 
 import com.oldterns.vilebot.handlers.user.FakeNews;
-import com.oldterns.vilebot.handlers.user.News;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -84,7 +83,7 @@ public class FakeNewsTest
         when( event.getMessage() ).thenReturn( ircmsg );
         fakeNewsClass.onGenericMessage( event );
 
-        verify( event, times( 5 ) ).respondWith( notNull() );
+        verify( event, times( 3 ) ).respondWith( notNull() );
     }
 
     @Test
@@ -95,6 +94,6 @@ public class FakeNewsTest
         when( event.getMessage() ).thenReturn( ircmsg );
         fakeNewsClass.onGenericMessage( event );
 
-        verify( event, times( 5 ) ).respondWith( notNull() );
+        verify( event, times( 3 ) ).respondWith( notNull() );
     }
 }

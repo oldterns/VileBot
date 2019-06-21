@@ -7,6 +7,8 @@
 
 package com.oldterns.vilebot.handlers.user;
 
+import com.oldterns.vilebot.Vilebot;
+import com.oldterns.vilebot.util.LimitCommand;
 import com.oldterns.vilebot.util.NewsParser;
 import org.apache.log4j.Logger;
 import org.pircbotx.hooks.types.GenericMessageEvent;
@@ -47,11 +49,15 @@ public class FakeNews
         }
     }
 
-    private static final Pattern FAKE_NEWS_PATTERN = Pattern.compile( "^!fakenews(?: ([a-zA-Z]{2,})|)" );
+    private static final Pattern FAKE_NEWS_PATTERN = Pattern.compile( "^!fakenews(?: ([a-zA-Z]+)|)" );
 
     private static final Pattern FAKE_NEWS_HELP_PATTERN = Pattern.compile( "^!fakenews help" );
 
     private final String HELP_MESSAGE = generateHelpMessage();
+
+    private static LimitCommand limitCommand = new LimitCommand();
+
+    private static final String RESTRICTED_CHANNEL = Vilebot.getConfig().get( "ircChannel1" );
 
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
@@ -69,7 +75,7 @@ public class FakeNews
         }
         else if ( matcher.matches() )
         {
-            currentNews( event, matcher, fakeNewsFeedsByCategory, DEFAULT_CATEGORY, logger );
+            newsLimit( event, matcher, fakeNewsFeedsByCategory, DEFAULT_CATEGORY, logger, limitCommand, RESTRICTED_CHANNEL );
         }
     }
 
