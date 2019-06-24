@@ -475,6 +475,7 @@ public class Countdown
 
     private String getSubmissionRuleString( GenericMessageEvent event )
     {
-        return RED + "Use \" /msg " + RESET + event.getBot().getNick() + RED + " !solution < answer > \" to submit." + RESET;
+        return RED + "Use \" /msg " + RESET + event.getBot().getNick() + RED + " !solution < answer > \" to submit."
+            + RESET;
     }
 }
