@@ -55,7 +55,7 @@ public class FakeNews
 
     private final String HELP_MESSAGE = generateHelpMessage();
 
-    private static LimitCommand limitCommand = new LimitCommand();
+    public static LimitCommand limitCommand = new LimitCommand();
 
     private static final String RESTRICTED_CHANNEL = Vilebot.getConfig().get( "ircChannel1" );
 
