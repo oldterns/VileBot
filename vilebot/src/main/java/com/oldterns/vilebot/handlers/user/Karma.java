@@ -263,7 +263,7 @@ public class Karma
         Matcher nickMatcher = nickBlobPattern.matcher( nickBlob );
         while ( nickMatcher.find() )
         {
-            nicks.add( nickMatcher.group( 1 ) );
+            nicks.add( BaseNick.toBaseNick( nickMatcher.group( 1 ) ) );
         }
 
         boolean reverse = "rev".equals( mode );
