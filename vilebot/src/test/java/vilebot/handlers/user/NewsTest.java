@@ -45,6 +45,8 @@ public class NewsTest
         sb.append( " { top }" );
         sb.append( " { world }" );
         sb.append( " { canada }" );
+        sb.append( " { usa }" );
+        sb.append( " { britain }" );
         sb.append( " { politics }" );
         sb.append( " { business }" );
         sb.append( " { health }" );
@@ -109,7 +111,7 @@ public class NewsTest
         when( event.getMessage() ).thenReturn( ircmsg );
         newsClass.onGenericMessage( event );
 
-        verify( event, times( 5 ) ).respondWith( notNull() );
+        verify( event, times( 3 ) ).respondWith( notNull() );
     }
 
     @Test
@@ -120,6 +122,6 @@ public class NewsTest
         when( event.getMessage() ).thenReturn( ircmsg );
         newsClass.onGenericMessage( event );
 
-        verify( event, times( 5 ) ).respondWith( notNull() );
+        verify( event, times( 3 ) ).respondWith( notNull() );
     }
 }

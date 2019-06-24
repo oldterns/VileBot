@@ -7,6 +7,8 @@
 
 package com.oldterns.vilebot.handlers.user;
 
+import com.oldterns.vilebot.Vilebot;
+import com.oldterns.vilebot.util.LimitCommand;
 import com.oldterns.vilebot.util.NewsParser;
 import org.apache.log4j.Logger;
 import org.pircbotx.hooks.types.GenericMessageEvent;
@@ -33,6 +35,8 @@ public class News
             newsFeedsByCategory.put( "top", new URL( "https://rss.cbc.ca/lineup/topstories.xml" ) );
             newsFeedsByCategory.put( "world", new URL( "https://rss.cbc.ca/lineup/world.xml" ) );
             newsFeedsByCategory.put( "canada", new URL( "https://rss.cbc.ca/lineup/canada.xml" ) );
+            newsFeedsByCategory.put( "usa", new URL( "http://feeds.reuters.com/Reuters/domesticNews" ) );
+            newsFeedsByCategory.put( "britain", new URL( "http://feeds.bbci.co.uk/news/uk/rss.xml" ) );
             newsFeedsByCategory.put( "politics", new URL( "https://rss.cbc.ca/lineup/politics.xml" ) );
             newsFeedsByCategory.put( "business", new URL( "https://rss.cbc.ca/lineup/business.xml" ) );
             newsFeedsByCategory.put( "health", new URL( "https://rss.cbc.ca/lineup/health.xml" ) );
@@ -74,11 +78,15 @@ public class News
         }
     }
 
-    private static final Pattern NEWS_PATTERN = Pattern.compile( "^!news(?: ([a-zA-Z]{2,})|)" );
+    private static final Pattern NEWS_PATTERN = Pattern.compile( "^!news(?: ([a-zA-Z]+)|)" );
 
     private static final Pattern NEWS_HELP_PATTERN = Pattern.compile( "^!news help" );
 
     private final String HELP_MESSAGE = generateHelpMessage();
+
+    private static LimitCommand limitCommand = new LimitCommand();
+
+    private static final String RESTRICTED_CHANNEL = Vilebot.getConfig().get( "ircChannel1" );
 
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
@@ -96,7 +104,7 @@ public class News
         }
         else if ( matcher.matches() )
         {
-            currentNews( event, matcher, newsFeedsByCategory, DEFAULT_CATEGORY, logger );
+            newsLimit( event, matcher, newsFeedsByCategory, DEFAULT_CATEGORY, logger, limitCommand, RESTRICTED_CHANNEL );
         }
     }
 

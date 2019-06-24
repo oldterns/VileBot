@@ -14,6 +14,7 @@ import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
 import org.apache.log4j.Logger;
 import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import java.io.IOException;
@@ -25,7 +26,29 @@ import java.util.regex.Matcher;
 public abstract class NewsParser
     extends ListenerAdapter
 {
-    protected static final int NUM_HEADLINES = 5;
+    protected static final int NUM_HEADLINES = 3;
+
+    protected void newsLimit( GenericMessageEvent event, Matcher matcher, HashMap<String, URL> newsFeedsByCategory,
+                              String defaultCategory, Logger logger, LimitCommand limitCommand, String restrictedChannel )
+    {
+        if ( event instanceof MessageEvent
+            && ( (MessageEvent) event ).getChannel().getName().equals( restrictedChannel ) )
+        {
+            String isLimit = limitCommand.addUse( event.getUser().getNick() );
+            if ( isLimit.isEmpty() )
+            {
+                currentNews( event, matcher, newsFeedsByCategory, defaultCategory, logger );
+            }
+            else
+            {
+                event.respondWith( isLimit );
+            }
+        }
+        else
+        {
+            currentNews( event, matcher, newsFeedsByCategory, defaultCategory, logger );
+        }
+    }
 
     protected void currentNews( GenericMessageEvent event, Matcher matcher, HashMap<String, URL> newsFeedsByCategory,
                                 String defaultCategory, Logger logger )
@@ -65,7 +88,8 @@ public abstract class NewsParser
 
         for ( int i = 0; i < NUM_HEADLINES; i++ )
         {
-            event.respondWith( entries.get( i ).getTitle() + " -> " + entries.get( i ).getLink() );
+            event.respondWith( Colors.bold( "  " + entries.get( i ).getTitle() ) + " -> "
+                + entries.get( i ).getLink() );
         }
     }
 
