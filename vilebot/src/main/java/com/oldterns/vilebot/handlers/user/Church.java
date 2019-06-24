@@ -280,8 +280,10 @@ public class Church
         {
             message += "The vote to inquisit " + currentVote.getDecisionTarget() + " has failed. Nothing will happen.";
         }
-
-        event.respondWith( message );
+        for ( String line : message.split( "\n" ) )
+        {
+            event.respondWith( line );
+        }
         currentVote = null;
     }
 
