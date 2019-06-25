@@ -9,6 +9,7 @@ package vilebot.handlers.user;
 
 import com.oldterns.vilebot.handlers.user.FakeNews;
 
+import com.oldterns.vilebot.util.LimitCommand;
 import org.junit.Before;
 import org.junit.Test;
 import org.pircbotx.Channel;
@@ -26,6 +27,7 @@ public class FakeNewsTest
     @Before
     public void setup()
     {
+        fakeNewsClass.limitCommand = new LimitCommand(3, 3600 );
         event = mock( MessageEvent.class );
         User user = mock( User.class );
         Channel channel = mock( Channel.class );
