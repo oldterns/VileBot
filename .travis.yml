@@ -1,6 +1,6 @@
 language: java
 dist: xenial
-jdk: openjdk8
+jdk: openjdk11
 before_install:
     - cd vilebot/
     - bash download-fonts.sh
