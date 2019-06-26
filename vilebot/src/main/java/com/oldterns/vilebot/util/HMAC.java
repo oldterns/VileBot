@@ -6,7 +6,8 @@
  */
 package com.oldterns.vilebot.util;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -16,7 +17,7 @@ import java.security.NoSuchAlgorithmException;
 public class HMAC
 {
 
-    private static Logger logger = Logger.getLogger( HMAC.class );
+    private static Logger logger = LoggerFactory.getLogger( HMAC.class );
 
     /**
      * Generate an HMAC signature from message and key, using the SHA2 512 bit hash algo.
