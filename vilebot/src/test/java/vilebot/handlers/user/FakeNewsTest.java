@@ -27,7 +27,7 @@ public class FakeNewsTest
     @Before
     public void setup()
     {
-        fakeNewsClass.limitCommand = new LimitCommand(3, 3600 );
+        fakeNewsClass.limitCommand = new LimitCommand( 3, 3600 );
         event = mock( MessageEvent.class );
         User user = mock( User.class );
         Channel channel = mock( Channel.class );

@@ -10,8 +10,9 @@ package com.oldterns.vilebot.handlers.user;
 import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.util.LimitCommand;
 import com.oldterns.vilebot.util.NewsParser;
-import org.apache.log4j.Logger;
 import org.pircbotx.hooks.types.GenericMessageEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
 public class News
     extends NewsParser
 {
-    private static Logger logger = Logger.getLogger( News.class );
+    private static Logger logger = LoggerFactory.getLogger( News.class );
 
     private static final String DEFAULT_CATEGORY = "toronto";
 
@@ -104,7 +105,8 @@ public class News
         }
         else if ( matcher.matches() )
         {
-            newsLimit( event, matcher, newsFeedsByCategory, DEFAULT_CATEGORY, logger, limitCommand, RESTRICTED_CHANNEL );
+            newsLimit( event, matcher, newsFeedsByCategory, DEFAULT_CATEGORY, logger, limitCommand,
+                       RESTRICTED_CHANNEL );
         }
     }
 

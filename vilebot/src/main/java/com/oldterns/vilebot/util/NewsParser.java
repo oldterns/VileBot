@@ -12,10 +12,11 @@ import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
-import org.apache.log4j.Logger;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -26,10 +27,13 @@ import java.util.regex.Matcher;
 public abstract class NewsParser
     extends ListenerAdapter
 {
+    private static final Logger logger = LoggerFactory.getLogger( NewsParser.class );
+
     protected static final int NUM_HEADLINES = 3;
 
     protected void newsLimit( GenericMessageEvent event, Matcher matcher, HashMap<String, URL> newsFeedsByCategory,
-                              String defaultCategory, Logger logger, LimitCommand limitCommand, String restrictedChannel )
+                              String defaultCategory, Logger logger, LimitCommand limitCommand,
+                              String restrictedChannel )
     {
         if ( event instanceof MessageEvent
             && ( (MessageEvent) event ).getChannel().getName().equals( restrictedChannel ) )

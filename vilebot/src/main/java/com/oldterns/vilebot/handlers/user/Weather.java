@@ -6,9 +6,10 @@ import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
-import org.apache.log4j.Logger;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -25,7 +26,7 @@ public class Weather
     extends ListenerAdapter
 {
 
-    private static Logger logger = Logger.getLogger( Weather.class );
+    private static final Logger logger = LoggerFactory.getLogger( Weather.class );
 
     private static final String LESS_NICK = "owilliams";
     static

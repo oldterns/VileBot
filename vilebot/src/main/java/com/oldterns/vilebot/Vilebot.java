@@ -8,14 +8,15 @@ package com.oldterns.vilebot;
 
 import com.oldterns.vilebot.handlers.admin.*;
 import com.oldterns.vilebot.handlers.user.Help;
-import com.oldterns.vilebot.handlers.user.*;
 import com.oldterns.vilebot.handlers.user.Ops;
+import com.oldterns.vilebot.handlers.user.*;
 import com.oldterns.vilebot.util.BaseNick;
-import org.apache.log4j.Logger;
 import org.pircbotx.Configuration;
 import org.pircbotx.MultiBotManager;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
@@ -32,7 +33,7 @@ public class Vilebot
     extends ListenerAdapter
 {
 
-    private static Logger logger = Logger.getLogger( Vilebot.class );
+    private static final Logger logger = LoggerFactory.getLogger( Vilebot.class );
 
     private static final String BOT_CONFIG_FILE = "cfg/vilebot.conf";
 
