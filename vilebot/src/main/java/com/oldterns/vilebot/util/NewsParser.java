@@ -31,9 +31,27 @@ public abstract class NewsParser
 
     protected static final int NUM_HEADLINES = 3;
 
-    protected void newsLimit( GenericMessageEvent event, Matcher matcher, HashMap<String, URL> newsFeedsByCategory,
-                              String defaultCategory, Logger logger, LimitCommand limitCommand,
-                              String restrictedChannel )
+    protected void currentNews( GenericMessageEvent event, Matcher matcher, HashMap<String, URL> newsFeedsByCategory,
+                                String defaultCategory, String helpCommand, LimitCommand limitCommand,
+                                String restrictedChannel, Logger logger )
+    {
+        String category = matcher.group( 1 ); // The news category
+
+        category = ( category != null ) ? category.toLowerCase() : defaultCategory;
+
+        if ( newsFeedsByCategory.containsKey( category ) )
+        {
+            newsLimit( event, newsFeedsByCategory, category, logger, limitCommand, restrictedChannel );
+        }
+        else
+        {
+            event.respondWith( "No news feed available for " + category + ". Try " + helpCommand
+                + " for available news categories." );
+        }
+    }
+
+    protected void newsLimit( GenericMessageEvent event, HashMap<String, URL> newsFeedsByCategory, String category,
+                              Logger logger, LimitCommand limitCommand, String restrictedChannel )
     {
         if ( event instanceof MessageEvent
             && ( (MessageEvent) event ).getChannel().getName().equals( restrictedChannel ) )
@@ -41,7 +59,7 @@ public abstract class NewsParser
             String isLimit = limitCommand.addUse( event.getUser().getNick() );
             if ( isLimit.isEmpty() )
             {
-                currentNews( event, matcher, newsFeedsByCategory, defaultCategory, logger );
+                printHeadlines( event, newsFeedsByCategory, category, logger );
             }
             else
             {
@@ -50,24 +68,7 @@ public abstract class NewsParser
         }
         else
         {
-            currentNews( event, matcher, newsFeedsByCategory, defaultCategory, logger );
-        }
-    }
-
-    protected void currentNews( GenericMessageEvent event, Matcher matcher, HashMap<String, URL> newsFeedsByCategory,
-                                String defaultCategory, Logger logger )
-    {
-        String category = matcher.group( 1 ); // The news category
-
-        category = ( category != null ) ? category.toLowerCase() : defaultCategory;
-
-        if ( newsFeedsByCategory.containsKey( category ) )
-        {
             printHeadlines( event, newsFeedsByCategory, category, logger );
-        }
-        else
-        {
-            event.respondWith( "No news feed available for " + category );
         }
     }
 
