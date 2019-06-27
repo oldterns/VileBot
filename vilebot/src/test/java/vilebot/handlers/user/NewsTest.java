@@ -27,7 +27,7 @@ public class NewsTest
     @Before
     public void setup()
     {
-        newsClass.limitCommand = new LimitCommand( 3, 3600 );
+        newsClass.limitCommand = new LimitCommand();
         event = mock( MessageEvent.class );
         User user = mock( User.class );
         Channel channel = mock( Channel.class );
@@ -98,7 +98,7 @@ public class NewsTest
     {
         String ircmsg = "!news invalid";
 
-        String expectedReply = "No news feed available for invalid";
+        String expectedReply = "No news feed available for invalid. Try '!news help' for available news categories.";
         when( event.getMessage() ).thenReturn( ircmsg );
         newsClass.onGenericMessage( event );
 

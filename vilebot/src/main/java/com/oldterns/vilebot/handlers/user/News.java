@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 public class News
     extends NewsParser
 {
-    private static Logger logger = LoggerFactory.getLogger( News.class );
+    private static final Logger logger = LoggerFactory.getLogger( News.class );
 
     private static final String DEFAULT_CATEGORY = "toronto";
 
@@ -85,6 +85,8 @@ public class News
 
     private final String HELP_MESSAGE = generateHelpMessage();
 
+    private final String HELP_COMMAND = "'!news help'";
+
     public static LimitCommand limitCommand = new LimitCommand();
 
     private static final String RESTRICTED_CHANNEL = Vilebot.getConfig().get( "ircChannel1" );
@@ -105,8 +107,8 @@ public class News
         }
         else if ( matcher.matches() )
         {
-            newsLimit( event, matcher, newsFeedsByCategory, DEFAULT_CATEGORY, logger, limitCommand,
-                       RESTRICTED_CHANNEL );
+            currentNews( event, matcher, newsFeedsByCategory, DEFAULT_CATEGORY, HELP_COMMAND, limitCommand,
+                         RESTRICTED_CHANNEL, logger );
         }
     }
 

@@ -70,7 +70,8 @@ public class FakeNewsTest
     {
         String ircmsg = "!fakenews invalid";
 
-        String expectedReply = "No news feed available for invalid";
+        String expectedReply =
+            "No news feed available for invalid. Try '!fakenews help' for available news categories.";
         when( event.getMessage() ).thenReturn( ircmsg );
         fakeNewsClass.onGenericMessage( event );
 

@@ -25,7 +25,7 @@ public class FakeNews
     extends NewsParser
 {
 
-    private static Logger logger = LoggerFactory.getLogger( FakeNews.class );
+    private static final Logger logger = LoggerFactory.getLogger( FakeNews.class );
 
     private static final String DEFAULT_CATEGORY = "canada";
 
@@ -57,6 +57,8 @@ public class FakeNews
 
     private final String HELP_MESSAGE = generateHelpMessage();
 
+    private final String HELP_COMMAND = "'!fakenews help'";
+
     public static LimitCommand limitCommand = new LimitCommand();
 
     private static final String RESTRICTED_CHANNEL = Vilebot.getConfig().get( "ircChannel1" );
@@ -77,8 +79,8 @@ public class FakeNews
         }
         else if ( matcher.matches() )
         {
-            newsLimit( event, matcher, fakeNewsFeedsByCategory, DEFAULT_CATEGORY, logger, limitCommand,
-                       RESTRICTED_CHANNEL );
+            currentNews( event, matcher, fakeNewsFeedsByCategory, DEFAULT_CATEGORY, HELP_COMMAND, limitCommand,
+                         RESTRICTED_CHANNEL, logger );
         }
     }
 
