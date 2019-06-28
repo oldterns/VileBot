@@ -34,7 +34,13 @@ public class News
         try
         {
             newsFeedsByCategory.put( "top", new URL( "https://rss.cbc.ca/lineup/topstories.xml" ) );
-            newsFeedsByCategory.put( "world", new URL( "https://rss.cbc.ca/lineup/world.xml" ) );
+            newsFeedsByCategory.put( "world",
+                                     new URL( "https://news.google.com/news/rss/headlines/section/topic/WORLD?ned=us&hl=en" ) );
+            newsFeedsByCategory.put( "redhat", new URL( "https://www.redhat.com/en/rss/blog/channel/red-hat-news" ) );
+            newsFeedsByCategory.put( "fedora", new URL( "http://fedoraplanet.org/rss20.xml" ) );
+            newsFeedsByCategory.put( "openshift", new URL( "https://blog.openshift.com/category/news/rss" ) );
+            newsFeedsByCategory.put( "opensource", new URL( "https://opensource.com/feed" ) );
+            newsFeedsByCategory.put( "coyote", new URL( "http://feeds.feedburner.com/CoyoteBlog" ) );
             newsFeedsByCategory.put( "canada", new URL( "https://rss.cbc.ca/lineup/canada.xml" ) );
             newsFeedsByCategory.put( "usa", new URL( "http://feeds.reuters.com/Reuters/domesticNews" ) );
             newsFeedsByCategory.put( "britain", new URL( "http://feeds.bbci.co.uk/news/uk/rss.xml" ) );
@@ -127,5 +133,4 @@ public class News
 
         return sb.toString();
     }
-
 }

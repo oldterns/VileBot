@@ -99,5 +99,4 @@ public class FakeNews
 
         return sb.toString();
     }
-
 }

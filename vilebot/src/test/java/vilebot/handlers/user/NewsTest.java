@@ -46,6 +46,11 @@ public class NewsTest
         sb.append( "\n" );
         sb.append( " { top }" );
         sb.append( " { world }" );
+        sb.append( " { redhat }" );
+        sb.append( " { fedora }" );
+        sb.append( " { openshift }" );
+        sb.append( " { opensource }" );
+        sb.append( " { coyote }" );
         sb.append( " { canada }" );
         sb.append( " { usa }" );
         sb.append( " { britain }" );
