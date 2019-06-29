@@ -36,19 +36,19 @@ public class News
             newsFeedsByCategory.put( "top", new URL( "https://rss.cbc.ca/lineup/topstories.xml" ) );
             newsFeedsByCategory.put( "world",
                                      new URL( "https://news.google.com/news/rss/headlines/section/topic/WORLD?ned=us&hl=en" ) );
+            newsFeedsByCategory.put( "canada", new URL( "https://rss.cbc.ca/lineup/canada.xml" ) );
+            newsFeedsByCategory.put( "usa", new URL( "http://feeds.reuters.com/Reuters/domesticNews" ) );
+            newsFeedsByCategory.put( "britain", new URL( "http://feeds.bbci.co.uk/news/uk/rss.xml" ) );
             newsFeedsByCategory.put( "redhat", new URL( "https://www.redhat.com/en/rss/blog/channel/red-hat-news" ) );
             newsFeedsByCategory.put( "fedora", new URL( "http://fedoraplanet.org/rss20.xml" ) );
             newsFeedsByCategory.put( "openshift", new URL( "https://blog.openshift.com/category/news/rss" ) );
             newsFeedsByCategory.put( "opensource", new URL( "https://opensource.com/feed" ) );
-            newsFeedsByCategory.put( "coyote", new URL( "http://feeds.feedburner.com/CoyoteBlog" ) );
-            newsFeedsByCategory.put( "canada", new URL( "https://rss.cbc.ca/lineup/canada.xml" ) );
-            newsFeedsByCategory.put( "usa", new URL( "http://feeds.reuters.com/Reuters/domesticNews" ) );
-            newsFeedsByCategory.put( "britain", new URL( "http://feeds.bbci.co.uk/news/uk/rss.xml" ) );
             newsFeedsByCategory.put( "politics", new URL( "https://rss.cbc.ca/lineup/politics.xml" ) );
             newsFeedsByCategory.put( "business", new URL( "https://rss.cbc.ca/lineup/business.xml" ) );
             newsFeedsByCategory.put( "health", new URL( "https://rss.cbc.ca/lineup/health.xml" ) );
             newsFeedsByCategory.put( "arts", new URL( "https://rss.cbc.ca/lineup/arts.xml" ) );
             newsFeedsByCategory.put( "tech", new URL( "https://rss.cbc.ca/lineup/technology.xml" ) );
+            newsFeedsByCategory.put( "offbeat", new URL( "https://rss.cbc.ca/lineup/offbeat.xml" ) );
             newsFeedsByCategory.put( "indigenous", new URL( "https://www.cbc.ca/cmlink/rss-cbcaboriginal" ) );
             newsFeedsByCategory.put( "sports", new URL( "https://rss.cbc.ca/lineup/sports.xml" ) );
             newsFeedsByCategory.put( "mlb", new URL( "https://rss.cbc.ca/lineup/sports-mlb.xml" ) );
@@ -57,6 +57,8 @@ public class News
             newsFeedsByCategory.put( "nfl", new URL( "https://rss.cbc.ca/lineup/sports-nfl.xml" ) );
             newsFeedsByCategory.put( "nhl", new URL( "https://rss.cbc.ca/lineup/sports-nhl.xml" ) );
             newsFeedsByCategory.put( "soccer", new URL( "https://rss.cbc.ca/lineup/sports-soccer.xml" ) );
+            newsFeedsByCategory.put( "curling", new URL( "https://rss.cbc.ca/lineup/sports-curling.xml" ) );
+            newsFeedsByCategory.put( "skating", new URL( "https://rss.cbc.ca/lineup/sports-figureskating.xml" ) );
             newsFeedsByCategory.put( "bc", new URL( "https://rss.cbc.ca/lineup/canada-britishcolumbia.xml" ) );
             newsFeedsByCategory.put( "kamloops", new URL( "https://rss.cbc.ca/lineup/canada-kamloops.xml" ) );
             newsFeedsByCategory.put( "calgary", new URL( "https://rss.cbc.ca/lineup/canada-calgary.xml" ) );
@@ -124,10 +126,35 @@ public class News
         StringBuilder sb = new StringBuilder();
 
         sb.append( "News Categories (example: !news toronto):" );
-        sb.append( "\n" );
 
         for ( String category : newsFeedsByCategory.keySet() )
         {
+            if ( category.equals( "top" ) )
+            {
+                sb.append( "\n" );
+                sb.append( "  General:" );
+            }
+            else if ( category.equals( "redhat" ) )
+            {
+                sb.append( "\n" );
+                sb.append( "  Open Source:" );
+            }
+            else if ( category.equals( "politics" ) )
+            {
+                sb.append( "\n" );
+                sb.append( "  Topics:" );
+            }
+            else if ( category.equals( "sports" ) )
+            {
+                sb.append( "\n" );
+                sb.append( "  Sports:" );
+            }
+            else if ( category.equals( "bc" ) )
+            {
+                sb.append( "\n" );
+                sb.append( "  Regional:" );
+            }
+
             sb.append( " { " + category + " }" );
         }
 
