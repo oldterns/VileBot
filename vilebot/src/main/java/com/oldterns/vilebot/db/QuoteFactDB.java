@@ -6,9 +6,11 @@
  */
 package com.oldterns.vilebot.db;
 
-import java.util.Set;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import redis.clients.jedis.Jedis;
 
@@ -20,6 +22,25 @@ public class QuoteFactDB
     private static final String keyOfFactSetsPrefix = "noun-facts-";
 
     private static final int COUNT = 5;
+
+    public static Set<String> getQuotableFactableNicks()
+    {
+        Jedis jedis = pool.getResource();
+        try
+        {
+            Set<String> hasQuotes = jedis.keys( keyOfQuoteSetsPrefix + "*" );
+            Set<String> hasFacts = jedis.keys( keyOfFactSetsPrefix + "*" );
+
+            Set<String> out = new HashSet<>();
+            out.addAll( hasQuotes.stream().map( s -> s.substring( keyOfQuoteSetsPrefix.length() ) ).collect( Collectors.toSet() ) );
+            out.addAll( hasFacts.stream().map( s -> s.substring( keyOfFactSetsPrefix.length() ) ).collect( Collectors.toSet() ) );
+            return out;
+        }
+        finally
+        {
+            pool.returnResource( jedis );
+        }
+    }
 
     /**
      * Add a quote to the quote set of a noun.
