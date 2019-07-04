@@ -16,6 +16,11 @@ public class ChurchDB
 
     private static final String keyOfChurchDonorTitleSortedSet = "church-title-";
 
+    public static boolean isTopDonor( String noun )
+    {
+        return getDonorRank( noun ) != null && getDonorRank( noun ) <= 4;
+    }
+
     /**
      * Change the karma of a noun by an integer.
      *
