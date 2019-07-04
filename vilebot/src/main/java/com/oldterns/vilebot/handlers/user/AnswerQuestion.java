@@ -43,7 +43,10 @@ public class AnswerQuestion
         String question = matcher.group( 2 );
         String answer = getAnswer( question );
         answer = truncate( answer );
-        event.respondWith( answer );
+        for ( String line : answer.split( "\n" ) )
+        {
+            event.respondWith( line );
+        }
     }
 
     private String getAnswer( String searchTerm )
