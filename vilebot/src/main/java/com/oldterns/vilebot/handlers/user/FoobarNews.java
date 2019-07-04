@@ -110,7 +110,7 @@ public class FoobarNews
             }
             catch ( IOException | JAXBException e )
             {
-                event.respond( "I could not create tempoary file for the news :(" );
+                event.respond( "I could not create temporary file for the news :(" );
             }
         }
     }
