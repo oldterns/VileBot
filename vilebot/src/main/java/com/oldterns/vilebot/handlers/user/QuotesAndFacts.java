@@ -201,7 +201,7 @@ public class QuotesAndFacts
                     }
                     try
                     {
-                        String title = queried + "'s quotes";
+                        String title = queried.trim() + "'s quotes";
                         String pasteLink = dumpToPastebin( title, sb.toString() );
                         dumpCache.put( dumpKey, pasteLink );
                         dumpSize.put( dumpKey, allQuotes.size() );
@@ -231,7 +231,9 @@ public class QuotesAndFacts
         conn.setDoOutput( true );
         conn.setRequestMethod( "POST" );
         conn.setRequestProperty( "Content-Type", "application/json" );
-        String input = "{\"title\": \" " + title + "\"," + " \"contents\": \"" + contents + "\"}";
+        String password = generatePassword();
+        String input = "{ \"title\": \" " + title + "\", " + "\"password\": \"" + password + "\", "
+            + " \"contents\": \"" + contents + "\" }";
 
         OutputStream os = conn.getOutputStream();
         os.write( input.getBytes() );
@@ -246,7 +248,21 @@ public class QuotesAndFacts
         }
         Gson gson = new Gson();
         Paste paste = gson.fromJson( response.toString(), Paste.class );
-        return paste.url;
+        return paste.url + " ( password: " + password + " )";
+    }
+
+    private String generatePassword()
+    {
+        String allowedChars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        int charRange = allowedChars.length();
+        Random random = new Random();
+        StringBuilder password = new StringBuilder();
+        int passwordLength = 10;
+        for ( int i = 0; i < passwordLength; i++ )
+        {
+            password.append( allowedChars.charAt( random.nextInt( charRange ) ) );
+        }
+        return password.toString();
     }
 
     private void factQuoteRandomDump( GenericMessageEvent event, Matcher factQuoteRandomDumpMatcher )
