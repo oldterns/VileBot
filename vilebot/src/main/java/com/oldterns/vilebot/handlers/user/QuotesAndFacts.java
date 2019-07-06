@@ -23,6 +23,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -252,17 +254,18 @@ public class QuotesAndFacts
     }
 
     private String generatePassword()
+        throws NoSuchAlgorithmException
     {
-        String allowedChars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        String allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&?";
         int charRange = allowedChars.length();
-        Random random = new Random();
-        StringBuilder password = new StringBuilder();
+        SecureRandom random = SecureRandom.getInstanceStrong();
         int passwordLength = 10;
+        char[] password = new char[passwordLength];
         for ( int i = 0; i < passwordLength; i++ )
         {
-            password.append( allowedChars.charAt( random.nextInt( charRange ) ) );
+            password[i] = allowedChars.charAt( random.nextInt( charRange ) );
         }
-        return password.toString();
+        return new String( password );
     }
 
     private void factQuoteRandomDump( GenericMessageEvent event, Matcher factQuoteRandomDumpMatcher )
