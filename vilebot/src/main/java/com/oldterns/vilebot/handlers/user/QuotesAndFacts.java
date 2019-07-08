@@ -601,7 +601,7 @@ public class QuotesAndFacts
 
     private String getTitle( String noun )
     {
-        if ( ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
+        if ( ChurchDB.isTopDonor( noun ) )
         {
             String title = ChurchDB.getDonorTitle( noun );
             if ( title.trim().length() > 0 )

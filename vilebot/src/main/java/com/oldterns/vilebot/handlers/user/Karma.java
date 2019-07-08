@@ -388,7 +388,7 @@ public class Karma
 
         Integer nounKarma = KarmaDB.getNounKarma( noun );
 
-        if ( useTitle && ChurchDB.getDonorRank( noun ) != null && ChurchDB.getDonorRank( noun ) < 4 )
+        if ( useTitle && ChurchDB.isTopDonor( noun ) )
         {
             String title = ChurchDB.getDonorTitle( noun );
             if ( title.trim().length() > 0 )
