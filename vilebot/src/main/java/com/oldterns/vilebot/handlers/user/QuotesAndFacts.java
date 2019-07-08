@@ -259,7 +259,7 @@ public class QuotesAndFacts
         String allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&?";
         int charRange = allowedChars.length();
         SecureRandom random = SecureRandom.getInstanceStrong();
-        int passwordLength = 10;
+        int passwordLength = 20;
         char[] password = new char[passwordLength];
         for ( int i = 0; i < passwordLength; i++ )
         {
