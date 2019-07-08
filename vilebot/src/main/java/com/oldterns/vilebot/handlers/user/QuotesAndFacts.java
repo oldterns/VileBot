@@ -23,6 +23,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -201,7 +203,7 @@ public class QuotesAndFacts
                     }
                     try
                     {
-                        String title = queried + "'s quotes";
+                        String title = queried.trim() + "'s quotes";
                         String pasteLink = dumpToPastebin( title, sb.toString() );
                         dumpCache.put( dumpKey, pasteLink );
                         dumpSize.put( dumpKey, allQuotes.size() );
@@ -231,7 +233,9 @@ public class QuotesAndFacts
         conn.setDoOutput( true );
         conn.setRequestMethod( "POST" );
         conn.setRequestProperty( "Content-Type", "application/json" );
-        String input = "{\"title\": \" " + title + "\"," + " \"contents\": \"" + contents + "\"}";
+        String password = generatePassword();
+        String input = "{ \"title\": \" " + title + "\", " + "\"password\": \"" + password + "\", "
+            + " \"contents\": \"" + contents + "\" }";
 
         OutputStream os = conn.getOutputStream();
         os.write( input.getBytes() );
@@ -246,7 +250,22 @@ public class QuotesAndFacts
         }
         Gson gson = new Gson();
         Paste paste = gson.fromJson( response.toString(), Paste.class );
-        return paste.url;
+        return paste.url + " ( password: " + password + " )";
+    }
+
+    private String generatePassword()
+        throws NoSuchAlgorithmException
+    {
+        String allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&?";
+        int charRange = allowedChars.length();
+        SecureRandom random = SecureRandom.getInstanceStrong();
+        int passwordLength = 20;
+        char[] password = new char[passwordLength];
+        for ( int i = 0; i < passwordLength; i++ )
+        {
+            password[i] = allowedChars.charAt( random.nextInt( charRange ) );
+        }
+        return new String( password );
     }
 
     private void factQuoteRandomDump( GenericMessageEvent event, Matcher factQuoteRandomDumpMatcher )
