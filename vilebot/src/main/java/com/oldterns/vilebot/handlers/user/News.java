@@ -10,13 +10,13 @@ package com.oldterns.vilebot.handlers.user;
 import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.util.LimitCommand;
 import com.oldterns.vilebot.util.NewsParser;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,57 +28,143 @@ public class News
 
     private static final String DEFAULT_CATEGORY = "toronto";
 
-    private static final HashMap<String, URL> newsFeedsByCategory = new LinkedHashMap<>();
+    private static final LinkedHashMap<String, ImmutablePair<String, URL>> newsFeedsByCategory = new LinkedHashMap<>();
     static
     {
         try
         {
-            newsFeedsByCategory.put( "top", new URL( "https://rss.cbc.ca/lineup/topstories.xml" ) );
+            newsFeedsByCategory.put( "top",
+                                     new ImmutablePair<>( "General",
+                                                          new URL( "https://rss.cbc.ca/lineup/topstories.xml" ) ) );
             newsFeedsByCategory.put( "world",
-                                     new URL( "https://news.google.com/news/rss/headlines/section/topic/WORLD?ned=us&hl=en" ) );
-            newsFeedsByCategory.put( "canada", new URL( "https://rss.cbc.ca/lineup/canada.xml" ) );
-            newsFeedsByCategory.put( "usa", new URL( "http://feeds.reuters.com/Reuters/domesticNews" ) );
-            newsFeedsByCategory.put( "britain", new URL( "http://feeds.bbci.co.uk/news/uk/rss.xml" ) );
-            newsFeedsByCategory.put( "redhat", new URL( "https://www.redhat.com/en/rss/blog/channel/red-hat-news" ) );
-            newsFeedsByCategory.put( "fedora", new URL( "http://fedoraplanet.org/rss20.xml" ) );
-            newsFeedsByCategory.put( "openshift", new URL( "https://blog.openshift.com/category/news/rss" ) );
-            newsFeedsByCategory.put( "opensource", new URL( "https://opensource.com/feed" ) );
-            newsFeedsByCategory.put( "politics", new URL( "https://rss.cbc.ca/lineup/politics.xml" ) );
-            newsFeedsByCategory.put( "business", new URL( "https://rss.cbc.ca/lineup/business.xml" ) );
-            newsFeedsByCategory.put( "health", new URL( "https://rss.cbc.ca/lineup/health.xml" ) );
-            newsFeedsByCategory.put( "arts", new URL( "https://rss.cbc.ca/lineup/arts.xml" ) );
-            newsFeedsByCategory.put( "tech", new URL( "https://rss.cbc.ca/lineup/technology.xml" ) );
-            newsFeedsByCategory.put( "offbeat", new URL( "https://rss.cbc.ca/lineup/offbeat.xml" ) );
-            newsFeedsByCategory.put( "indigenous", new URL( "https://www.cbc.ca/cmlink/rss-cbcaboriginal" ) );
-            newsFeedsByCategory.put( "sports", new URL( "https://rss.cbc.ca/lineup/sports.xml" ) );
-            newsFeedsByCategory.put( "mlb", new URL( "https://rss.cbc.ca/lineup/sports-mlb.xml" ) );
-            newsFeedsByCategory.put( "nba", new URL( "https://rss.cbc.ca/lineup/sports-nba.xml" ) );
-            newsFeedsByCategory.put( "cfl", new URL( "https://rss.cbc.ca/lineup/sports-cfl.xml" ) );
-            newsFeedsByCategory.put( "nfl", new URL( "https://rss.cbc.ca/lineup/sports-nfl.xml" ) );
-            newsFeedsByCategory.put( "nhl", new URL( "https://rss.cbc.ca/lineup/sports-nhl.xml" ) );
-            newsFeedsByCategory.put( "soccer", new URL( "https://rss.cbc.ca/lineup/sports-soccer.xml" ) );
-            newsFeedsByCategory.put( "curling", new URL( "https://rss.cbc.ca/lineup/sports-curling.xml" ) );
-            newsFeedsByCategory.put( "skating", new URL( "https://rss.cbc.ca/lineup/sports-figureskating.xml" ) );
-            newsFeedsByCategory.put( "bc", new URL( "https://rss.cbc.ca/lineup/canada-britishcolumbia.xml" ) );
-            newsFeedsByCategory.put( "kamloops", new URL( "https://rss.cbc.ca/lineup/canada-kamloops.xml" ) );
-            newsFeedsByCategory.put( "calgary", new URL( "https://rss.cbc.ca/lineup/canada-calgary.xml" ) );
-            newsFeedsByCategory.put( "edmonton", new URL( "https://rss.cbc.ca/lineup/canada-edmonton.xml" ) );
-            newsFeedsByCategory.put( "saskatchewan", new URL( "https://rss.cbc.ca/lineup/canada-saskatchewan.xml" ) );
-            newsFeedsByCategory.put( "saskatoon", new URL( "https://rss.cbc.ca/lineup/canada-saskatoon.xml" ) );
-            newsFeedsByCategory.put( "manitoba", new URL( "https://rss.cbc.ca/lineup/canada-manitoba.xml" ) );
-            newsFeedsByCategory.put( "thunderbay", new URL( "https://rss.cbc.ca/lineup/canada-thunderbay.xml" ) );
-            newsFeedsByCategory.put( "sudbury", new URL( "https://rss.cbc.ca/lineup/canada-sudbury.xml" ) );
-            newsFeedsByCategory.put( "windsor", new URL( "https://rss.cbc.ca/lineup/canada-windsor.xml" ) );
-            newsFeedsByCategory.put( "london", new URL( "https://www.cbc.ca/cmlink/rss-canada-london" ) );
-            newsFeedsByCategory.put( "waterloo", new URL( "https://rss.cbc.ca/lineup/canada-kitchenerwaterloo.xml" ) );
-            newsFeedsByCategory.put( "toronto", new URL( "https://rss.cbc.ca/lineup/canada-toronto.xml" ) );
-            newsFeedsByCategory.put( "hamilton", new URL( "https://rss.cbc.ca/lineup/canada-hamiltonnews.xml" ) );
-            newsFeedsByCategory.put( "montreal", new URL( "https://rss.cbc.ca/lineup/canada-montreal.xml" ) );
-            newsFeedsByCategory.put( "nb", new URL( "https://rss.cbc.ca/lineup/canada-newbrunswick.xml" ) );
-            newsFeedsByCategory.put( "pei", new URL( "https://rss.cbc.ca/lineup/canada-pei.xml" ) );
-            newsFeedsByCategory.put( "ns", new URL( "https://rss.cbc.ca/lineup/canada-novascotia.xml" ) );
-            newsFeedsByCategory.put( "newfoundland", new URL( "https://rss.cbc.ca/lineup/canada-newfoundland.xml" ) );
-            newsFeedsByCategory.put( "north", new URL( "https://rss.cbc.ca/lineup/canada-north.xml" ) );
+                                     new ImmutablePair<>( "General",
+                                                          new URL( "https://news.google.com/news/rss/headlines/section/topic/WORLD?ned=us&hl=en" ) ) );
+            newsFeedsByCategory.put( "canada",
+                                     new ImmutablePair<>( "General",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada.xml" ) ) );
+            newsFeedsByCategory.put( "usa",
+                                     new ImmutablePair<>( "General",
+                                                          new URL( "http://feeds.reuters.com/Reuters/domesticNews" ) ) );
+            newsFeedsByCategory.put( "britain",
+                                     new ImmutablePair<>( "General",
+                                                          new URL( "http://feeds.bbci.co.uk/news/uk/rss.xml" ) ) );
+            newsFeedsByCategory.put( "redhat",
+                                     new ImmutablePair<>( "Open Source",
+                                                          new URL( "https://www.redhat.com/en/rss/blog/channel/red-hat-news" ) ) );
+            newsFeedsByCategory.put( "fedora", new ImmutablePair<>( "Open Source",
+                                                                    new URL( "http://fedoraplanet.org/rss20.xml" ) ) );
+            newsFeedsByCategory.put( "openshift",
+                                     new ImmutablePair<>( "Open Source",
+                                                          new URL( "https://blog.openshift.com/category/news/rss" ) ) );
+            newsFeedsByCategory.put( "opensource",
+                                     new ImmutablePair<>( "Open Source", new URL( "https://opensource.com/feed" ) ) );
+            newsFeedsByCategory.put( "politics",
+                                     new ImmutablePair<>( "Topics",
+                                                          new URL( "https://rss.cbc.ca/lineup/politics.xml" ) ) );
+            newsFeedsByCategory.put( "business",
+                                     new ImmutablePair<>( "Topics",
+                                                          new URL( "https://rss.cbc.ca/lineup/business.xml" ) ) );
+            newsFeedsByCategory.put( "health",
+                                     new ImmutablePair<>( "Topics",
+                                                          new URL( "https://rss.cbc.ca/lineup/health.xml" ) ) );
+            newsFeedsByCategory.put( "arts",
+                                     new ImmutablePair<>( "Topics", new URL( "https://rss.cbc.ca/lineup/arts.xml" ) ) );
+            newsFeedsByCategory.put( "tech",
+                                     new ImmutablePair<>( "Topics",
+                                                          new URL( "https://rss.cbc.ca/lineup/technology.xml" ) ) );
+            newsFeedsByCategory.put( "offbeat",
+                                     new ImmutablePair<>( "Topics",
+                                                          new URL( "https://rss.cbc.ca/lineup/offbeat.xml" ) ) );
+            newsFeedsByCategory.put( "indigenous",
+                                     new ImmutablePair<>( "Topics",
+                                                          new URL( "https://www.cbc.ca/cmlink/rss-cbcaboriginal" ) ) );
+            newsFeedsByCategory.put( "sports",
+                                     new ImmutablePair<>( "Sports",
+                                                          new URL( "https://rss.cbc.ca/lineup/sports.xml" ) ) );
+            newsFeedsByCategory.put( "mlb",
+                                     new ImmutablePair<>( "Sports",
+                                                          new URL( "https://rss.cbc.ca/lineup/sports-mlb.xml" ) ) );
+            newsFeedsByCategory.put( "nba",
+                                     new ImmutablePair<>( "Sports",
+                                                          new URL( "https://rss.cbc.ca/lineup/sports-nba.xml" ) ) );
+            newsFeedsByCategory.put( "cfl",
+                                     new ImmutablePair<>( "Sports",
+                                                          new URL( "https://rss.cbc.ca/lineup/sports-cfl.xml" ) ) );
+            newsFeedsByCategory.put( "nfl",
+                                     new ImmutablePair<>( "Sports",
+                                                          new URL( "https://rss.cbc.ca/lineup/sports-nfl.xml" ) ) );
+            newsFeedsByCategory.put( "nhl",
+                                     new ImmutablePair<>( "Sports",
+                                                          new URL( "https://rss.cbc.ca/lineup/sports-nhl.xml" ) ) );
+            newsFeedsByCategory.put( "soccer",
+                                     new ImmutablePair<>( "Sports",
+                                                          new URL( "https://rss.cbc.ca/lineup/sports-soccer.xml" ) ) );
+            newsFeedsByCategory.put( "curling",
+                                     new ImmutablePair<>( "Sports",
+                                                          new URL( "https://rss.cbc.ca/lineup/sports-curling.xml" ) ) );
+            newsFeedsByCategory.put( "skating",
+                                     new ImmutablePair<>( "Sports",
+                                                          new URL( "https://rss.cbc.ca/lineup/sports-figureskating.xml" ) ) );
+            newsFeedsByCategory.put( "bc",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-britishcolumbia.xml" ) ) );
+            newsFeedsByCategory.put( "kamloops",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-kamloops.xml" ) ) );
+            newsFeedsByCategory.put( "calgary",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-calgary.xml" ) ) );
+            newsFeedsByCategory.put( "edmonton",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-edmonton.xml" ) ) );
+            newsFeedsByCategory.put( "saskatchewan",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-saskatchewan.xml" ) ) );
+            newsFeedsByCategory.put( "saskatoon",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-saskatoon.xml" ) ) );
+            newsFeedsByCategory.put( "manitoba",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-manitoba.xml" ) ) );
+            newsFeedsByCategory.put( "thunderbay",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-thunderbay.xml" ) ) );
+            newsFeedsByCategory.put( "sudbury",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-sudbury.xml" ) ) );
+            newsFeedsByCategory.put( "windsor",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-windsor.xml" ) ) );
+            newsFeedsByCategory.put( "london",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://www.cbc.ca/cmlink/rss-canada-london" ) ) );
+            newsFeedsByCategory.put( "waterloo",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-kitchenerwaterloo.xml" ) ) );
+            newsFeedsByCategory.put( "toronto",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-toronto.xml" ) ) );
+            newsFeedsByCategory.put( "hamilton",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-hamiltonnews.xml" ) ) );
+            newsFeedsByCategory.put( "montreal",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-montreal.xml" ) ) );
+            newsFeedsByCategory.put( "newbrunswick",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-newbrunswick.xml" ) ) );
+            newsFeedsByCategory.put( "pei",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-pei.xml" ) ) );
+            newsFeedsByCategory.put( "novascotia",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-novascotia.xml" ) ) );
+            newsFeedsByCategory.put( "newfoundland",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-newfoundland.xml" ) ) );
+            newsFeedsByCategory.put( "north",
+                                     new ImmutablePair<>( "Regional",
+                                                          new URL( "https://rss.cbc.ca/lineup/canada-north.xml" ) ) );
         }
         catch ( MalformedURLException e )
         {
@@ -127,32 +213,17 @@ public class News
 
         sb.append( "News Categories (example: !news toronto):" );
 
+        String prevGenre = null;
+
         for ( String category : newsFeedsByCategory.keySet() )
         {
-            if ( category.equals( "top" ) )
+            String currentGenre = newsFeedsByCategory.get( category ).getLeft();
+
+            if ( !currentGenre.equals( prevGenre ) )
             {
                 sb.append( "\n" );
-                sb.append( "  General:" );
-            }
-            else if ( category.equals( "redhat" ) )
-            {
-                sb.append( "\n" );
-                sb.append( "  Open Source:" );
-            }
-            else if ( category.equals( "politics" ) )
-            {
-                sb.append( "\n" );
-                sb.append( "  Topics:" );
-            }
-            else if ( category.equals( "sports" ) )
-            {
-                sb.append( "\n" );
-                sb.append( "  Sports:" );
-            }
-            else if ( category.equals( "bc" ) )
-            {
-                sb.append( "\n" );
-                sb.append( "  Regional:" );
+                sb.append( "  " + currentGenre + ":" );
+                prevGenre = currentGenre;
             }
 
             sb.append( " { " + category + " }" );

@@ -93,9 +93,9 @@ public class NewsTest
         sb.append( " { toronto }" );
         sb.append( " { hamilton }" );
         sb.append( " { montreal }" );
-        sb.append( " { nb }" );
+        sb.append( " { newbrunswick }" );
         sb.append( " { pei }" );
-        sb.append( " { ns }" );
+        sb.append( " { novascotia }" );
         sb.append( " { newfoundland }" );
         sb.append( " { north }" );
 

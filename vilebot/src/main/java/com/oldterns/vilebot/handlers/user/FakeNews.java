@@ -10,13 +10,13 @@ package com.oldterns.vilebot.handlers.user;
 import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.util.LimitCommand;
 import com.oldterns.vilebot.util.NewsParser;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,20 +29,33 @@ public class FakeNews
 
     private static final String DEFAULT_CATEGORY = "canada";
 
-    private static final HashMap<String, URL> fakeNewsFeedsByCategory = new LinkedHashMap<>();
+    private static final LinkedHashMap<String, ImmutablePair<String, URL>> fakeNewsFeedsByCategory =
+        new LinkedHashMap<>();
     static
     {
         try
         {
-            fakeNewsFeedsByCategory.put( "canada", new URL( "https://www.thebeaverton.com/rss" ) );
-            fakeNewsFeedsByCategory.put( "usa", new URL( "https://www.theonion.com/rss" ) );
-            fakeNewsFeedsByCategory.put( "belgium", new URL( "https://nordpresse.be/rss" ) );
-            fakeNewsFeedsByCategory.put( "france", new URL( "http://www.legorafi.fr/rss" ) );
-            fakeNewsFeedsByCategory.put( "india", new URL( "http://www.fakingnews.com/rss" ) );
-            fakeNewsFeedsByCategory.put( "russia", new URL( "https://fognews.ru/rss" ) );
-            fakeNewsFeedsByCategory.put( "serbia", new URL( "https://www.njuz.net/rss" ) );
-            fakeNewsFeedsByCategory.put( "venezuela", new URL( "http://feeds.feedburner.com/elchiguirebipolar" ) );
-            fakeNewsFeedsByCategory.put( "newzealand", new URL( "http://www.thecivilian.co.nz/rss" ) );
+            fakeNewsFeedsByCategory.put( "canada",
+                                         new ImmutablePair<>( "Countries",
+                                                              new URL( "https://www.thebeaverton.com/rss" ) ) );
+            fakeNewsFeedsByCategory.put( "usa", new ImmutablePair<>( "Countries",
+                                                                     new URL( "https://www.theonion.com/rss" ) ) );
+            fakeNewsFeedsByCategory.put( "belgium",
+                                         new ImmutablePair<>( "Countries", new URL( "https://nordpresse.be/rss" ) ) );
+            fakeNewsFeedsByCategory.put( "france",
+                                         new ImmutablePair<>( "Countries", new URL( "http://www.legorafi.fr/rss" ) ) );
+            fakeNewsFeedsByCategory.put( "india", new ImmutablePair<>( "Countries",
+                                                                       new URL( "http://www.fakingnews.com/rss" ) ) );
+            fakeNewsFeedsByCategory.put( "russia",
+                                         new ImmutablePair<>( "Countries", new URL( "https://fognews.ru/rss" ) ) );
+            fakeNewsFeedsByCategory.put( "serbia",
+                                         new ImmutablePair<>( "Countries", new URL( "https://www.njuz.net/rss" ) ) );
+            fakeNewsFeedsByCategory.put( "venezuela",
+                                         new ImmutablePair<>( "Countries",
+                                                              new URL( "http://feeds.feedburner.com/elchiguirebipolar" ) ) );
+            fakeNewsFeedsByCategory.put( "newzealand",
+                                         new ImmutablePair<>( "Countries",
+                                                              new URL( "http://www.thecivilian.co.nz/rss" ) ) );
         }
         catch ( MalformedURLException e )
         {

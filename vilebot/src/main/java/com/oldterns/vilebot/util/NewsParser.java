@@ -12,6 +12,7 @@ import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 
@@ -31,7 +32,8 @@ public abstract class NewsParser
 
     protected static final int NUM_HEADLINES = 3;
 
-    protected void currentNews( GenericMessageEvent event, Matcher matcher, HashMap<String, URL> newsFeedsByCategory,
+    protected void currentNews( GenericMessageEvent event, Matcher matcher,
+                                LinkedHashMap<String, ImmutablePair<String, URL>> newsFeedsByCategory,
                                 String defaultCategory, String helpCommand, LimitCommand limitCommand,
                                 String restrictedChannel, Logger logger )
     {
@@ -50,7 +52,8 @@ public abstract class NewsParser
         }
     }
 
-    protected void newsLimit( GenericMessageEvent event, HashMap<String, URL> newsFeedsByCategory, String category,
+    protected void newsLimit( GenericMessageEvent event,
+                              LinkedHashMap<String, ImmutablePair<String, URL>> newsFeedsByCategory, String category,
                               Logger logger, LimitCommand limitCommand, String restrictedChannel )
     {
         if ( event instanceof MessageEvent
@@ -72,14 +75,16 @@ public abstract class NewsParser
         }
     }
 
-    protected void printHeadlines( GenericMessageEvent event, HashMap<String, URL> newsFeedsByCategory, String category,
-                                   Logger logger )
+    protected void printHeadlines( GenericMessageEvent event,
+                                   LinkedHashMap<String, ImmutablePair<String, URL>> newsFeedsByCategory,
+                                   String category, Logger logger )
     {
         SyndFeedInput input = new SyndFeedInput();
         SyndFeed feed = null;
+
         try
         {
-            feed = input.build( new XmlReader( newsFeedsByCategory.get( category ) ) );
+            feed = input.build( new XmlReader( newsFeedsByCategory.get( category ).getRight() ) );
         }
         catch ( FeedException | IOException e )
         {
