@@ -1,17 +1,19 @@
 package com.oldterns.vilebot.handlers.user;
 
-import com.oldterns.vilebot.db.LogDB;
-import com.oldterns.vilebot.util.MangleNicks;
-import com.oldterns.vilebot.util.Zalgo;
-import org.pircbotx.hooks.ListenerAdapter;
-import org.pircbotx.hooks.types.GenericMessageEvent;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import com.oldterns.vilebot.db.LogDB;
+import com.oldterns.vilebot.db.QuoteFactDB;
+import com.oldterns.vilebot.util.MangleNicks;
+import com.oldterns.vilebot.util.Zalgo;
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 /**
  * Created by emmett on 12/08/15.
@@ -48,10 +50,20 @@ public class Markov
         }
     }
 
-    private void train()
+    protected void train()
     {
         String data = LogDB.getLog();
         fillMarkovMap( data );
+    }
+
+    protected void trainOnNick( String nick )
+    {
+        Set<String> quotes = QuoteFactDB.getQuotes( nick );
+        Set<String> facts = QuoteFactDB.getFacts( nick );
+        StringBuilder trainingData = new StringBuilder();
+        quotes.forEach( q -> trainingData.append( q ).append( "\n" ) );
+        facts.forEach( f -> trainingData.append( f ).append( "\n" ) );
+        fillMarkovMap( trainingData.toString() );
     }
 
     private void fillMarkovMap( String data )
@@ -80,7 +92,7 @@ public class Markov
         }
     }
 
-    private String generatePhrase()
+    protected String generatePhrase()
     {
         Random random = new Random();
         String key = getRandomKey( random );
@@ -93,6 +105,55 @@ public class Markov
             {
                 break;
             }
+            key = nextKey( key, random );
+        }
+
+        return phrase.toString().replace( "\n", " " );
+    }
+
+    protected String generatePhrase( String topic )
+    {
+        Random random = new Random();
+        String key = topic;
+        StringBuilder phrase = new StringBuilder();
+
+        while ( key != null && phrase.length() < 1000 )
+        {
+            phrase.append( key ).append( " " );
+            if ( shouldEnd( key ) )
+            {
+                break;
+            }
+            key = nextKey( key, random );
+        }
+
+        return phrase.toString().replace( "\n", " " );
+    }
+
+    protected String generatePhrase( String topic, int idealLength )
+    {
+        Random random = new Random();
+        String key = topic;
+        StringBuilder phrase = new StringBuilder();
+
+        while ( key != null && phrase.length() < idealLength )
+        {
+            phrase.append( key ).append( " " );
+            key = nextKey( key, random );
+        }
+
+        return phrase.toString().replace( "\n", " " );
+    }
+
+    protected String generatePhrase( int idealLength )
+    {
+        Random random = new Random();
+        String key = getRandomKey( random );
+        StringBuilder phrase = new StringBuilder();
+
+        while ( key != null && phrase.length() < idealLength )
+        {
+            phrase.append( key ).append( " " );
             key = nextKey( key, random );
         }
 
