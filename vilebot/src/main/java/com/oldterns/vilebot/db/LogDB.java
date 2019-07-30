@@ -1,5 +1,6 @@
 package com.oldterns.vilebot.db;
 
+import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -9,13 +10,19 @@ public class LogDB
     extends RedisDB
 {
 
-    private static final String logKey = "chat-log";
+    public static String logKey = "chat-log";
+
+    private static final int MAX_LOG_SIZE = 100000;
 
     public static void addItem( String chatMessage )
     {
         Jedis jedis = pool.getResource();
         try
         {
+            if ( jedis.strlen( logKey ) > MAX_LOG_SIZE )
+            {
+                jedis.set( logKey, StringUtils.right( jedis.get( logKey ), MAX_LOG_SIZE - chatMessage.length() ) );
+            }
             jedis.append( logKey, chatMessage );
         }
         finally
