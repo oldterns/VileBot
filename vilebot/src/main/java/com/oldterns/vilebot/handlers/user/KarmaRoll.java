@@ -1,16 +1,16 @@
 package com.oldterns.vilebot.handlers.user;
 
+import java.security.SecureRandom;
+import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.db.KarmaDB;
 import com.oldterns.vilebot.util.BaseNick;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
-
-import java.security.SecureRandom;
-import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class KarmaRoll
     extends ListenerAdapter
@@ -176,7 +176,7 @@ public class KarmaRoll
 
     private void manualCancel( GenericMessageEvent event )
     {
-        if ( !currentGame.getFirstPlayerNick().equals( event.getUser().getNick() ) )
+        if ( !currentGame.getFirstPlayerNick().equals( BaseNick.toBaseNick( event.getUser().getNick() ) ) )
         {
             event.respondWith( "Only " + currentGame.getFirstPlayerNick() + " may cancel this game." );
             return;
