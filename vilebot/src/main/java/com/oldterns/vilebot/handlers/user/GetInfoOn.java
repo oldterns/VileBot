@@ -9,6 +9,7 @@ import org.pircbotx.hooks.types.GenericMessageEvent;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,7 +33,10 @@ public class GetInfoOn
             String question = infoonMatch.group( 2 );
             String queryModifier = " site:wikipedia.org";
             String answer = getWiki( question, queryModifier );
-            event.respondWith( answer );
+            for ( String line : answer.split( "\n" ) )
+            {
+                event.respondWith( line );
+            }
         }
     }
 
@@ -103,6 +107,6 @@ public class GetInfoOn
     private String encode( String string )
         throws Exception
     {
-        return URLEncoder.encode( string, "UTF-8" );
+        return URLEncoder.encode( string, StandardCharsets.UTF_8 );
     }
 }
