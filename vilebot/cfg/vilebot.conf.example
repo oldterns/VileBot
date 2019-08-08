@@ -37,3 +37,5 @@ OmgwordList=files/wordlist.txt
 FortuneList=files/fortunelist.txt
 InspirationList=files/inspirationslist.txt
 InspirationIndex=files/inspirationsindex.txt
+
+pastebinApiUrl=
