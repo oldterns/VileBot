@@ -6,25 +6,22 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
-import com.google.gson.Gson;
+import com.oldterns.vilebot.Vilebot;
 import com.oldterns.vilebot.db.ChurchDB;
 import com.oldterns.vilebot.db.QuoteFactDB;
 import com.oldterns.vilebot.util.BaseNick;
 import com.oldterns.vilebot.util.Ignore;
 import com.oldterns.vilebot.util.MangleNicks;
 import com.oldterns.vilebot.util.StringUtil;
-import org.apache.commons.text.StringEscapeUtils;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.JoinEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -63,6 +60,8 @@ public class QuotesAndFacts
 
     // update cache when new quotes/facts added
     private Map<String, Integer> dumpSize = new HashMap<>();
+
+    private static final String PASTEBIN_API_URL = Vilebot.getConfig().get("pastebinApiUrl");
 
     @Override
     public void onJoin( final JoinEvent event ) // announce fact or quote on join
@@ -156,15 +155,10 @@ public class QuotesAndFacts
                 String response;
                 if ( allFacts.size() != dumpSize.getOrDefault( dumpKey, 0 ) )
                 {
-                    StringBuilder sb = new StringBuilder();
-                    for ( String fact : allFacts )
-                    {
-                        sb.append( formatFactReply( queried, StringEscapeUtils.escapeJson( fact ) ) ).append( "\\n" );
-                    }
                     try
                     {
                         String title = queried + "'s facts";
-                        String pasteLink = dumpToPastebin( title, sb.toString() );
+                        String pasteLink = dumpToPastebin( title, allFacts );
                         dumpCache.put( dumpKey, pasteLink );
                         dumpSize.put( dumpKey, allFacts.size() );
                         response = "factdump for " + queried + ": " + pasteLink;
@@ -196,15 +190,10 @@ public class QuotesAndFacts
                 String response;
                 if ( allQuotes.size() != dumpSize.getOrDefault( dumpKey, 0 ) )
                 {
-                    StringBuilder sb = new StringBuilder();
-                    for ( String quote : allQuotes )
-                    {
-                        sb.append( StringEscapeUtils.escapeJson( quote ) ).append( "\\n" );
-                    }
                     try
                     {
                         String title = queried.trim() + "'s quotes";
-                        String pasteLink = dumpToPastebin( title, sb.toString() );
+                        String pasteLink = dumpToPastebin( title, allQuotes );
                         dumpCache.put( dumpKey, pasteLink );
                         dumpSize.put( dumpKey, allQuotes.size() );
                         response = "quotedump for " + queried + ": " + pasteLink;
@@ -225,47 +214,28 @@ public class QuotesAndFacts
         }
     }
 
-    private String dumpToPastebin( String title, String contents )
+    private String dumpToPastebin( String title, Set<String> allQuotes )
         throws Exception
     {
-        URL url = new URL( "https://paste.fedoraproject.org/api/paste/submit" );
+        StringBuilder sb = new StringBuilder();
+        for ( String quote : allQuotes )
+        {
+            sb.append( URLEncoder.encode( quote + "\n", StandardCharsets.UTF_8 ) );
+        }
+
+        URL url = new URL( PASTEBIN_API_URL );
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setDoOutput( true );
         conn.setRequestMethod( "POST" );
-        conn.setRequestProperty( "Content-Type", "application/json" );
-        String password = generatePassword();
-        String input = "{ \"title\": \" " + title + "\", " + "\"password\": \"" + password + "\", "
-            + " \"contents\": \"" + contents + "\" }";
+        conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded" );
+        conn.setInstanceFollowRedirects( false );
+        String input = "format=text&code2=" + title + "\n\n" + sb.toString() + "&poster=vilebot&paste=Send&expiry=m";
 
         OutputStream os = conn.getOutputStream();
         os.write( input.getBytes() );
         os.flush();
-
-        BufferedReader br = new BufferedReader( new InputStreamReader( conn.getInputStream() ) );
-        StringBuilder response = new StringBuilder();
-        String line;
-        while ( ( line = br.readLine() ) != null )
-        {
-            response.append( line );
-        }
-        Gson gson = new Gson();
-        Paste paste = gson.fromJson( response.toString(), Paste.class );
-        return paste.url + " ( password: " + password + " )";
-    }
-
-    private String generatePassword()
-        throws NoSuchAlgorithmException
-    {
-        String allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&?";
-        int charRange = allowedChars.length();
-        SecureRandom random = SecureRandom.getInstanceStrong();
-        int passwordLength = 20;
-        char[] password = new char[passwordLength];
-        for ( int i = 0; i < passwordLength; i++ )
-        {
-            password[i] = allowedChars.charAt( random.nextInt( charRange ) );
-        }
-        return new String( password );
+        assert conn.getResponseCode() == 302;
+        return conn.getHeaderField( "Location" );
     }
 
     private void factQuoteRandomDump( GenericMessageEvent event, Matcher factQuoteRandomDumpMatcher )
@@ -596,7 +566,7 @@ public class QuotesAndFacts
         String text = QuoteFactDB.getRandQuote( noun );
         if ( text == null )
         {
-            return text;
+            return null;
         }
         if ( jaziz )
         {
@@ -657,38 +627,5 @@ public class QuotesAndFacts
         }
 
         return input.substring( st, len );
-    }
-
-    class Paste
-    {
-        /* response fields on success */
-        public String[] attachments;
-
-        public String contents;
-
-        public int expiry_time;
-
-        public boolean is_active;
-
-        public boolean is_password_protected;
-
-        public String language;
-
-        public String paste_id_repr;
-
-        public int post_time;
-
-        public String title;
-
-        public String url;
-
-        public int views;
-
-        /* response fields on failure */
-        public String failure;
-
-        public String message;
-
-        public boolean success;
     }
 }
