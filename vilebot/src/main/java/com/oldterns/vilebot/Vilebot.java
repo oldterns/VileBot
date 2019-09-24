@@ -6,10 +6,56 @@
  */
 package com.oldterns.vilebot;
 
-import com.oldterns.vilebot.handlers.admin.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import com.oldterns.vilebot.handlers.admin.AdminManagement;
+import com.oldterns.vilebot.handlers.admin.AdminPing;
+import com.oldterns.vilebot.handlers.admin.Auth;
+import com.oldterns.vilebot.handlers.admin.GetLog;
+import com.oldterns.vilebot.handlers.admin.NickChange;
+import com.oldterns.vilebot.handlers.admin.Quit;
+import com.oldterns.vilebot.handlers.user.AnswerQuestion;
+import com.oldterns.vilebot.handlers.user.Ascii;
+import com.oldterns.vilebot.handlers.user.ChatLogger;
+import com.oldterns.vilebot.handlers.user.Church;
+import com.oldterns.vilebot.handlers.user.Countdown;
+import com.oldterns.vilebot.handlers.user.Decide;
+import com.oldterns.vilebot.handlers.user.Excuses;
+import com.oldterns.vilebot.handlers.user.FakeNews;
+import com.oldterns.vilebot.handlers.user.Fortune;
+import com.oldterns.vilebot.handlers.user.GetInfoOn;
 import com.oldterns.vilebot.handlers.user.Help;
+import com.oldterns.vilebot.handlers.user.ImageToAscii;
+import com.oldterns.vilebot.handlers.user.Inspiration;
+import com.oldterns.vilebot.handlers.user.Jaziz;
+import com.oldterns.vilebot.handlers.user.Jokes;
+import com.oldterns.vilebot.handlers.user.Kaomoji;
+import com.oldterns.vilebot.handlers.user.Karma;
+import com.oldterns.vilebot.handlers.user.KarmaRoll;
+import com.oldterns.vilebot.handlers.user.LastMessageSed;
+import com.oldterns.vilebot.handlers.user.LastSeen;
+import com.oldterns.vilebot.handlers.user.Markov;
+import com.oldterns.vilebot.handlers.user.News;
+import com.oldterns.vilebot.handlers.user.Omgword;
 import com.oldterns.vilebot.handlers.user.Ops;
-import com.oldterns.vilebot.handlers.user.*;
+import com.oldterns.vilebot.handlers.user.QuotesAndFacts;
+import com.oldterns.vilebot.handlers.user.RemindMe;
+import com.oldterns.vilebot.handlers.user.RockPaperScissors;
+import com.oldterns.vilebot.handlers.user.Summon;
+import com.oldterns.vilebot.handlers.user.Trivia;
+import com.oldterns.vilebot.handlers.user.Ttc;
+import com.oldterns.vilebot.handlers.user.TwitterCorrection;
+import com.oldterns.vilebot.handlers.user.UrlTitleAnnouncer;
+import com.oldterns.vilebot.handlers.user.UrlTweetAnnouncer;
+import com.oldterns.vilebot.handlers.user.UserPing;
+import com.oldterns.vilebot.handlers.user.Userlists;
+import com.oldterns.vilebot.handlers.user.Weather;
 import com.oldterns.vilebot.util.BaseNick;
 import org.pircbotx.Configuration;
 import org.pircbotx.MultiBotManager;
@@ -20,14 +66,6 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 public class Vilebot
     extends ListenerAdapter
@@ -78,7 +116,7 @@ public class Vilebot
 
             Configuration botConfiguration =
                 new Configuration.Builder().setName( ircNick ).setLogin( ircUser ).setRealName( ircRealName ).addServer( ircServerAddress,
-                                                                                                                         ircPort ).addAutoJoinChannel( ircChannel ).setAutoReconnect( true ).addListener( new Vilebot() ).addListener( new AdminManagement() ).addListener( new AdminPing() ).addListener( new Auth() ).addListener( new GetLog() ).addListener( new com.oldterns.vilebot.handlers.admin.Help() ).addListener( new NickChange() ).addListener( new com.oldterns.vilebot.handlers.admin.Ops() ).addListener( new Quit() ).addListener( new AnswerQuestion() ).addListener( new Ascii() ).addListener( new ChatLogger() ).addListener( new Church() ).addListener( new Countdown() ).addListener( new Decide() ).addListener( new Excuses() ).addListener( new FakeNews() ).addListener( new Fortune() ).addListener( new GetInfoOn() ).addListener( new Help() ).addListener( new ImageToAscii() ).addListener( new Inspiration() ).addListener( new Jaziz() ).addListener( new Jokes() ).addListener( new Kaomoji() ).addListener( new Karma() ).addListener( new KarmaRoll() ).addListener( new LastMessageSed() ).addListener( new LastSeen() ).addListener( new Markov() ).addListener( new News() ).addListener( new Omgword() ).addListener( new Ops() ).addListener( new QuotesAndFacts() ).addListener( new RemindMe() ).addListener( new RockPaperScissors() ).addListener( new Trivia() ).addListener( new Ttc() ).addListener( new TwitterCorrection() ).addListener( new UrlTitleAnnouncer() ).addListener( new UrlTweetAnnouncer() ).addListener( new Userlists() ).addListener( new UserPing() ).addListener( new Weather() ).buildConfiguration();
+                                                                                                                         ircPort ).addAutoJoinChannel( ircChannel ).setAutoReconnect( true ).addListener( new Vilebot() ).addListener( new AdminManagement() ).addListener( new AdminPing() ).addListener( new Auth() ).addListener( new GetLog() ).addListener( new com.oldterns.vilebot.handlers.admin.Help() ).addListener( new NickChange() ).addListener( new com.oldterns.vilebot.handlers.admin.Ops() ).addListener( new Quit() ).addListener( new AnswerQuestion() ).addListener( new Ascii() ).addListener( new ChatLogger() ).addListener( new Church() ).addListener( new Countdown() ).addListener( new Decide() ).addListener( new Excuses() ).addListener( new FakeNews() ).addListener( new Fortune() ).addListener( new GetInfoOn() ).addListener( new Help() ).addListener( new ImageToAscii() ).addListener( new Inspiration() ).addListener( new Jaziz() ).addListener( new Jokes() ).addListener( new Kaomoji() ).addListener( new Karma() ).addListener( new KarmaRoll() ).addListener( new LastMessageSed() ).addListener( new LastSeen() ).addListener( new Markov() ).addListener( new News() ).addListener( new Omgword() ).addListener( new Ops() ).addListener( new QuotesAndFacts() ).addListener( new RemindMe() ).addListener( new RockPaperScissors() ).addListener( new Summon() ).addListener( new Trivia() ).addListener( new Ttc() ).addListener( new TwitterCorrection() ).addListener( new UrlTitleAnnouncer() ).addListener( new UrlTweetAnnouncer() ).addListener( new Userlists() ).addListener( new UserPing() ).addListener( new Weather() ).buildConfiguration();
 
             botManager.addBot( botConfiguration );
         }
