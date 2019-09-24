@@ -6,11 +6,11 @@
  */
 package com.oldterns.vilebot.handlers.user;
 
-import org.pircbotx.hooks.ListenerAdapter;
-import org.pircbotx.hooks.types.GenericMessageEvent;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 public class Help
     extends ListenerAdapter
@@ -108,6 +108,7 @@ public class Help
         sb.append( " { !asciifonts }" );
         sb.append( " { !news [<category>] }" );
         sb.append( " { !fakenews [<category>] }" );
+        sb.append( " { !reddit [<subreddit>] } " );
         sb.append( "\n" );
         sb.append( "  Userlists:" );
         sb.append( " { !list <listname> }" );
