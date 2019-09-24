@@ -7,6 +7,12 @@
 
 package com.oldterns.vilebot.util;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
@@ -19,12 +25,6 @@ import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.regex.Matcher;
-
 public abstract class NewsParser
     extends ListenerAdapter
 {
@@ -33,9 +33,8 @@ public abstract class NewsParser
     protected static final int NUM_HEADLINES = 3;
 
     protected void currentNews( GenericMessageEvent event, Matcher matcher,
-                                LinkedHashMap<String, ImmutablePair<String, URL>> newsFeedsByCategory,
-                                String defaultCategory, String helpCommand, LimitCommand limitCommand,
-                                String restrictedChannel, Logger logger )
+                                Map<String, ImmutablePair<String, URL>> newsFeedsByCategory, String defaultCategory,
+                                String helpCommand, LimitCommand limitCommand, String restrictedChannel, Logger logger )
     {
         String category = matcher.group( 1 ); // The news category
 
@@ -52,9 +51,8 @@ public abstract class NewsParser
         }
     }
 
-    protected void newsLimit( GenericMessageEvent event,
-                              LinkedHashMap<String, ImmutablePair<String, URL>> newsFeedsByCategory, String category,
-                              Logger logger, LimitCommand limitCommand, String restrictedChannel )
+    protected void newsLimit( GenericMessageEvent event, Map<String, ImmutablePair<String, URL>> newsFeedsByCategory,
+                              String category, Logger logger, LimitCommand limitCommand, String restrictedChannel )
     {
         if ( event instanceof MessageEvent
             && ( (MessageEvent) event ).getChannel().getName().equals( restrictedChannel ) )
@@ -76,8 +74,8 @@ public abstract class NewsParser
     }
 
     protected void printHeadlines( GenericMessageEvent event,
-                                   LinkedHashMap<String, ImmutablePair<String, URL>> newsFeedsByCategory,
-                                   String category, Logger logger )
+                                   Map<String, ImmutablePair<String, URL>> newsFeedsByCategory, String category,
+                                   Logger logger )
     {
         SyndFeedInput input = new SyndFeedInput();
         SyndFeed feed = null;
