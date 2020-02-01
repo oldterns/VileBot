@@ -75,7 +75,7 @@ public class KarmaRoll
                 if ( !validWager( wager, senderKarma ) )
                 {
                     event.respondWith( wager
-                        + " isn't a valid wager. Must be greater than 0. If you wager is larger than " + UPPER_WAGER
+                        + " isn't a valid wager. Must be greater than 0. If your wager is larger than " + UPPER_WAGER
                         + " you must have at least as much karma as your wager." );
                 }
                 else
