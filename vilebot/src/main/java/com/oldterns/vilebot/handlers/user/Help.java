@@ -57,6 +57,8 @@ public class Help
         sb.append( " { !bottomthree }" );
         sb.append( " { !roll [for] [<karma wager>] }" );
         sb.append( " { !rollcancel }" );
+        sb.append( " { !transfer <noun> <karma amount> }" );
+        sb.append( " { !transfercancel }" );
         sb.append( "\n" );
         sb.append( "  Games:" );
         sb.append( " { !rps <noun> [<dared thing>]}" );
