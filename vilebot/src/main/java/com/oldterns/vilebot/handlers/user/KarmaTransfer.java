@@ -162,7 +162,7 @@ public class KarmaTransfer
 
     private void cancelTransfer( GenericMessageEvent event )
     {
-        if ( !doesCurrentTransactionExist( event ) )
+        if ( !reportHasCurrentTransaction(event ) )
             return;
 
         String user = BaseNick.toBaseNick( ( event.getUser().getNick() ) );
@@ -186,7 +186,7 @@ public class KarmaTransfer
 
     private void acceptTransfer( GenericMessageEvent event )
     {
-        if ( !doesCurrentTransactionExist( event ) )
+        if ( !reportHasCurrentTransaction(event ) )
             return;
 
         String user = BaseNick.toBaseNick( ( event.getUser().getNick() ) );
@@ -218,7 +218,7 @@ public class KarmaTransfer
 
     private void rejectTransfer( GenericMessageEvent event )
     {
-        if ( !doesCurrentTransactionExist( event ) )
+        if ( !reportHasCurrentTransaction(event ) )
             return;
 
         String user = BaseNick.toBaseNick( ( event.getUser().getNick() ) );
@@ -241,7 +241,7 @@ public class KarmaTransfer
         event.respondWith( user + " has rejected " + sender + "'s transfer." );
     }
 
-    private boolean doesCurrentTransactionExist( GenericMessageEvent event )
+    private boolean reportHasCurrentTransaction(GenericMessageEvent event )
     {
         if ( currentTransaction == null )
         {
