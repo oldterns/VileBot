@@ -56,7 +56,7 @@ public class TransferKarmaTest
         KarmaTransfer karmaTransfer = new KarmaTransfer();
         karmaTransfer.onGenericMessage( event );
 
-        String expectedResponse = "You must be in " + getChannel() + " to make or accept wagers.";
+        String expectedResponse = "You must be in " + getChannel() + " to transfer karma.";
         verify( event, times( 1 ) ).respondWith( expectedResponse );
     }
 
