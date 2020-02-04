@@ -65,7 +65,7 @@ public class KarmaTransfer
             || !( (MessageEvent) event ).getChannel().getName().equals( Vilebot.getConfig().get( "ircChannel1" ) ) )
         {
             event.respondWith( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
-                + " to make or accept wagers." );
+                + " to transfer karma." );
             return;
         }
 
