@@ -61,7 +61,7 @@ public class QuotesAndFacts
     // update cache when new quotes/facts added
     private Map<String, Integer> dumpSize = new HashMap<>();
 
-    private static final String PASTEBIN_API_URL = Vilebot.getConfig().get("pastebinApiUrl");
+    private static final String PASTEBIN_API_URL = Vilebot.getConfig().get( "pastebinApiUrl" );
 
     @Override
     public void onJoin( final JoinEvent event ) // announce fact or quote on join
