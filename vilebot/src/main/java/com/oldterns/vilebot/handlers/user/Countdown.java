@@ -468,9 +468,9 @@ public class Countdown
             "2) Answer with !solution <your answer> . Make sure to only use valid characters, such as numbers and + - * / ( ) . ",
             "Breaking Rule 2 will subject you to a loss of " + INVALID_STAKE + " karma.",
             "3) The closer you are to the target number, the more karma you will get (max. 10).",
-            RED + "TIP: If you are over/under " + ANSWER_THRESHOLD + "you will be penalized " + INVALID_STAKE
+            RED + "TIP: If you are over/under " + ANSWER_THRESHOLD + " you will be penalized " + INVALID_STAKE
                 + " karma." + RESET,
-            "4) Use /msg Countdownb0t !solution <your answer> for your answers." };
+            "4) Use \" /msg CountdownB0t !solution <your answer> \" for your answers." };
     }
 
     private String getSubmissionRuleString( GenericMessageEvent event )

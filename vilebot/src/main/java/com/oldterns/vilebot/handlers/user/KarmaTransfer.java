@@ -64,8 +64,7 @@ public class KarmaTransfer
         if ( !( event instanceof MessageEvent )
             || !( (MessageEvent) event ).getChannel().getName().equals( Vilebot.getConfig().get( "ircChannel1" ) ) )
         {
-            event.respondWith( "You must be in " + Vilebot.getConfig().get( "ircChannel1" )
-                + " to transfer karma." );
+            event.respondWith( "You must be in " + Vilebot.getConfig().get( "ircChannel1" ) + " to transfer karma." );
             return;
         }
 
@@ -162,7 +161,7 @@ public class KarmaTransfer
 
     private void cancelTransfer( GenericMessageEvent event )
     {
-        if ( !reportHasCurrentTransaction(event ) )
+        if ( !reportHasCurrentTransaction( event ) )
             return;
 
         String user = BaseNick.toBaseNick( ( event.getUser().getNick() ) );
@@ -186,7 +185,7 @@ public class KarmaTransfer
 
     private void acceptTransfer( GenericMessageEvent event )
     {
-        if ( !reportHasCurrentTransaction(event ) )
+        if ( !reportHasCurrentTransaction( event ) )
             return;
 
         String user = BaseNick.toBaseNick( ( event.getUser().getNick() ) );
@@ -218,7 +217,7 @@ public class KarmaTransfer
 
     private void rejectTransfer( GenericMessageEvent event )
     {
-        if ( !reportHasCurrentTransaction(event ) )
+        if ( !reportHasCurrentTransaction( event ) )
             return;
 
         String user = BaseNick.toBaseNick( ( event.getUser().getNick() ) );
@@ -241,7 +240,7 @@ public class KarmaTransfer
         event.respondWith( user + " has rejected " + sender + "'s transfer." );
     }
 
-    private boolean reportHasCurrentTransaction(GenericMessageEvent event )
+    private boolean reportHasCurrentTransaction( GenericMessageEvent event )
     {
         if ( currentTransaction == null )
         {
