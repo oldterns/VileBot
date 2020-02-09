@@ -283,10 +283,6 @@ public class Countdown
 
     private boolean inGameChannel( GenericMessageEvent event )
     {
-        if ( event instanceof PrivateMessageEvent )
-        {
-            return false;
-        }
         String currChannel = ( (MessageEvent) event ).getChannel().getName();
         if ( currChannel.equals( COUNTDOWN_CHANNEL ) )
         {
@@ -304,10 +300,6 @@ public class Countdown
 
     private boolean correctSolutionChannel( GenericMessageEvent event )
     {
-        if ( event instanceof PrivateMessageEvent )
-        {
-            return false;
-        }
         String currChannel = ( (MessageEvent) event ).getChannel().getName();
         if ( ( isPrivate( event ) && inGameChannel( event ) ) )
         {
@@ -414,9 +406,8 @@ public class Countdown
 
     private void timeoutTimer( GenericMessageEvent event )
     {
-        stopTimer();
         Set<String> keys = currGame.submissions.keySet();
-        event.respondWith( String.format( "Your time is up! The target number was %s",
+        event.respondWith( String.format( "Your time is up! The target number was %s.",
                                           RED + currGame.getTargetNumber() + RESET ) );
         if ( !keys.isEmpty() )
         {
@@ -433,7 +424,7 @@ public class Countdown
                 for ( String winner : winners )
                 {
                     karmaAwarded = currGame.karmaAwarded( winner );
-                    event.respondWith( winner + " awarded " + GREEN + karmaAwarded + RESET + " karma" );
+                    event.respondWith( winner + ", awarded " + karmaAwarded + " karma." );
                     KarmaDB.modNounKarma( winner, karmaAwarded );
                 }
             }
@@ -447,6 +438,7 @@ public class Countdown
             event.respondWith( "There were no submissions for this game. Better luck next time!" );
         }
         currGame = null;
+        stopTimer();
     }
 
     private void stopTimer()
