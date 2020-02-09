@@ -160,6 +160,7 @@ public class Countdown
         {
             List<String> countdownIntro = new ArrayList<>();
             countdownIntro.add( GREEN + "Welcome to Countdown!" + RESET );
+            countdownIntro.add( "See the game rules with !countdownrules." );
             countdownIntro.addAll( Arrays.asList( getQuestion() ) );
             countdownIntro.add( "Good luck! You have 45 seconds." );
             return countdownIntro;
