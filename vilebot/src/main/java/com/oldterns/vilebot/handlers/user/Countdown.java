@@ -273,7 +273,7 @@ public class Countdown
                 return true;
             }
         }
-        event.respondWith( "To play Countdown join : " + COUNTDOWN_CHANNEL );
+        event.respondWith( "To play Countdown join: " + COUNTDOWN_CHANNEL );
         return false;
     }
 
