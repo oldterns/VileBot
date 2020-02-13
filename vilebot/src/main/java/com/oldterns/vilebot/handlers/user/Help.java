@@ -110,6 +110,7 @@ public class Help
         sb.append( " { !asciifonts }" );
         sb.append( " { !news [<category>] }" );
         sb.append( " { !fakenews [<category>] }" );
+        sb.append( " { !downorjustme <hostname|url> }" );
         sb.append( "\n" );
         sb.append( "  Userlists:" );
         sb.append( " { !list <listname> }" );
