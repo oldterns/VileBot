@@ -1,6 +1,7 @@
-/target/
-/db/
-/db-backups/
-/log/
 /cfg/vilebot*.conf
+/db-backups/
+/db/
 /files/fonts/
+/log/
+/target/
+utils/delete-backups.sh
