@@ -82,7 +82,7 @@ public class Church
         donorKarma = donorKarma == null ? 0 : donorKarma;
         if ( donationAmount <= 0 )
         {
-            event.respondWith( "You cannot donate a non-positive number, imbecile." );
+            event.respondWith( "You cannot donate a non-positive number." );
         }
         else if ( donorKarma <= 0 || donorKarma < donationAmount )
         {
