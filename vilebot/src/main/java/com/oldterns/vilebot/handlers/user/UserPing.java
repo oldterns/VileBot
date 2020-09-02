@@ -13,7 +13,7 @@ public class UserPing
     extends ListenerAdapter
 {
     /**
-     * Reply to user !ping command with username: pong
+     * Reply to user !ping command with "nickname, pong"
      */
     @Override
     public void onGenericMessage( final GenericMessageEvent event )
@@ -22,7 +22,8 @@ public class UserPing
 
         if ( text.startsWith( "!ping" ) )
         {
-            event.respondWith( "pong" );
+            String user = event.getUser().getNick();
+            event.respondWith( user + ", pong" );
         }
     }
 }
