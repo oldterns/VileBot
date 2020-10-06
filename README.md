@@ -5,7 +5,7 @@
 
 ### Create config file
 
-    cp cfg/vilebot.conf.example cfg/vilebot.conf
+    cp vilebot/cfg/vilebot.conf.example vilebot/cfg/vilebot.conf
     $EDITOR vilebot/cfg/vilebot.conf
 
 ### Eclipse import

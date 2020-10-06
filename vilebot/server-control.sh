@@ -18,7 +18,7 @@ set -f
 : "${VB_PID_PATH:=/tmp/vb-server-pid-$USER}"
 : "${VB_LOG_PATH:=log}"
 : "${VB_REMOTE_DEBUG:=0}"
-
+: "${VB_JAVA_STDOUT:=0}"
 
 die() {
     if [ -n "$*" ]
@@ -103,7 +103,12 @@ mode_start() {
             msg ">> Starting Vilebot"
         fi
 
-        nohup java $extra_opts -jar "$VB_JAR_PATH" 1>>"$VB_LOG_PATH/vilebot-stdout.log" 2>&1 &
+        if [ "$VB_JAVA_STDOUT" = "1" ]
+        then
+            java $extra_opts -jar "$VB_JAR_PATH" 1
+        else
+            nohup java $extra_opts -jar "$VB_JAR_PATH" 1>>"$VB_LOG_PATH/vilebot-stdout.log" 2>&1 &
+        fi
         echo -n "$!" >| "$VB_PID_PATH"
     fi
 

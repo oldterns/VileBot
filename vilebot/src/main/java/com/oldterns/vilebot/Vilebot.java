@@ -9,6 +9,7 @@ package com.oldterns.vilebot;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +62,7 @@ import com.oldterns.vilebot.handlers.user.Weather;
 import com.oldterns.vilebot.util.BaseNick;
 import org.pircbotx.Configuration;
 import org.pircbotx.MultiBotManager;
+import org.pircbotx.hooks.Listener;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.slf4j.Logger;
@@ -78,6 +80,12 @@ public class Vilebot
     private static final String BOT_CONFIG_FILE = "cfg/vilebot.conf";
 
     private static Map<String, String> cfg = getConfigMap();
+
+    private static final String[] allListenerClasses = { "AnswerQuestion", "Ascii", "ChatLogger", "Church", "Countdown",
+        "Decide", "DownOrJustMe", "Excuses", "FakeNews", "Fortune", "GetInfoOn", "Help", "ImageToAscii", "Inspiration",
+        "Jaziz", "Jokes", "Kaomoji", "Karma", "KarmaRoll", "KarmaTransfer", "LastMessageSed", "LastSeen", "Markov",
+        "News", "Omgword", "Ops", "QuotesAndFacts", "RemindMe", "RockPaperScissors", "Summon", "Trivia", "Ttc",
+        "TwitterCorrection", "UrlTitleAnnouncer", "UrlTweetAnnouncer", "UserPing", "Userlists", "Weather" };
 
     private static JedisPool pool;
 
@@ -113,18 +121,71 @@ public class Vilebot
             String ircServerAddress = cfg.get( "ircServerAddress" + i );
             int ircPort = Integer.parseInt( cfg.get( "ircPort" + i ) );
             String ircChannel = cfg.get( "ircChannel" + i );
+            String listenerCsvString = cfg.get( "listeners" + i );
 
             BaseNick.addBotNick( ircNick );
 
-            Configuration botConfiguration =
-                new Configuration.Builder().setName( ircNick ).setLogin( ircUser ).setRealName( ircRealName ).addServer( ircServerAddress,
-                                                                                                                         ircPort ).addAutoJoinChannel( ircChannel ).setAutoReconnect( true ).addListener( new Vilebot() ).addListener( new AdminManagement() ).addListener( new AdminPing() ).addListener( new Auth() ).addListener( new DownOrJustMe() ).addListener( new GetLog() ).addListener( new com.oldterns.vilebot.handlers.admin.Help() ).addListener( new NickChange() ).addListener( new com.oldterns.vilebot.handlers.admin.Ops() ).addListener( new Quit() ).addListener( new AnswerQuestion() ).addListener( new Ascii() ).addListener( new ChatLogger() ).addListener( new Church() ).addListener( new Countdown() ).addListener( new Decide() ).addListener( new Excuses() ).addListener( new FakeNews() ).addListener( new Fortune() ).addListener( new GetInfoOn() ).addListener( new Help() ).addListener( new ImageToAscii() ).addListener( new Inspiration() ).addListener( new Jaziz() ).addListener( new Jokes() ).addListener( new Kaomoji() ).addListener( new Karma() ).addListener( new KarmaRoll() ).addListener( new KarmaTransfer() ).addListener( new LastMessageSed() ).addListener( new LastSeen() ).addListener( new Markov() ).addListener( new News() ).addListener( new Omgword() ).addListener( new Ops() ).addListener( new QuotesAndFacts() ).addListener( new RemindMe() ).addListener( new RockPaperScissors() ).addListener( new Summon() ).addListener( new Trivia() ).addListener( new Ttc() ).addListener( new TwitterCorrection() ).addListener( new UrlTitleAnnouncer() ).addListener( new UrlTweetAnnouncer() ).addListener( new Userlists() ).addListener( new UserPing() ).addListener( new Weather() ).buildConfiguration();
-
-            botManager.addBot( botConfiguration );
+            Configuration.Builder botCfg = new Configuration.Builder();
+            botCfg.setName( ircNick );
+            botCfg.setLogin( ircUser );
+            botCfg.setRealName( ircRealName );
+            botCfg.addServer( ircServerAddress, ircPort );
+            botCfg.addAutoJoinChannel( ircChannel );
+            botCfg.setAutoReconnect( true );
+            botCfg.addListeners( convertListenerStrings( listenerCsvString ) );
+            botManager.addBot( botCfg.buildConfiguration() );
         }
 
         botManager.start();
         // Done
+    }
+
+    /**
+     * Returns list of Listener object based on a CSV string of Listener class names.
+     *
+     * @param listenerCsvString CSV list of listener class names.
+     * @return List of Listener objects.
+     **/
+    private static ArrayList<Listener> convertListenerStrings( String listenerCsvString )
+    {
+        ArrayList<Listener> listeners = new ArrayList<Listener>();
+
+        // add admin listeners
+        listeners.add( new AdminManagement() );
+        listeners.add( new AdminPing() );
+        listeners.add( new Auth() );
+        listeners.add( new GetLog() );
+        listeners.add( new NickChange() );
+        listeners.add( new Quit() );
+
+        // add user listeners
+        String[] listenerStrings =
+            ( listenerCsvString.equals( "all" ) ) ? allListenerClasses : listenerCsvString.split( "," );
+        for ( String listenerString : listenerStrings )
+        {
+            listeners.add( createListenerFromString( listenerString ) );
+        }
+
+        return listeners;
+    }
+
+    /**
+     * Returns Listener object based on class name.
+     *
+     * @param listenerString Name of class.
+     * @return Listener object of class name.
+     **/
+    private static Listener createListenerFromString( String listenerString )
+    {
+        final String className = "com.oldterns.vilebot.handlers.user." + listenerString;
+        try
+        {
+            return (Listener) Class.forName( className ).newInstance();
+        }
+        catch ( InstantiationException | IllegalAccessException | ClassNotFoundException e )
+        {
+            throw new IllegalStateException( e );
+        }
     }
 
     private static Map<String, String> getConfigMap()
