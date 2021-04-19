@@ -12,6 +12,8 @@
 
     <modules>
         <module>vilebot</module>
+        <module>vilebot-quarkus</module>
+        <module>quarkus-irc-bot</module>
     </modules>
 
     <build>
