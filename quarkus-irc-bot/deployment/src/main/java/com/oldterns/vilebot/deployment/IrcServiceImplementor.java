@@ -4,27 +4,20 @@ import com.oldterns.vilebot.Nick;
 import com.oldterns.vilebot.annotations.Delimiter;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.annotations.Regex;
-import com.oldterns.vilebot.services.ChannelMessage;
 import com.oldterns.vilebot.services.IRCService;
 import io.quarkus.arc.deployment.GeneratedBeanGizmoAdaptor;
 import io.quarkus.gizmo.*;
 import io.vertx.codegen.annotations.Nullable;
-import org.apache.camel.Message;
-import org.apache.camel.Predicate;
-import org.apache.camel.Processor;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.irc.IrcMessage;
-import org.apache.camel.model.*;
-import org.jboss.jandex.DotName;
-import org.jboss.jandex.MethodInfo;
+import net.engio.mbassy.listener.Handler;
+import net.engio.mbassy.listener.Invoke;
+import org.kitteh.irc.client.library.element.Channel;
+import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
+import org.kitteh.irc.client.library.event.helper.ChannelEvent;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.io.PrintStream;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -34,11 +27,13 @@ public class IrcServiceImplementor {
     private final GeneratedBeanGizmoAdaptor classOutput;
     private ClassCreator classCreator;
     private MethodCreator methodCreator;
-    private ResultHandle ircServiceResultHandle;
+    private FieldDescriptor ircServiceField;
+    private Set<String> channelSet;
 
     public IrcServiceImplementor(GeneratedBeanGizmoAdaptor classOutput, Class<?> ircServiceClass) {
         this.ircServiceClass = ircServiceClass;
         this.classOutput = classOutput;
+        channelSet = new HashSet<>();
     }
 
     public String generateImplementation() {
@@ -55,13 +50,10 @@ public class IrcServiceImplementor {
 
         classCreator.addAnnotation(ApplicationScoped.class);
 
-        FieldDescriptor ircServiceField = FieldDescriptor.of(classCreator.getClassName(), "ircService", ircServiceClass);
+        ircServiceField = FieldDescriptor.of(classCreator.getClassName(), "ircService", ircServiceClass);
         classCreator.getFieldCreator(ircServiceField)
                     .setModifiers(Modifier.PUBLIC)
                     .addAnnotation(Inject.class);
-
-        methodCreator = classCreator.getMethodCreator(MethodDescriptor.ofMethod(classCreator.getClassName(), "configure", void.class));
-        ircServiceResultHandle = methodCreator.readInstanceField(ircServiceField, methodCreator.getThis());
 
         for (Method method : ircServiceClass.getDeclaredMethods()) {
             if (hasIrcServiceAnnotation(method) && !Modifier.isPublic(method.getModifiers())) {
@@ -69,7 +61,20 @@ public class IrcServiceImplementor {
             }
             Optional.ofNullable(method.getAnnotation(OnChannelMessage.class)).ifPresent(annotation -> implementOnChannelMessage(method, annotation));
         }
-        methodCreator.returnValue(null);
+
+        methodCreator = classCreator.getMethodCreator(MethodDescriptor.ofMethod(IRCService.class, "getChannelsToJoin",
+                Collection.class));
+        ResultHandle outputArray = methodCreator.newInstance(MethodDescriptor.ofConstructor(ArrayList.class, int.class),
+                methodCreator.load(channelSet.size()));
+        channelSet.forEach(channel -> {
+            ResultHandle channelResultHandle = methodCreator.load(channel);
+            ResultHandle actualChannel = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getChannel", String.class, String.class),
+                    methodCreator.getThis(), channelResultHandle);
+            methodCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(Collection.class, "add", boolean.class, Object.class),
+                    outputArray, actualChannel);
+        });
+        methodCreator.returnValue(outputArray);
+
         classCreator.close();
         return generatedClassName;
     }
@@ -82,66 +87,85 @@ public class IrcServiceImplementor {
      * Generates code that looks like this:
      *
      * <pre>
-     *   Pattern pattern = Pattern.compile(...);
-     *   from("direct:methodId")
-     *       .pipeline()
-     *           .filter(messageTextMatches(pattern.asPredicate()))
-     *           .process(reply(ircMessage -> {
-     *               Matcher matcher = pattern.matcher(ircMessage.getMessage());
-     *               Integer intArg = Integer.parseInt(matcher.group("intArg"));
-     *               String stringArg = matcher.group("stringArg");
-     *               return service.theMethod(intArg, stringArg);
-     *           }))
-     *           .to(getChannel("#example"));
+     *   @Handler
+     *   public void method$Handler(ChannelMessage channelMessage) {
+     *       if (!targetChannel.equals(channelMessage.getChannel().getMessagingName())) {
+     *           return;
+     *       }
+     *       Pattern pattern = Pattern.compile(...);
+     *       Matcher matcher = pattern.matcher(channelMessage.getMessage());
+     *       if (!matcher.matches()) {
+     *           return;
+     *       }
+     *       Integer intArg = Integer.parseInt(matcher.group("intArg"));
+     *       String stringArg = matcher.group("stringArg");
+     *       return service.theMethod(intArg, stringArg);
+     *   }
      * </pre>
      * @param method
      * @param onChannelMessage
      */
     private void implementOnChannelMessage(Method method, OnChannelMessage onChannelMessage) {
-        ResultHandle fromChannelResultHandle = fromChannel(method);
-        ResultHandle pipeLineResultHandle = pipeLine(fromChannelResultHandle);
-        ResultHandle patternRegexResultHandle  = methodCreator.load(getPatternRegex(method, onChannelMessage.value()));
-        ResultHandle compiledPatternResultHandle = methodCreator.invokeStaticMethod(MethodDescriptor.ofMethod(Pattern.class, "compile", Pattern.class, String.class),
+        channelSet.add(onChannelMessage.channel());
+        methodCreator = classCreator.getMethodCreator(method.getName() + "$Handler", void.class, ChannelMessageEvent.class);
+        AnnotationCreator annotationCreator = methodCreator.addAnnotation(Handler.class);
+        annotationCreator.addValue("delivery", Invoke.Asynchronously);
+        ResultHandle channelResultHandle = methodCreator.load(onChannelMessage.channel());
+        ResultHandle actualChannelToCheckResultHandle = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getChannel", String.class, String.class),
+                methodCreator.getThis(), channelResultHandle);
+        ResultHandle channelMessageEventResultHandle = methodCreator.getMethodParam(0);
+
+        ResultHandle channelInstanceResultHandle = methodCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(ChannelEvent.class,
+                "getChannel", Channel.class), channelMessageEventResultHandle);
+        ResultHandle channelMessagingResultHandle = methodCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(Channel.class,
+                "getMessagingName", String.class), channelInstanceResultHandle);
+        ResultHandle isChannelTarget = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(String.class, "equals",
+                boolean.class, Object.class), actualChannelToCheckResultHandle, channelMessagingResultHandle);
+
+        BranchResult channelMatchesBranchResult = methodCreator.ifFalse(isChannelTarget);
+        channelMatchesBranchResult.trueBranch().returnValue(null);
+        BytecodeCreator matcherBytecodeCreator = channelMatchesBranchResult.falseBranch();
+        ResultHandle patternRegexResultHandle  = matcherBytecodeCreator.load(getPatternRegex(method, onChannelMessage.value()));
+        ResultHandle compiledPatternResultHandle = matcherBytecodeCreator.invokeStaticMethod(MethodDescriptor.ofMethod(Pattern.class, "compile", Pattern.class, String.class),
                 patternRegexResultHandle);
-        ResultHandle compiledPatternPredicateResultHandle = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(Pattern.class, "asPredicate", java.util.function.Predicate.class),
-                compiledPatternResultHandle);
-        ResultHandle camelPredicate = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "messageTextMatches", Predicate.class, java.util.function.Predicate.class),
-                methodCreator.getThis(), compiledPatternPredicateResultHandle);
-        ResultHandle filterResultHandle = filter(pipeLineResultHandle, camelPredicate);
-
-        FunctionCreator processorFunctionCreator = methodCreator.createFunction(getFunctionType(method));
-        BytecodeCreator processorBytecode = processorFunctionCreator.getBytecode();
-
-        ResultHandle ircMessageTextResultHandle = processorBytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(ChannelMessage.class, "getMessage", String.class),
-                processorBytecode.getMethodParam(0));
-
-        ResultHandle patternMatcherResultHandle = processorBytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(Pattern.class, "matcher", Matcher.class, CharSequence.class),
+        ResultHandle ircMessageTextResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(ChannelMessageEvent.class, "getMessage", String.class),
+                channelMessageEventResultHandle);
+        ResultHandle patternMatcherResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(Pattern.class, "matcher", Matcher.class, CharSequence.class),
                 compiledPatternResultHandle, ircMessageTextResultHandle);
-
-        processorBytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(Matcher.class, "matches", boolean.class),
+        ResultHandle matchesResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(Matcher.class, "matches", boolean.class),
                 patternMatcherResultHandle);
+        BranchResult branchResult = matcherBytecodeCreator.ifFalse(matchesResultHandle);
+        branchResult.trueBranch().returnValue(null);
+        BytecodeCreator processorBytecode = branchResult.falseBranch();
+        ResultHandle ircServiceResultHandle = processorBytecode.readInstanceField(ircServiceField, methodCreator.getThis());
 
         ResultHandle[] methodArgumentResultHandles = new ResultHandle[method.getParameterCount()];
         for (int i = 0; i < method.getParameterCount(); i++) {
             Parameter parameter = method.getParameters()[i];
-            if (parameter.getType().isAssignableFrom(ChannelMessage.class)) {
-                methodArgumentResultHandles[i] = processorBytecode.getMethodParam(0);
+            if (parameter.getType().isAssignableFrom(ChannelMessageEvent.class)) {
+                methodArgumentResultHandles[i] = channelMessageEventResultHandle;
             } else {
                 methodArgumentResultHandles[i] = extractParameterFromMatcher(processorBytecode, parameter, patternMatcherResultHandle);
             }
         }
         ResultHandle methodResult = processorBytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(method),
                 ircServiceResultHandle, methodArgumentResultHandles);
-        processorBytecode.returnValue(getReturnValue(processorBytecode, method, methodResult));
-
-        ResultHandle processorFunctionResultHandle = methodCreator.invokeVirtualMethod(getProcessorForMethod(method),
-                methodCreator.getThis(), processorFunctionCreator.getInstance());
-        ResultHandle processorResultHandle = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(ProcessorDefinition.class, "process", ProcessorDefinition.class,
-                Processor.class), filterResultHandle, processorFunctionResultHandle);
+        ResultHandle stringReturnValue = getReturnValue(processorBytecode, method, methodResult);
 
         if (!method.getReturnType().isAssignableFrom(void.class)) {
-            toChannel(processorResultHandle, onChannelMessage.channel());
+            BytecodeCreator replyBytecodeCreator = processorBytecode.ifNotNull(stringReturnValue).trueBranch();
+            ResultHandle splitResultHandle = replyBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(String.class, "split", String[].class,
+                    String.class), stringReturnValue, replyBytecodeCreator.load("\n"));
+            AssignableResultHandle indexResultHandle = replyBytecodeCreator.createVariable(int.class);
+            replyBytecodeCreator.assign(indexResultHandle, replyBytecodeCreator.load(0));
+            BytecodeCreator replyLoopBytecodeCreator = replyBytecodeCreator.whileLoop(conditionCreator ->
+                conditionCreator.ifIntegerLessThan(indexResultHandle, conditionCreator.arrayLength(splitResultHandle))
+            ).block();
+            replyLoopBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(ChannelMessageEvent.class, "sendReply", void.class, String.class),
+                    channelMessageEventResultHandle, replyLoopBytecodeCreator.readArrayValue(splitResultHandle, indexResultHandle));
+            replyLoopBytecodeCreator.assign(indexResultHandle, replyLoopBytecodeCreator.increment(indexResultHandle));
         }
+        processorBytecode.returnValue(null);
     }
 
     private ResultHandle extractParameterFromMatcher(BytecodeCreator bytecodeCreator, Parameter parameter, ResultHandle matcherResultHandle) {
@@ -281,26 +305,6 @@ public class IrcServiceImplementor {
         }
     }
 
-    private MethodDescriptor getProcessorForMethod(Method method) {
-        if (method.getReturnType().isAssignableFrom(String.class)) {
-            return MethodDescriptor.ofMethod(IRCService.class, "reply", Processor.class, Function.class);
-        } else if (method.getReturnType().isAssignableFrom(void.class)) {
-            return MethodDescriptor.ofMethod(IRCService.class, "handleMessage", Processor.class, Consumer.class);
-        } else {
-            throw new IllegalStateException("Illegal return type (" + method.getReturnType() + ") for method (" + method.getName() + ").");
-        }
-    }
-
-    private Class<?> getFunctionType(Method method) {
-        if (method.getReturnType().isAssignableFrom(String.class)) {
-            return Function.class;
-        } else if (method.getReturnType().isAssignableFrom(void.class)) {
-            return Consumer.class;
-        } else {
-            throw new IllegalStateException("Illegal return type (" + method.getReturnType() + ") for method (" + method.getName() + ").");
-        }
-    }
-
     private ResultHandle getReturnValue(BytecodeCreator bytecodeCreator, Method method, ResultHandle methodReturnValue) {
         if (method.getReturnType().isAssignableFrom(void.class)) {
             return null;
@@ -309,51 +313,5 @@ public class IrcServiceImplementor {
         } else {
             return bytecodeCreator.invokeStaticMethod(MethodDescriptor.ofMethod(String.class, "valueOf", String.class, Object.class), methodReturnValue);
         }
-    }
-
-    public static String getDirectNameForMethod(Method method) {
-        return encodeForDirect(method.getDeclaringClass().getName() + "-" + method.getName() + "-" + Arrays.stream(method.getParameters())
-                    .map(Parameter::getType).map(Class::getName)
-                    .collect(Collectors.joining("-")));
-    }
-
-    public static String getDirectNameForMethod(MethodInfo method) {
-        return encodeForDirect(method.declaringClass().name().toString() + "-" + method.name() + "-" + method.parameters().stream()
-                .map(org.jboss.jandex.Type::name)
-                .map(DotName::toString)
-                .collect(Collectors.joining("-")));
-    }
-
-    private static String encodeForDirect(String name) {
-        return "direct:" + name;
-    }
-
-    private ResultHandle fromChannel(Method method) {
-        return methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(RouteBuilder.class, "from", RouteDefinition.class, String.class),
-                methodCreator.getThis(), methodCreator.load(getDirectNameForMethod(method)));
-    }
-
-    private ResultHandle toChannel(ResultHandle processorResult, String channel) {
-        ResultHandle theChannel;
-        if ("<<default>>".equals(channel)) {
-            theChannel = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getMainChannel", String.class),
-                    methodCreator.getThis());
-        } else {
-            theChannel = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getChannel",
-                    String.class, String.class), methodCreator.getThis(), methodCreator.load(channel));
-        }
-        return methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(ProcessorDefinition.class, "to", ProcessorDefinition.class, String.class),
-                processorResult, theChannel);
-    }
-
-    private ResultHandle pipeLine(ResultHandle routeDefinitionResultHandle) {
-        return methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(RouteDefinition.class, "pipeline", PipelineDefinition.class),
-                routeDefinitionResultHandle);
-    }
-
-    private ResultHandle filter(ResultHandle pipelineDefinitionResultHandle, ResultHandle predicate) {
-        return methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(PipelineDefinition.class, "filter", FilterDefinition.class,
-                Predicate.class),
-                pipelineDefinitionResultHandle, predicate);
     }
 }

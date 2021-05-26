@@ -51,7 +51,5 @@ class IrcServiceProcessor {
                 throw new IllegalStateException("Unable to find class (" + classInfo.name() + ").", e);
             }
         }
-        IrcListenerImplementor ircListenerImplementor = new IrcListenerImplementor(indexView, classOutput);
-        ircListenerImplementor.generateImplementation();
     }
 }

@@ -1,6 +1,7 @@
 package com.oldterns.vilebot;
 
-import org.apache.camel.component.irc.IrcMessage;
+import org.kitteh.irc.client.library.element.User;
+import org.kitteh.irc.client.library.event.helper.ActorEvent;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,11 +28,16 @@ public class Nick {
         return nick;
     }
 
-    public static Nick getUser(IrcMessage ircMessage) {
-        return new Nick((String) ircMessage.getHeader("irc.user.nick"));
+    public static Nick getUser(ActorEvent<User> event) {
+        return new Nick(event.getActor().getNick());
     }
 
     public static Nick valueOf(String nick) {
         return new Nick(nick);
+    }
+
+    @Override
+    public String toString() {
+        return getBaseNick();
     }
 }

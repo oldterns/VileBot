@@ -25,7 +25,7 @@
         <maven.compiler.release>11</maven.compiler.release>
         <maven.compiler.parameters>true</maven.compiler.parameters>
         <quarkus.version>1.11.1.Final</quarkus.version>
-        <camel-quarkus.version>1.8.1</camel-quarkus.version>
+        <kitteh.version>8.0.0</kitteh.version>
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
     </properties>
 
@@ -37,18 +37,16 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.apache.camel.quarkus</groupId>
-                <artifactId>camel-quarkus-bom</artifactId>
-                <version>${camel-quarkus.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-bom</artifactId>
                 <version>${quarkus.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.kitteh.irc</groupId>
+                <artifactId>client-lib</artifactId>
+                <version>${kitteh.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

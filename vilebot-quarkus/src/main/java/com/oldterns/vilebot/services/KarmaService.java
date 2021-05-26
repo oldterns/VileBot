@@ -1,16 +1,15 @@
 package com.oldterns.vilebot.services;
 
 import com.oldterns.vilebot.Nick;
-import com.oldterns.vilebot.annotations.Delimiter;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
-import com.oldterns.vilebot.annotations.Regex;
 import com.oldterns.vilebot.database.ChurchDB;
 import com.oldterns.vilebot.database.KarmaDB;
+import com.oldterns.vilebot.util.RandomProvider;
+import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,6 +23,9 @@ public class KarmaService
 
     @Inject
     ChurchDB churchDB;
+
+    @Inject
+    RandomProvider randomProvider;
 
     @OnChannelMessage( "!total" )
     public String total()
@@ -61,36 +63,30 @@ public class KarmaService
         }
     }
 
-    @OnChannelMessage( ".*?@nounList.*?" )
-    public void karmaInc( @Regex(Nick.regex + "\\+\\+" ) @Delimiter( "\\w.+" ) List<String> nounList )
+    @OnChannelMessage( ".*" )
+    public String karmaIncOrDec( ChannelMessageEvent channelMessage )
     {
-        for ( String noun : nounList )
-        {
-            Nick nick = Nick.valueOf( noun );
-            System.out.println(nick.getFullNick());
-            System.out.println(nick.getBaseNick());
-            karmaDB.modNounKarma( nick.getBaseNick(), 1 );
+        StringBuilder out = new StringBuilder();
+        for ( String noun : channelMessage.getMessage().split("\\s+") ) {
+            Nick nick = Nick.valueOf(noun);
+            if (noun.endsWith("++")) {
+                karmaDB.modNounKarma(nick.getBaseNick(), 1);
+            } else if (noun.endsWith("--")) {
+                karmaDB.modNounKarma(nick.getBaseNick(), -1);
+            } else if (noun.endsWith("+-")) {
+                int karma = randomProvider.getRandomBoolean() ? 1 : -1;
+                String reply = nick + " had their karma ";
+                reply += karma == 1 ? "increased" : "decreased";
+                reply += " by 1";
+                out.append(reply);
+                karmaDB.modNounKarma(nick.getBaseNick(), karma);
+            }
         }
-    }
 
-    @OnChannelMessage( ".*@nounList.*?" )
-    public void karmaDec( @Regex(Nick.regex + "--" ) @Delimiter( ".*?" ) List<String> nounList )
-    {
-        for ( String noun : nounList )
-        {
-            Nick nick = Nick.valueOf( noun );
-            karmaDB.modNounKarma( nick.getBaseNick(), -1 );
+        if (out.length() == 0) {
+            return null;
         }
-    }
-
-    @OnChannelMessage( ".*@nounList.*?" )
-    public void karmaIncOrDec( @Regex(Nick.regex + "\\+-" ) @Delimiter( ".*?" ) List<String> nounList )
-    {
-        for ( String noun : nounList )
-        {
-            Nick nick = Nick.valueOf( noun );
-            karmaDB.modNounKarma( nick.getBaseNick(), -1 );
-        }
+        return out.toString();
     }
 
     @OnChannelMessage( "!rank @nick" )
@@ -106,15 +102,15 @@ public class KarmaService
     }
 
     @OnChannelMessage( "!rank" )
-    public String selfRank( ChannelMessage message )
+    public String selfRank( ChannelMessageEvent message )
     {
-        return rank(message.getNick());
+        return rank(Nick.getUser(message));
     }
 
     @OnChannelMessage( "!revrank" )
-    public String selfRevrank( ChannelMessage message )
+    public String selfRevrank( ChannelMessageEvent message )
     {
-        return revrank(message.getNick());
+        return revrank(Nick.getUser(message));
     }
 
     private String getReplyWithRankAndKarma( String noun )
