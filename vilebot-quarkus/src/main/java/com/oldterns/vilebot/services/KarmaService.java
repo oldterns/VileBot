@@ -67,23 +67,30 @@ public class KarmaService
     public String karmaIncOrDec( ChannelMessageEvent channelMessage )
     {
         StringBuilder out = new StringBuilder();
-        for ( String noun : channelMessage.getMessage().split("\\s+") ) {
-            Nick nick = Nick.valueOf(noun);
-            if (noun.endsWith("++")) {
-                karmaDB.modNounKarma(nick.getBaseNick(), 1);
-            } else if (noun.endsWith("--")) {
-                karmaDB.modNounKarma(nick.getBaseNick(), -1);
-            } else if (noun.endsWith("+-")) {
+        for ( String noun : channelMessage.getMessage().split( "\\s+" ) )
+        {
+            Nick nick = Nick.valueOf( noun );
+            if ( noun.endsWith( "++" ) )
+            {
+                karmaDB.modNounKarma( nick.getBaseNick(), 1 );
+            }
+            else if ( noun.endsWith( "--" ) )
+            {
+                karmaDB.modNounKarma( nick.getBaseNick(), -1 );
+            }
+            else if ( noun.endsWith( "+-" ) )
+            {
                 int karma = randomProvider.getRandomBoolean() ? 1 : -1;
                 String reply = nick + " had their karma ";
                 reply += karma == 1 ? "increased" : "decreased";
                 reply += " by 1";
-                out.append(reply);
-                karmaDB.modNounKarma(nick.getBaseNick(), karma);
+                out.append( reply );
+                karmaDB.modNounKarma( nick.getBaseNick(), karma );
             }
         }
 
-        if (out.length() == 0) {
+        if ( out.length() == 0 )
+        {
             return null;
         }
         return out.toString();
@@ -104,13 +111,13 @@ public class KarmaService
     @OnChannelMessage( "!rank" )
     public String selfRank( ChannelMessageEvent message )
     {
-        return rank(Nick.getUser(message));
+        return rank( Nick.getUser( message ) );
     }
 
     @OnChannelMessage( "!revrank" )
     public String selfRevrank( ChannelMessageEvent message )
     {
-        return revrank(Nick.getUser(message));
+        return revrank( Nick.getUser( message ) );
     }
 
     private String getReplyWithRankAndKarma( String noun )

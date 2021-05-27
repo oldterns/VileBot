@@ -43,7 +43,7 @@ public class KarmaDB
      */
     public Optional<Long> getNounKarma( String noun )
     {
-        return Optional.ofNullable( redisClient.zscore( keyOfKarmaSortedSet, noun )).map(Response::toLong);
+        return Optional.ofNullable( redisClient.zscore( keyOfKarmaSortedSet, noun ) ).map( Response::toLong );
     }
 
     /**
@@ -54,7 +54,7 @@ public class KarmaDB
      */
     public Optional<Long> getNounRank( String noun )
     {
-        return Optional.ofNullable( redisClient.zrevrank( keyOfKarmaSortedSet, noun )).map(Response::toLong);
+        return Optional.ofNullable( redisClient.zrevrank( keyOfKarmaSortedSet, noun ) ).map( Response::toLong );
     }
 
     /**
@@ -65,8 +65,8 @@ public class KarmaDB
      */
     public Optional<Long> getNounRevRank( String noun )
     {
-        return Optional.ofNullable( redisClient.zrank( keyOfKarmaSortedSet, noun )).map(Response::toLong).map( revRank -> revRank
-            + 1 );
+        return Optional.ofNullable( redisClient.zrank( keyOfKarmaSortedSet,
+                                                       noun ) ).map( Response::toLong ).map( revRank -> revRank + 1 );
     }
 
     /**

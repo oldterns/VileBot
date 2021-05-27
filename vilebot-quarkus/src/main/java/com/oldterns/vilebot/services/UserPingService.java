@@ -7,11 +7,11 @@ import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class UserPing
+public class UserPingService
 {
     @OnChannelMessage( "!ping" )
     public String ping( ChannelMessageEvent ircMessage )
     {
-        return Nick.getUser(ircMessage).getBaseNick() + ": pong";
+        return Nick.getUser( ircMessage ).getBaseNick() + ": pong";
     }
 }

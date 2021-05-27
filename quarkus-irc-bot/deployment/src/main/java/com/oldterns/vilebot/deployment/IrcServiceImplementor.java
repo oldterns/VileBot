@@ -107,7 +107,7 @@ public class IrcServiceImplementor {
      */
     private void implementOnChannelMessage(Method method, OnChannelMessage onChannelMessage) {
         channelSet.add(onChannelMessage.channel());
-        methodCreator = classCreator.getMethodCreator(method.getName() + "$Handler", void.class, ChannelMessageEvent.class);
+        methodCreator = classCreator.getMethodCreator(getSafeMethodSignature(method), void.class, ChannelMessageEvent.class);
         AnnotationCreator annotationCreator = methodCreator.addAnnotation(Handler.class);
         annotationCreator.addValue("delivery", Invoke.Asynchronously);
         ResultHandle channelResultHandle = methodCreator.load(onChannelMessage.channel());
@@ -166,6 +166,11 @@ public class IrcServiceImplementor {
             replyLoopBytecodeCreator.assign(indexResultHandle, replyLoopBytecodeCreator.increment(indexResultHandle));
         }
         processorBytecode.returnValue(null);
+    }
+
+    private String getSafeMethodSignature(Method method) {
+        return method.getName() + "$$" + Arrays.stream(method.getParameters()).map(parameter -> parameter.getType().getName().replace('.', '$'))
+                .collect(Collectors.joining("$$")) + "$$Handler";
     }
 
     private ResultHandle extractParameterFromMatcher(BytecodeCreator bytecodeCreator, Parameter parameter, ResultHandle matcherResultHandle) {
