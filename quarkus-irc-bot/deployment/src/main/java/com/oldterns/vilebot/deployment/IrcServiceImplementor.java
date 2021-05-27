@@ -7,7 +7,6 @@ import com.oldterns.vilebot.annotations.Regex;
 import com.oldterns.vilebot.services.IRCService;
 import io.quarkus.arc.deployment.GeneratedBeanGizmoAdaptor;
 import io.quarkus.gizmo.*;
-import io.vertx.codegen.annotations.Nullable;
 import net.engio.mbassy.listener.Handler;
 import net.engio.mbassy.listener.Invoke;
 import org.kitteh.irc.client.library.Client;
@@ -185,7 +184,12 @@ public class IrcServiceImplementor {
         AssignableResultHandle returnValue = bytecodeCreator.createVariable(parameter.getType());
         BranchResult ifNullBranchResult = bytecodeCreator.ifNull(matcherText);
         bytecodeCreator = ifNullBranchResult.trueBranch();
-        bytecodeCreator.assign(returnValue, bytecodeCreator.loadNull());
+        if (parameter.getParameterizedType() instanceof ParameterizedType && Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) parameter.getParameterizedType()).getRawType())) {
+            bytecodeCreator.assign(returnValue, bytecodeCreator.invokeStaticMethod(MethodDescriptor.ofMethod(Optional.class, "empty", Optional.class)));
+        } else {
+            bytecodeCreator.assign(returnValue, bytecodeCreator.loadNull());
+        }
+
         bytecodeCreator = ifNullBranchResult.falseBranch();
 
         if (parameter.getParameterizedType() instanceof Class) {
@@ -214,6 +218,16 @@ public class IrcServiceImplementor {
                 whileLoopBlock.assign(indexResultHandle, whileLoopBlock.increment(indexResultHandle));
 
                 bytecodeCreator.assign(returnValue, parsedValueListResultHandle);
+            } else if (Optional.class.isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
+                BranchResult isEmptyBranchResult = bytecodeCreator.ifTrue(bytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(String.class, "isEmpty", boolean.class),
+                        matcherText));
+                bytecodeCreator = isEmptyBranchResult.trueBranch();
+                bytecodeCreator.assign(returnValue, bytecodeCreator.invokeStaticMethod(MethodDescriptor.ofMethod(Optional.class, "empty", Optional.class)));
+                bytecodeCreator = isEmptyBranchResult.falseBranch();
+                Class<?> optionalType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+                MethodDescriptor valueParser = getValueOfForType(optionalType);
+                bytecodeCreator.assign(returnValue, bytecodeCreator.invokeStaticMethod(MethodDescriptor.ofMethod(Optional.class, "of",
+                        Optional.class, Object.class), bytecodeCreator.invokeStaticMethod(valueParser, matcherText)));
             }
         } else {
             throw new IllegalStateException("Illegal type (" + parameter.getType() + ") for parameter (" + parameter.getName() + ").");
@@ -222,9 +236,9 @@ public class IrcServiceImplementor {
     }
 
     private MethodDescriptor getValueOfForType(Class<?> type) {
-        if (type.isAssignableFrom(int.class)) {
+        if (type.isAssignableFrom(int.class) || type.isAssignableFrom(Integer.class)) {
             return MethodDescriptor.ofMethod(Integer.class, "parseInt", int.class, String.class);
-        } else if (type.isAssignableFrom(long.class)) {
+        } else if (type.isAssignableFrom(long.class) || type.isAssignableFrom(Long.class)) {
             return MethodDescriptor.ofMethod(Long.class, "parseLong", long.class, String.class);
         } else if (type.isAssignableFrom(String.class)) {
             // pointless, but makes generated code more readable
@@ -262,7 +276,7 @@ public class IrcServiceImplementor {
 
                 patternRegexBuilder.append("(?<" + variableName + ">" +
                         getRegexForType(methodParameter, methodParameter.getParameterizedType())
-                        + ")" + ((methodParameter.isAnnotationPresent(Nullable.class))? "?" : ""));
+                        + ")");
             }
         }
         patternRegexBuilder.append("$");
@@ -306,7 +320,9 @@ public class IrcServiceImplementor {
                 String innerTypeRegex = "(?:" + getRegexForType(parameter, parameterizedType.getActualTypeArguments()[0]) + ")";
                 String collectionDelimiterRegex = getListDelimiter(parameter);
                 return innerTypeRegex + "(?:(?:" + collectionDelimiterRegex +")" + innerTypeRegex + ")*";
-            } else {
+            } else if (Optional.class.isAssignableFrom(rawType)) {
+                return "(?:" + getRegexForType(parameter, parameterizedType.getActualTypeArguments()[0]) + ")?";
+            }else {
                 throw new IllegalArgumentException("Illegal type (" + type + ") on parameter (" + parameter + ")");
             }
         } else {

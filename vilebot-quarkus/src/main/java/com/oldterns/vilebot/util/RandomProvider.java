@@ -22,7 +22,7 @@ public class RandomProvider
 
     public int getRandomInt( int min, int max )
     {
-        return getRandomInt( max - min ) + min;
+        return getRandomInt( max - min + 1 ) + min;
     }
 
     public int getRandomInt( int bound )
