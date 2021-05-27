@@ -10,6 +10,7 @@ import io.quarkus.gizmo.*;
 import io.vertx.codegen.annotations.Nullable;
 import net.engio.mbassy.listener.Handler;
 import net.engio.mbassy.listener.Invoke;
+import org.kitteh.irc.client.library.Client;
 import org.kitteh.irc.client.library.element.Channel;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 import org.kitteh.irc.client.library.event.helper.ChannelEvent;
@@ -144,6 +145,9 @@ public class IrcServiceImplementor {
             Parameter parameter = method.getParameters()[i];
             if (parameter.getType().isAssignableFrom(ChannelMessageEvent.class)) {
                 methodArgumentResultHandles[i] = channelMessageEventResultHandle;
+            } else if (parameter.getType().isAssignableFrom(Client.class)) {
+                methodArgumentResultHandles[i] = processorBytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getBot", Client.class),
+                        processorBytecode.getThis());
             } else {
                 methodArgumentResultHandles[i] = extractParameterFromMatcher(processorBytecode, parameter, patternMatcherResultHandle);
             }
@@ -269,7 +273,7 @@ public class IrcServiceImplementor {
         if (parameter.isAnnotationPresent(Delimiter.class)) {
             return parameter.getAnnotation(Delimiter.class).value();
         } else {
-            return "\\w";
+            return "\\s";
         }
     }
     private String getRegexForType(Parameter parameter, Type type) {

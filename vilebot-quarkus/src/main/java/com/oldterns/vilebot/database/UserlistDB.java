@@ -8,6 +8,7 @@ package com.oldterns.vilebot.database;
 
 import io.quarkus.redis.client.RedisClient;
 import io.vertx.redis.client.Response;
+import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
