@@ -252,8 +252,11 @@ public class IrcServiceImplementor {
         }
     }
 
-    private String getPatternRegex(Method method, String patternString) {
+    private String getPatternRegex(Method method, String parameterPatternString) {
         String splitRegex = "@([a-zA-Z0-9$_]+)";
+        // add a space to the beginning to guarantee first token is not
+        // a parameter
+        String patternString = (" " + parameterPatternString);
         String[] patternStringParts = patternString.split(splitRegex);
         String remaining = patternString;
 
@@ -280,6 +283,8 @@ public class IrcServiceImplementor {
             }
         }
         patternRegexBuilder.append("$");
+        // remove the additional space we added
+        patternRegexBuilder.delete(1,2);
         return patternRegexBuilder.toString();
     }
 
