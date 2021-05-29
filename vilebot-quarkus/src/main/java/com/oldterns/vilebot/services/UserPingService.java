@@ -12,6 +12,6 @@ public class UserPingService
     @OnChannelMessage( "!ping" )
     public String ping( User user )
     {
-        return Nick.getUser( user ).getBaseNick() + ": pong";
+        return Nick.getNick( user ).getFullNick() + ": pong";
     }
 }

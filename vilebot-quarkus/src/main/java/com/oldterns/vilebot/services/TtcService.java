@@ -1,6 +1,5 @@
 package com.oldterns.vilebot.services;
 
-
 import com.oldterns.vilebot.annotations.OnChannelMessage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -14,18 +13,17 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class TtcService {
+public class TtcService
+{
 
     public static final String TTC_URL = "https://www.ttc.ca/Service_Advisories/all_service_alerts.jsp";
 
-    @OnChannelMessage("!ttc")
+    @OnChannelMessage( "!ttc" )
     public String printAlerts()
     {
         try
         {
-            return parseContent(getContent()).stream()
-                    .map(Element::text)
-                    .collect(Collectors.joining("\n"));
+            return parseContent( getContent() ).stream().map( Element::text ).collect( Collectors.joining( "\n" ) );
         }
         catch ( Exception e )
         {
@@ -49,7 +47,7 @@ public class TtcService {
     }
 
     private String getContent()
-            throws Exception
+        throws Exception
     {
         String content;
         URLConnection connection;

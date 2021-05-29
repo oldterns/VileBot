@@ -28,11 +28,11 @@ public class Nick {
         return nick;
     }
 
-    public static Nick getUser(ActorEvent<User> event) {
-        return getUser(event.getActor());
+    public static Nick getNick(ActorEvent<User> event) {
+        return getNick(event.getActor());
     }
 
-    public static Nick getUser(User user) {
+    public static Nick getNick(User user) {
         return new Nick(user.getNick());
     }
 

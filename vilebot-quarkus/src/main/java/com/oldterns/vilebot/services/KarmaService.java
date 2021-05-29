@@ -5,7 +5,7 @@ import com.oldterns.vilebot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.database.ChurchDB;
 import com.oldterns.vilebot.database.KarmaDB;
 import com.oldterns.vilebot.util.RandomProvider;
-import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
+import org.kitteh.irc.client.library.element.User;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -63,13 +63,21 @@ public class KarmaService
         }
     }
 
-    @OnChannelMessage( ".*" )
-    public String karmaIncOrDec( ChannelMessageEvent channelMessage )
+    @OnChannelMessage( "@channelMessage" )
+    public String karmaIncOrDec( User user, String channelMessage )
     {
+        Nick userNick = Nick.getNick( user );
         StringBuilder out = new StringBuilder();
-        for ( String noun : channelMessage.getMessage().split( "\\s+" ) )
+        boolean insult = false;
+        for ( String noun : channelMessage.split( "\\s+" ) )
         {
             Nick nick = Nick.valueOf( noun );
+            if ( userNick.getBaseNick().equals( nick.getBaseNick() ) )
+            {
+                insult = true;
+                continue;
+            }
+
             if ( noun.endsWith( "++" ) )
             {
                 karmaDB.modNounKarma( nick.getBaseNick(), 1 );
@@ -83,16 +91,23 @@ public class KarmaService
                 int karma = randomProvider.getRandomBoolean() ? 1 : -1;
                 String reply = nick + " had their karma ";
                 reply += karma == 1 ? "increased" : "decreased";
-                reply += " by 1";
+                reply += " by 1\n";
                 out.append( reply );
                 karmaDB.modNounKarma( nick.getBaseNick(), karma );
             }
+        }
+
+        if ( insult )
+        {
+            out.append( "I think I'm supposed to insult you now.\n" );
         }
 
         if ( out.length() == 0 )
         {
             return null;
         }
+        // Remove last newline
+        out.deleteCharAt( out.length() - 1 );
         return out.toString();
     }
 
@@ -109,15 +124,15 @@ public class KarmaService
     }
 
     @OnChannelMessage( "!rank" )
-    public String selfRank( ChannelMessageEvent message )
+    public String selfRank( User user )
     {
-        return rank( Nick.getUser( message ) );
+        return rank( Nick.getNick( user ) );
     }
 
     @OnChannelMessage( "!revrank" )
-    public String selfRevrank( ChannelMessageEvent message )
+    public String selfRevrank( User user )
     {
-        return revrank( Nick.getUser( message ) );
+        return revrank( Nick.getNick( user ) );
     }
 
     private String getReplyWithRankAndKarma( String noun )

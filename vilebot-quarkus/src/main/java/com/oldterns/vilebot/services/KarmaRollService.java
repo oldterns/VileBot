@@ -37,7 +37,7 @@ public class KarmaRollService
         gameLock.lock();
         try
         {
-            Nick sender = Nick.getUser( user );
+            Nick sender = Nick.getNick( user );
             if ( isGameStarted() )
             {
                 if ( bet.isPresent() )
@@ -45,15 +45,15 @@ public class KarmaRollService
                     return "A game is already active; started by " + gameInitatorNick.getBaseNick() + " for " + wager
                         + " karma. Use !roll to accept.";
                 }
-                if ( Nick.getUser( user ).equals( gameInitatorNick ) )
+                if ( Nick.getNick( user ).equals( gameInitatorNick ) )
                 {
                     return "You can't accept your own wager.";
                 }
-                return getGameResult( gameInitatorNick, Nick.getUser( user ) );
+                return getGameResult( gameInitatorNick, Nick.getNick( user ) );
             }
             else
             {
-                int actualBet = bet.orElse(UPPER_WAGER);
+                int actualBet = bet.orElse( UPPER_WAGER );
                 Long senderKarma = karmaDB.getNounKarma( sender.getBaseNick() ).orElse( 0L );
 
                 if ( !validWager( actualBet, senderKarma ) )
@@ -78,7 +78,7 @@ public class KarmaRollService
         gameLock.lock();
         try
         {
-            Nick sender = Nick.getUser( event );
+            Nick sender = Nick.getNick( event );
             if ( !gameInitatorNick.getBaseNick().equals( sender.getBaseNick() ) )
             {
                 return "Only " + gameInitatorNick.getBaseNick() + " may cancel this game.";
@@ -163,7 +163,8 @@ public class KarmaRollService
         return gameInitatorNick != null;
     }
 
-    private void endGame() {
+    private void endGame()
+    {
         gameInitatorNick = null;
     }
 }
