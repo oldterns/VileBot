@@ -2,7 +2,7 @@ package com.oldterns.vilebot.services;
 
 import com.oldterns.vilebot.Nick;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
-import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
+import org.kitteh.irc.client.library.element.User;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -10,8 +10,8 @@ import javax.enterprise.context.ApplicationScoped;
 public class UserPingService
 {
     @OnChannelMessage( "!ping" )
-    public String ping( ChannelMessageEvent ircMessage )
+    public String ping( User user )
     {
-        return Nick.getUser( ircMessage ).getBaseNick() + ": pong";
+        return Nick.getUser( user ).getBaseNick() + ": pong";
     }
 }

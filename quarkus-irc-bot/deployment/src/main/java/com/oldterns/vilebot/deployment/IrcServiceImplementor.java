@@ -10,8 +10,11 @@ import io.quarkus.gizmo.*;
 import net.engio.mbassy.listener.Handler;
 import net.engio.mbassy.listener.Invoke;
 import org.kitteh.irc.client.library.Client;
+import org.kitteh.irc.client.library.element.Actor;
 import org.kitteh.irc.client.library.element.Channel;
+import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
+import org.kitteh.irc.client.library.event.helper.ActorEvent;
 import org.kitteh.irc.client.library.event.helper.ChannelEvent;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -147,7 +150,10 @@ public class IrcServiceImplementor {
             } else if (parameter.getType().isAssignableFrom(Client.class)) {
                 methodArgumentResultHandles[i] = processorBytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getBot", Client.class),
                         processorBytecode.getThis());
-            } else {
+            } else if (parameter.getType().isAssignableFrom(User.class)) {
+                methodArgumentResultHandles[i] = processorBytecode.invokeInterfaceMethod(MethodDescriptor.ofMethod(ActorEvent.class, "getActor", Actor.class),
+                        channelMessageEventResultHandle);
+            }else {
                 methodArgumentResultHandles[i] = extractParameterFromMatcher(processorBytecode, parameter, patternMatcherResultHandle);
             }
         }

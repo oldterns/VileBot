@@ -4,6 +4,7 @@ import com.oldterns.vilebot.Nick;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.database.KarmaDB;
 import com.oldterns.vilebot.util.RandomProvider;
+import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -31,12 +32,12 @@ public class KarmaRollService
 
     // ? before wager to make the space optional (for the "!roll" variant)
     @OnChannelMessage( "!roll ?@bet" )
-    public String roll( ChannelMessageEvent event, Optional<Integer> bet )
+    public String roll( User user, Optional<Integer> bet )
     {
         gameLock.lock();
         try
         {
-            Nick sender = Nick.getUser( event );
+            Nick sender = Nick.getUser( user );
             if ( isGameStarted() )
             {
                 if ( bet.isPresent() )
@@ -44,11 +45,11 @@ public class KarmaRollService
                     return "A game is already active; started by " + gameInitatorNick.getBaseNick() + " for " + wager
                         + " karma. Use !roll to accept.";
                 }
-                if ( Nick.getUser( event ).equals( gameInitatorNick ) )
+                if ( Nick.getUser( user ).equals( gameInitatorNick ) )
                 {
                     return "You can't accept your own wager.";
                 }
-                return getGameResult( gameInitatorNick, Nick.getUser( event ) );
+                return getGameResult( gameInitatorNick, Nick.getUser( user ) );
             }
             else
             {
