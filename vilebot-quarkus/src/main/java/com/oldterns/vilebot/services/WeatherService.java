@@ -160,7 +160,7 @@ public class WeatherService
             else
             {
                 StringBuilder out = new StringBuilder();
-                if ( !"less".equals( modifier ) )
+                if ( !"less".equals( modifier ) && !weather.getAlerts().isEmpty() )
                 {
                     out.append( String.join( "\n", weather.getAlerts() ) ).append( '\n' );
                 }
