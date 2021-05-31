@@ -3,6 +3,7 @@ package com.oldterns.vilebot.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -101,6 +102,23 @@ public class TestUrlStreamHandler extends URLStreamHandler {
         URLConnection urlConnection = mock(URLConnection.class);
         try {
             when(urlConnection.getInputStream()).thenReturn(resource);
+        } catch (IOException e) {
+            throw new IllegalStateException("Impossible state: exception thrown when mocking");
+        }
+        return mockConnection(url, urlConnection);
+    }
+
+    public TestUrlStreamHandler mockHttpConnection(URL url, InputStream resource) {
+        return mockHttpConnection("GET", url, resource, 200);
+    }
+
+    public TestUrlStreamHandler mockHttpConnection(String method, URL url, InputStream resource, int status) {
+        HttpURLConnection urlConnection = mock(HttpURLConnection.class);
+        try {
+            when(urlConnection.getInputStream()).thenReturn(resource);
+            when(urlConnection.getResponseCode()).thenReturn(status);
+            when(urlConnection.getRequestMethod()).thenReturn(method);
+            when(urlConnection.getURL()).thenReturn(url);
         } catch (IOException e) {
             throw new IllegalStateException("Impossible state: exception thrown when mocking");
         }
