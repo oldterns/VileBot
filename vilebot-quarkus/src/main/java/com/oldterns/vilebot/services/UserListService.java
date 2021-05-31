@@ -3,7 +3,7 @@ package com.oldterns.vilebot.services;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.annotations.Regex;
 import com.oldterns.vilebot.database.UserlistDB;
-import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
+import org.kitteh.irc.client.library.element.User;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -19,7 +19,7 @@ public class UserListService
     UserlistDB userlistDB;
 
     @OnChannelMessage( "!lists" )
-    public String listsEnumerate( ChannelMessageEvent event )
+    public String listsEnumerate()
     {
         Set<String> lists = userlistDB.getLists();
 
@@ -42,7 +42,7 @@ public class UserListService
     }
 
     @OnChannelMessage( "!list @listName" )
-    public void listQuery( ChannelMessageEvent event, @Regex( NOUN_REGEX ) String listName )
+    public void listQuery( User requester, @Regex( NOUN_REGEX ) String listName )
     {
 
         Set<String> users = userlistDB.getUsersIn( listName );
@@ -60,11 +60,11 @@ public class UserListService
             }
             sb.delete( sb.length() - 2, sb.length() );
 
-            event.getActor().sendMessage( sb.toString() );
+            requester.sendMessage( sb.toString() );
         }
         else
         {
-            event.getActor().sendMessage( "The list " + listName + " does not exist or is empty." );
+            requester.sendMessage( "The list " + listName + " does not exist or is empty." );
         }
     }
 
@@ -92,7 +92,7 @@ public class UserListService
     {
         StringBuilder sb = new StringBuilder();
         userlistDB.removeUsersFrom( listName, nicks );
-        sb.append( "Removed the following names to list " );
+        sb.append( "Removed the following names from list " );
         sb.append( listName );
         sb.append( ": " );
 
@@ -107,9 +107,9 @@ public class UserListService
     }
 
     @OnChannelMessage( "@listName: @msg" )
-    public String listExpansion( ChannelMessageEvent event, @Regex( NOUN_REGEX ) String listName, String msg )
+    public String listExpansion( User requester, @Regex( NOUN_REGEX ) String listName, String msg )
     {
-        String sender = event.getActor().getNick();
+        String sender = requester.getNick();
         Set<String> users = userlistDB.getUsersIn( listName );
 
         if ( users != null && users.size() > 0 )
