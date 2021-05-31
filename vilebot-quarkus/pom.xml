@@ -98,6 +98,13 @@
       <artifactId>quarkus-junit5-mockito</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- So Quarkus can load JAR files -->
+    <dependency>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-legacy-classloader-protocol-jar</artifactId>
+      <version>13.4</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

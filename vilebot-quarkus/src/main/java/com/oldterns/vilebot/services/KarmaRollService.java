@@ -16,6 +16,8 @@ import java.util.concurrent.locks.ReentrantLock;
 @ApplicationScoped
 public class KarmaRollService
 {
+    public final static int UPPER_WAGER = 10;
+
     @Inject
     KarmaDB karmaDB;
 
@@ -25,8 +27,6 @@ public class KarmaRollService
     Nick gameInitatorNick;
 
     Lock gameLock = new ReentrantLock();
-
-    final int UPPER_WAGER = 10;
 
     int wager;
 
@@ -45,7 +45,7 @@ public class KarmaRollService
                     return "A game is already active; started by " + gameInitatorNick.getBaseNick() + " for " + wager
                         + " karma. Use !roll to accept.";
                 }
-                if ( Nick.getNick( user ).equals( gameInitatorNick ) )
+                if ( Nick.getNick( user ).getBaseNick().equals( gameInitatorNick.getBaseNick() ) )
                 {
                     return "You can't accept your own wager.";
                 }
@@ -73,12 +73,16 @@ public class KarmaRollService
     }
 
     @OnChannelMessage( "!rollcancel" )
-    public String rollCancel( ChannelMessageEvent event )
+    public String rollCancel( User user )
     {
         gameLock.lock();
         try
         {
-            Nick sender = Nick.getNick( event );
+            if ( gameInitatorNick == null )
+            {
+                return "No roll game is active.";
+            }
+            Nick sender = Nick.getNick( user );
             if ( !gameInitatorNick.getBaseNick().equals( sender.getBaseNick() ) )
             {
                 return "Only " + gameInitatorNick.getBaseNick() + " may cancel this game.";
