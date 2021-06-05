@@ -7,6 +7,7 @@ import org.kitteh.irc.client.library.feature.EventManager;
 import org.mockito.Mockito;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Alternative;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 
 @ApplicationScoped
+@Alternative
 public class MockClientCreator implements ClientCreator {
     static Client client;
     static List<Consumer<ChannelMessageEvent>> eventListeners = new ArrayList<>();

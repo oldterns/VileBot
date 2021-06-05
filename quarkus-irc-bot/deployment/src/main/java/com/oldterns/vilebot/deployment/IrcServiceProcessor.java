@@ -28,7 +28,6 @@ class IrcServiceProcessor {
     @BuildStep
     void createIrcServiceImplementations(
             CombinedIndexBuildItem combinedIndex,
-            BuildProducer<AdditionalBeanBuildItem> additionalBeanConsumer,
             BuildProducer<GeneratedBeanBuildItem> generatedBeanConsumer) {
         DotName onChannelMessageDotName = DotName.createSimple(OnChannelMessage.class.getName());
         IndexView indexView = combinedIndex.getIndex();

@@ -25,6 +25,7 @@ public class ServiceImplementationTest {
             .overrideConfigKey("vilebot.default.channel", "#channel")
             .overrideConfigKey("vilebot.default.nick", "Bot")
             .overrideConfigKey("vilebot.irc.server", "localhost")
+            .overrideConfigKey("quarkus.arc.selected-alternatives", "com.oldterns.vilebot.MockClientCreator")
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
                                                 .addClasses(ExampleService.class,
                                                         MockClientCreator.class)

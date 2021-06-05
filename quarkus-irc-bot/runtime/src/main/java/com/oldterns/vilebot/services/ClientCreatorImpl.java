@@ -7,7 +7,7 @@ import org.kitteh.irc.client.library.util.StsUtil;
 import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class ClientCreatorImpl {
+public class ClientCreatorImpl implements ClientCreator {
 
     @ConfigProperty(name="vilebot.irc.server")
     public String ircServer;

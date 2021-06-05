@@ -17,6 +17,7 @@ import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 import org.kitteh.irc.client.library.event.helper.ActorEvent;
 import org.kitteh.irc.client.library.event.helper.ChannelEvent;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.lang.reflect.*;
@@ -30,6 +31,7 @@ public class IrcServiceImplementor {
     private final GeneratedBeanGizmoAdaptor classOutput;
     private ClassCreator classCreator;
     private MethodCreator methodCreator;
+    private MethodCreator postConstructMethodCreator;
     private FieldDescriptor ircServiceField;
     private Set<String> channelSet;
 
@@ -58,6 +60,8 @@ public class IrcServiceImplementor {
                     .setModifiers(Modifier.PUBLIC)
                     .addAnnotation(Inject.class);
 
+        postConstructMethodCreator = classCreator.getMethodCreator(MethodDescriptor.ofMethod(classCreator.getClassName(), "__postConstruct", void.class));
+        postConstructMethodCreator.addAnnotation(PostConstruct.class);
         for (Method method : ircServiceClass.getDeclaredMethods()) {
             if (hasIrcServiceAnnotation(method) && !Modifier.isPublic(method.getModifiers())) {
                 throw new IllegalStateException("IRC Service annotation detected on non-public method (" + method.toGenericString() + "). Maybe make the method public?" );
@@ -78,6 +82,7 @@ public class IrcServiceImplementor {
         });
         methodCreator.returnValue(outputArray);
 
+        postConstructMethodCreator.returnValue(null);
         classCreator.close();
         return generatedClassName;
     }
@@ -128,13 +133,15 @@ public class IrcServiceImplementor {
         BranchResult channelMatchesBranchResult = methodCreator.ifFalse(isChannelTarget);
         channelMatchesBranchResult.trueBranch().returnValue(null);
         BytecodeCreator matcherBytecodeCreator = channelMatchesBranchResult.falseBranch();
-        ResultHandle patternRegexResultHandle  = matcherBytecodeCreator.load(getPatternRegex(method, onChannelMessage.value()));
-        ResultHandle compiledPatternResultHandle = matcherBytecodeCreator.invokeStaticMethod(MethodDescriptor.ofMethod(Pattern.class, "compile", Pattern.class, String.class),
-                patternRegexResultHandle);
+        FieldDescriptor patternField = classCreator.getFieldCreator(FieldDescriptor.of(classCreator.getClassName(), getSafeMethodSignature(method) + "$pattern", Pattern.class))
+                .getFieldDescriptor();
+        postConstructMethodCreator.writeInstanceField(patternField, postConstructMethodCreator.getThis(),
+                postConstructMethodCreator.invokeStaticMethod(MethodDescriptor.ofMethod(Pattern.class, "compile", Pattern.class, String.class),
+                        postConstructMethodCreator.load(getPatternRegex(method, onChannelMessage.value()))));
         ResultHandle ircMessageTextResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(ChannelMessageEvent.class, "getMessage", String.class),
                 channelMessageEventResultHandle);
         ResultHandle patternMatcherResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(Pattern.class, "matcher", Matcher.class, CharSequence.class),
-                compiledPatternResultHandle, ircMessageTextResultHandle);
+                matcherBytecodeCreator.readInstanceField(patternField, matcherBytecodeCreator.getThis()), ircMessageTextResultHandle);
         ResultHandle matchesResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(Matcher.class, "matches", boolean.class),
                 patternMatcherResultHandle);
         BranchResult branchResult = matcherBytecodeCreator.ifFalse(matchesResultHandle);
