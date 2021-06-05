@@ -1,0 +1,27 @@
+package com.oldterns.vilebot.services;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.kitteh.irc.client.library.Client;
+import org.kitteh.irc.client.library.util.StsUtil;
+
+import javax.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class ClientCreatorImpl {
+
+    @ConfigProperty(name="vilebot.irc.server")
+    public String ircServer;
+
+    @ConfigProperty(name="vilebot.irc.port", defaultValue = "6667")
+    public Integer ircPort;
+
+    public Client createClient(String nick) {
+        return Client.builder()
+                     .name(nick).nick(nick)
+                     .server().host(ircServer).port(ircPort, Client.Builder.Server.SecurityType.INSECURE)
+                     .then()
+                     .management().stsStorageManager(StsUtil.getDefaultStorageManager())
+                     .then()
+                     .build();
+    }
+}

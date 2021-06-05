@@ -3,6 +3,7 @@ package com.oldterns.vilebot;
 import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.helper.ActorEvent;
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +39,19 @@ public class Nick {
 
     public static Nick valueOf(String nick) {
         return new Nick(nick);
+    }
+
+    @Override public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Nick nick1 = (Nick) o;
+        return getBaseNick().equals(nick1.getBaseNick());
+    }
+
+    @Override public int hashCode() {
+        return Objects.hash(getBaseNick());
     }
 
     @Override
