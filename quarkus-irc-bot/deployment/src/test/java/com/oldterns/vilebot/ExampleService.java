@@ -1,6 +1,7 @@
 package com.oldterns.vilebot;
 
 import com.oldterns.vilebot.annotations.Delimiter;
+import com.oldterns.vilebot.annotations.NoHelp;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
 import org.kitteh.irc.client.library.Client;
 import org.kitteh.irc.client.library.element.User;
@@ -85,5 +86,11 @@ public class ExampleService {
     public String returnNewline() {
         mock.returnNewline();
         return "Message\nwith\nnewlines.";
+    }
+
+    @NoHelp
+    @OnChannelMessage("!nohelp")
+    public void noHelp() {
+        mock.noHelp();
     }
 }

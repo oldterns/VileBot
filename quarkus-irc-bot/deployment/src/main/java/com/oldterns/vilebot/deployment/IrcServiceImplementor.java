@@ -2,8 +2,10 @@ package com.oldterns.vilebot.deployment;
 
 import com.oldterns.vilebot.Nick;
 import com.oldterns.vilebot.annotations.Delimiter;
+import com.oldterns.vilebot.annotations.NoHelp;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.annotations.Regex;
+import com.oldterns.vilebot.services.HelpService;
 import com.oldterns.vilebot.services.IRCService;
 import io.quarkus.arc.deployment.GeneratedBeanGizmoAdaptor;
 import io.quarkus.gizmo.*;
@@ -33,7 +35,9 @@ public class IrcServiceImplementor {
     private MethodCreator methodCreator;
     private MethodCreator postConstructMethodCreator;
     private FieldDescriptor ircServiceField;
+    private FieldDescriptor helpServiceField;
     private Set<String> channelSet;
+    private String helpCommandGroup;
 
     public IrcServiceImplementor(GeneratedBeanGizmoAdaptor classOutput, Class<?> ircServiceClass) {
         this.ircServiceClass = ircServiceClass;
@@ -56,9 +60,20 @@ public class IrcServiceImplementor {
         classCreator.addAnnotation(ApplicationScoped.class);
 
         ircServiceField = FieldDescriptor.of(classCreator.getClassName(), "ircService", ircServiceClass);
+        helpServiceField = FieldDescriptor.of(classCreator.getClassName(), "helpService", HelpService.class);
         classCreator.getFieldCreator(ircServiceField)
                     .setModifiers(Modifier.PUBLIC)
                     .addAnnotation(Inject.class);
+
+        classCreator.getFieldCreator(helpServiceField)
+                .setModifiers(Modifier.PUBLIC)
+                .addAnnotation(Inject.class);
+
+
+        helpCommandGroup = ircServiceClass.getSimpleName();
+        if (helpCommandGroup.endsWith("Service")) {
+            helpCommandGroup = helpCommandGroup.substring(0, helpCommandGroup.length() - "Service".length());
+        }
 
         postConstructMethodCreator = classCreator.getMethodCreator(MethodDescriptor.ofMethod(classCreator.getClassName(), "__postConstruct", void.class));
         postConstructMethodCreator.addAnnotation(PostConstruct.class);
@@ -118,6 +133,7 @@ public class IrcServiceImplementor {
         methodCreator = classCreator.getMethodCreator(getSafeMethodSignature(method), void.class, ChannelMessageEvent.class);
         AnnotationCreator annotationCreator = methodCreator.addAnnotation(Handler.class);
         annotationCreator.addValue("delivery", Invoke.Asynchronously);
+
         ResultHandle channelResultHandle = methodCreator.load(onChannelMessage.channel());
         ResultHandle actualChannelToCheckResultHandle = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getChannel", String.class, String.class),
                 methodCreator.getThis(), channelResultHandle);
@@ -138,6 +154,14 @@ public class IrcServiceImplementor {
         postConstructMethodCreator.writeInstanceField(patternField, postConstructMethodCreator.getThis(),
                 postConstructMethodCreator.invokeStaticMethod(MethodDescriptor.ofMethod(Pattern.class, "compile", Pattern.class, String.class),
                         postConstructMethodCreator.load(getPatternRegex(method, onChannelMessage.value()))));
+
+
+        if (!method.isAnnotationPresent(NoHelp.class)) {
+            postConstructMethodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(HelpService.class, "addHelpCommand", void.class, String.class, String.class),
+                    postConstructMethodCreator.readInstanceField(helpServiceField, postConstructMethodCreator.getThis()),
+                    postConstructMethodCreator.load(helpCommandGroup),
+                    postConstructMethodCreator.load(getHelpString(method, onChannelMessage.value())));
+        }
         ResultHandle ircMessageTextResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(ChannelMessageEvent.class, "getMessage", String.class),
                 channelMessageEventResultHandle);
         ResultHandle patternMatcherResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(Pattern.class, "matcher", Matcher.class, CharSequence.class),
@@ -297,8 +321,42 @@ public class IrcServiceImplementor {
         }
         patternRegexBuilder.append("$");
         // remove the additional space we added
-        patternRegexBuilder.delete(1,2);
+        patternRegexBuilder.deleteCharAt(1);
         return patternRegexBuilder.toString();
+    }
+
+    private String getHelpString(Method method, String parameterPatternString) {
+        String splitRegex = "@([a-zA-Z0-9$_]+)";
+        // add a space to the beginning to guarantee first token is not
+        // a parameter
+        String helpString = (" " + parameterPatternString);
+        String[] helpStringParts = helpString.split(splitRegex);
+        String remaining = helpString;
+
+        StringBuilder helpBuilder = new StringBuilder();
+        for (String part : helpStringParts) {
+            helpBuilder.append(part);
+            remaining = remaining.substring(part.length());
+            if (!remaining.isEmpty()) {
+                int endIndex = 1;
+                while (endIndex < remaining.length() && Character.isJavaIdentifierPart(remaining.charAt(endIndex))) {
+                    endIndex++;
+                }
+                String variableName = remaining.substring(1, endIndex);
+                remaining = remaining.substring(variableName.length() + 1);
+
+                Parameter methodParameter = Arrays.stream(method.getParameters()).filter(parameter -> parameter.getName().equals(variableName))
+                        .findFirst().orElseThrow(() -> new IllegalArgumentException("Expected a parameter with name (" +
+                                variableName + ") on method (" + method.getName()
+                                + ") for pattern (" + helpString + "), but no such parameter exists." ));
+
+                helpBuilder.append(getHelpForType(methodParameter, methodParameter.getParameterizedType()));
+            }
+        }
+
+        // remove the additional space we added
+        helpBuilder.deleteCharAt(0);
+        return "{ " + helpBuilder + " }";
     }
 
     private String getListDelimiter(Parameter parameter) {
@@ -308,6 +366,7 @@ public class IrcServiceImplementor {
             return "\\s";
         }
     }
+
     private String getRegexForType(Parameter parameter, Type type) {
         if (type instanceof Class) {
             Class<?> parameterType = (Class<?>) type;
@@ -340,6 +399,45 @@ public class IrcServiceImplementor {
                 return innerTypeRegex + "(?:(?:" + collectionDelimiterRegex +")" + innerTypeRegex + ")*";
             } else if (Optional.class.isAssignableFrom(rawType)) {
                 return "(?:" + getRegexForType(parameter, parameterizedType.getActualTypeArguments()[0]) + ")?";
+            }else {
+                throw new IllegalArgumentException("Illegal type (" + type + ") on parameter (" + parameter + ")");
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid type (" + type + ").");
+        }
+    }
+
+    private String getHelpForType(Parameter parameter, Type type) {
+        if (type instanceof Class) {
+            Class<?> parameterType = (Class<?>) type;
+            if (int.class.isAssignableFrom(parameterType) ||
+                    Integer.class.isAssignableFrom(parameterType) ||
+                    long.class.isAssignableFrom(parameterType) ||
+                    Long.class.isAssignableFrom(parameterType)
+            ) {
+                return "<" + parameter.getName() + ":number>";
+            } else if (String.class.isAssignableFrom(parameterType)) {
+                if (parameter.isAnnotationPresent(Regex.class)) {
+                    return "<" + parameter.getName() + ":" + parameter.getAnnotation(Regex.class).value() + ">";
+                } else {
+                    return "<" + parameter.getName() + ">";
+                }
+            } else if (Nick.class.isAssignableFrom(parameterType)) {
+                return "<" + parameter.getName() + ":nick>";
+            } else if (parameterType.isEnum()) {
+                return "<" + parameter.getName() + ":" + Arrays.stream(parameterType.getEnumConstants())
+                        .map(Object::toString).collect(Collectors.joining("|")) + ">";
+            } else {
+                throw new IllegalArgumentException("Illegal type (" + type + ") on parameter (" + parameter + ")");
+            }
+        } else if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Class<?> rawType = (Class<?>) parameterizedType.getRawType();
+            if (List.class.isAssignableFrom(rawType)) {
+                String innerHelp = getHelpForType(parameter, parameterizedType.getActualTypeArguments()[0]);
+                return innerHelp + "[" + getListDelimiter(parameter) + "<" + parameter.getName() + "2>...]";
+            } else if (Optional.class.isAssignableFrom(rawType)) {
+                return "[" + getHelpForType(parameter, parameterizedType.getActualTypeArguments()[0]) + "]";
             }else {
                 throw new IllegalArgumentException("Illegal type (" + type + ") on parameter (" + parameter + ")");
             }

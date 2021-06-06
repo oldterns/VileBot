@@ -12,11 +12,13 @@ import org.kitteh.irc.client.library.element.Channel;
 import org.kitteh.irc.client.library.element.ServerMessage;
 import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.internal.verification.VerificationModeFactory.only;
 
 public class ServiceImplementationTest {
@@ -53,6 +55,32 @@ public class ServiceImplementationTest {
             MockClientCreator.eventListeners.forEach(listener -> listener.accept(event));
             return event;
         };
+    }
+
+    @Test
+    public void testHelp() {
+        ChannelMessageEvent event = fireMessage.apply("user", "#channel", "!help");
+        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(event.getActor(), Mockito.atLeastOnce()).sendMessage(captor.capture());
+
+        String message = String.join("\n", captor.getAllValues());
+        assertThat(message).contains("Available Commands: \n");
+        assertThat(message).contains("Help: { !help }");
+        assertThat(message).contains("Example: ");
+        assertThat(message).contains("{ !noargs }");
+        assertThat(message).contains("{ !string <arg0> }");
+        assertThat(message).contains("{ !int <arg0:number> }");
+        assertThat(message).contains("{ !maybe ?[<arg0:number>] }");
+        assertThat(message).contains("{ !list <arg0:number>[,<arg02>...] }");
+        assertThat(message).contains("{ !client }");
+        assertThat(message).contains("{ !user }");
+        assertThat(message).contains("{ !event }");
+        assertThat(message).contains("{ !nick <arg0:nick> }");
+        assertThat(message).contains("{ !multiarg <arg0:nick> <arg1:number> }");
+        assertThat(message).contains("{ !returnSomething }");
+        assertThat(message).contains("{ !returnNewline }");
+
+        assertThat(message).doesNotContain("{ !nohelp }");
     }
 
     @Test
@@ -105,7 +133,11 @@ public class ServiceImplementationTest {
         Mockito.verify(exampleService, only()).clientArg(MockClientCreator.client);
         Mockito.reset(exampleService);
 
-        ChannelMessageEvent event = fireMessage.apply("user", "#channel", "!event");
+        ChannelMessageEvent event = fireMessage.apply("user", "#channel", "!user");
+        Mockito.verify(exampleService, only()).userArg(event.getActor());
+        Mockito.reset(exampleService);
+
+        event = fireMessage.apply("user", "#channel", "!event");
         Mockito.verify(exampleService, only()).eventArg(event);
         Mockito.reset(exampleService);
 
@@ -133,6 +165,10 @@ public class ServiceImplementationTest {
         Mockito.verify(event.getChannel()).sendMessage("Message");
         Mockito.verify(event.getChannel()).sendMessage("with");
         Mockito.verify(event.getChannel()).sendMessage("newlines.");
+        Mockito.reset(exampleService);
+
+        fireMessage.apply("user", "#channel", "!nohelp");
+        Mockito.verify(exampleService, only()).noHelp();
         Mockito.reset(exampleService);
     }
 }
