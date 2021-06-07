@@ -8,9 +8,12 @@ import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
 import org.jboss.logging.Logger;
+import org.kitteh.irc.client.library.Client;
+import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,6 +30,9 @@ public class WeatherService
 {
     private static final Logger logger = Logger.getLogger( WeatherService.class );
 
+    @Inject
+    ClientCreator clientCreator;
+
     final String DEFAULT_LOCATION = "ytz";
 
     Map<String, URL> weatherFeedsByIataCode;
@@ -34,6 +40,7 @@ public class WeatherService
     Map<String, WeatherData> weatherDataByIataCode;
 
     final long weatherDataCacheTime = 1000 * 60 * 30;
+    public static final String LESS_NICK = "owilliams";
 
     @PostConstruct
     public void setup()
@@ -109,43 +116,25 @@ public class WeatherService
         }
     }
 
-    @OnChannelMessage( "!lessweather" )
-    public String onLessWeather()
+    @OnChannelMessage( "!lessweather ?@areaCode" )
+    public String onLessWeather( ChannelMessageEvent event, Optional<String> areaCode )
     {
-        return currentWeather( DEFAULT_LOCATION, "less" );
+        return currentWeather( event, areaCode.orElse(DEFAULT_LOCATION), "less" );
     }
 
-    @OnChannelMessage( "!lessweather @areaCode" )
-    public String onLessWeather( String areaCode )
+    @OnChannelMessage( "!moreweather ?@areaCode" )
+    public String onMoreWeather( ChannelMessageEvent event, Optional<String> areaCode )
     {
-        return currentWeather( areaCode, "less" );
+        return currentWeather( event, areaCode.orElse(DEFAULT_LOCATION), "more" );
     }
 
-    @OnChannelMessage( "!moreweather" )
-    public String onMoreWeather()
+    @OnChannelMessage( "!weather ?@areaCode" )
+    public String onWeather( ChannelMessageEvent event, Optional<String> areaCode )
     {
-        return currentWeather( DEFAULT_LOCATION, "more" );
+        return currentWeather( event, areaCode.orElse(DEFAULT_LOCATION), "" );
     }
 
-    @OnChannelMessage( "!moreweather @areaCode" )
-    public String onMoreWeather( String areaCode )
-    {
-        return currentWeather( areaCode, "more" );
-    }
-
-    @OnChannelMessage( "!weather" )
-    public String onWeather()
-    {
-        return currentWeather( DEFAULT_LOCATION, "" );
-    }
-
-    @OnChannelMessage( "!weather @areaCode" )
-    public String onWeather( String areaCode )
-    {
-        return currentWeather( areaCode, "" );
-    }
-
-    private String currentWeather( String areaCode, String modifier )
+    private String currentWeather( ChannelMessageEvent event, String areaCode, String modifier )
     {
         String locationCode = areaCode;
         locationCode = locationCode.toLowerCase();
@@ -176,9 +165,16 @@ public class WeatherService
                 }
                 else if ( "less".equals( modifier ) )
                 {
-                    // bot.sendPrivmsgAs( LESS_NICK, event.getChannel(),
-                    // "IT'S " + currentConditions.get( "Condition" ).toUpperCase() );
-                    out.append( "IT'S " + currentConditions.get( "Condition" ).toUpperCase() );
+                    Client weatherGuyClient = clientCreator.createClient(LESS_NICK);
+                    weatherGuyClient.addChannel(event.getChannel().getMessagingName());
+                    weatherGuyClient.connect();
+                    String output = "IT'S " + currentConditions.get( "Condition" ).toUpperCase();
+                    weatherGuyClient.setOutputListener(message -> {
+                        if (message.contains(output)) {
+                            weatherGuyClient.shutdown();
+                        }
+                    });
+                    weatherGuyClient.sendMessage(event.getChannel().getMessagingName(), output);
                 }
                 else if ( "more".equals( modifier ) )
                 {
@@ -193,7 +189,10 @@ public class WeatherService
                     }
                     out.append( sb );
                 }
-                return out.toString();
+                if (out.length() > 0) {
+                    return out.toString();
+                }
+                return null;
             }
         }
         else
