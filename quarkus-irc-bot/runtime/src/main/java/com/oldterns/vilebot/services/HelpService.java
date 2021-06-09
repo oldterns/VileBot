@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.annotations.OnChannelMessage;
+import com.oldterns.vilebot.annotations.OnMessage;
 import org.kitteh.irc.client.library.element.User;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class HelpService {
@@ -18,7 +17,7 @@ public class HelpService {
         groupToCommandList.computeIfAbsent(group, key -> new ArrayList<>()).add(command);
     }
 
-    @OnChannelMessage("!help")
+    @OnMessage("!help")
     public void help(User user) {
         user.sendMessage("Available Commands: ");
         groupToCommandList.entrySet().stream()

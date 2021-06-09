@@ -2,10 +2,12 @@ package com.oldterns.vilebot.services;
 
 import com.oldterns.vilebot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.annotations.Regex;
+import com.oldterns.vilebot.util.URLFactory;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
@@ -16,6 +18,9 @@ public class UrlTitleAnnouncerService
         "((?:http|https)://(?:www.|)(?:(?:abstrusegoose|xkcd)\\.com|youtube\\.(?:com|ca)|youtu\\.be)[^ ]*)";
 
     private static final Pattern titlePattern = Pattern.compile( "<title>(.*)</title>" );
+
+    @Inject
+    URLFactory urlFactory;
 
     @OnChannelMessage( "@url" )
     public String getUrlTitle( @Regex( URL_PATTERN ) String url )
@@ -36,7 +41,7 @@ public class UrlTitleAnnouncerService
 
         try
         {
-            Document doc = Jsoup.connect( url ).get();
+            Document doc = Jsoup.parse( urlFactory.build( url ), 5000 );
             title = doc.title();
         }
         catch ( IOException x )

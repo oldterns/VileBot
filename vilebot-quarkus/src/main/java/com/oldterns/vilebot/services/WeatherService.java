@@ -1,7 +1,7 @@
 package com.oldterns.vilebot.services;
 
 import com.oldterns.vilebot.annotations.OnChannelMessage;
-import com.oldterns.vilebot.annotations.Regex;
+import com.oldterns.vilebot.util.URLFactory;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
@@ -33,6 +33,9 @@ public class WeatherService
     @Inject
     ClientCreator clientCreator;
 
+    @Inject
+    URLFactory urlFactory;
+
     final String DEFAULT_LOCATION = "ytz";
 
     Map<String, URL> weatherFeedsByIataCode;
@@ -40,6 +43,7 @@ public class WeatherService
     Map<String, WeatherData> weatherDataByIataCode;
 
     final long weatherDataCacheTime = 1000 * 60 * 30;
+
     public static final String LESS_NICK = "owilliams";
 
     @PostConstruct
@@ -48,35 +52,35 @@ public class WeatherService
     {
         weatherDataByIataCode = new HashMap<>();
         weatherFeedsByIataCode = new HashMap<>();
-        weatherFeedsByIataCode.put( "yxu", new URL( "https://weather.gc.ca/rss/city/on-137_e.xml" ) );
-        weatherFeedsByIataCode.put( "yyz", new URL( "https://weather.gc.ca/rss/city/on-143_e.xml" ) );
-        weatherFeedsByIataCode.put( "ygk", new URL( "https://weather.gc.ca/rss/city/on-69_e.xml" ) );
-        weatherFeedsByIataCode.put( "yeg", new URL( "https://weather.gc.ca/rss/city/ab-50_e.xml" ) );
-        weatherFeedsByIataCode.put( "yyc", new URL( "https://weather.gc.ca/rss/city/ab-52_e.xml" ) );
-        weatherFeedsByIataCode.put( "yul", new URL( "https://weather.gc.ca/rss/city/qc-147_e.xml" ) );
-        weatherFeedsByIataCode.put( "yvr", new URL( "https://weather.gc.ca/rss/city/bc-74_e.xml" ) );
-        weatherFeedsByIataCode.put( "yhm", new URL( "https://weather.gc.ca/rss/city/on-77_e.xml" ) );
-        weatherFeedsByIataCode.put( "ytz", new URL( "https://weather.gc.ca/rss/city/on-128_e.xml" ) );
-        weatherFeedsByIataCode.put( "ykz", new URL( "https://weather.gc.ca/rss/city/on-85_e.xml" ) );
-        weatherFeedsByIataCode.put( "ykf", new URL( "https://weather.gc.ca/rss/city/on-82_e.xml" ) );
-        weatherFeedsByIataCode.put( "yhz", new URL( "https://weather.gc.ca/rss/city/ns-19_e.xml" ) );
-        weatherFeedsByIataCode.put( "yfc", new URL( "https://weather.gc.ca/rss/city/nb-29_e.xml" ) );
-        weatherFeedsByIataCode.put( "yyt", new URL( "https://weather.gc.ca/rss/city/nl-24_e.xml" ) );
-        weatherFeedsByIataCode.put( "yyg", new URL( "https://weather.gc.ca/rss/city/pe-5_e.xml" ) );
-        weatherFeedsByIataCode.put( "yqt", new URL( "https://weather.gc.ca/rss/city/on-100_e.xml" ) );
-        weatherFeedsByIataCode.put( "ywg", new URL( "https://weather.gc.ca/rss/city/mb-38_e.xml" ) );
-        weatherFeedsByIataCode.put( "yqr", new URL( "https://weather.gc.ca/rss/city/sk-32_e.xml" ) );
-        weatherFeedsByIataCode.put( "yxe", new URL( "https://weather.gc.ca/rss/city/sk-40_e.xml" ) );
-        weatherFeedsByIataCode.put( "ymm", new URL( "https://weather.gc.ca/rss/city/ab-20_e.xml" ) );
-        weatherFeedsByIataCode.put( "yxs", new URL( "https://weather.gc.ca/rss/city/bc-79_e.xml" ) );
-        weatherFeedsByIataCode.put( "yyj", new URL( "https://weather.gc.ca/rss/city/bc-85_e.xml" ) );
-        weatherFeedsByIataCode.put( "ylw", new URL( "https://weather.gc.ca/rss/city/bc-48_e.xml" ) );
-        weatherFeedsByIataCode.put( "yka", new URL( "https://weather.gc.ca/rss/city/bc-45_e.xml" ) );
-        weatherFeedsByIataCode.put( "yow", new URL( "https://weather.gc.ca/rss/city/on-118_e.xml" ) );
-        weatherFeedsByIataCode.put( "yxy", new URL( "https://weather.gc.ca/rss/city/yt-16_e.xml" ) );
-        weatherFeedsByIataCode.put( "yzf", new URL( "https://weather.gc.ca/rss/city/nt-24_e.xml" ) );
-        weatherFeedsByIataCode.put( "yfb", new URL( "https://weather.gc.ca/rss/city/nu-21_e.xml" ) );
-        weatherFeedsByIataCode.put( "ylt", new URL( "https://weather.gc.ca/rss/city/nu-22_e.xml" ) );
+        weatherFeedsByIataCode.put( "yxu", urlFactory.build( "https://weather.gc.ca/rss/city/on-137_e.xml" ) );
+        weatherFeedsByIataCode.put( "yyz", urlFactory.build( "https://weather.gc.ca/rss/city/on-143_e.xml" ) );
+        weatherFeedsByIataCode.put( "ygk", urlFactory.build( "https://weather.gc.ca/rss/city/on-69_e.xml" ) );
+        weatherFeedsByIataCode.put( "yeg", urlFactory.build( "https://weather.gc.ca/rss/city/ab-50_e.xml" ) );
+        weatherFeedsByIataCode.put( "yyc", urlFactory.build( "https://weather.gc.ca/rss/city/ab-52_e.xml" ) );
+        weatherFeedsByIataCode.put( "yul", urlFactory.build( "https://weather.gc.ca/rss/city/qc-147_e.xml" ) );
+        weatherFeedsByIataCode.put( "yvr", urlFactory.build( "https://weather.gc.ca/rss/city/bc-74_e.xml" ) );
+        weatherFeedsByIataCode.put( "yhm", urlFactory.build( "https://weather.gc.ca/rss/city/on-77_e.xml" ) );
+        weatherFeedsByIataCode.put( "ytz", urlFactory.build( "https://weather.gc.ca/rss/city/on-128_e.xml" ) );
+        weatherFeedsByIataCode.put( "ykz", urlFactory.build( "https://weather.gc.ca/rss/city/on-85_e.xml" ) );
+        weatherFeedsByIataCode.put( "ykf", urlFactory.build( "https://weather.gc.ca/rss/city/on-82_e.xml" ) );
+        weatherFeedsByIataCode.put( "yhz", urlFactory.build( "https://weather.gc.ca/rss/city/ns-19_e.xml" ) );
+        weatherFeedsByIataCode.put( "yfc", urlFactory.build( "https://weather.gc.ca/rss/city/nb-29_e.xml" ) );
+        weatherFeedsByIataCode.put( "yyt", urlFactory.build( "https://weather.gc.ca/rss/city/nl-24_e.xml" ) );
+        weatherFeedsByIataCode.put( "yyg", urlFactory.build( "https://weather.gc.ca/rss/city/pe-5_e.xml" ) );
+        weatherFeedsByIataCode.put( "yqt", urlFactory.build( "https://weather.gc.ca/rss/city/on-100_e.xml" ) );
+        weatherFeedsByIataCode.put( "ywg", urlFactory.build( "https://weather.gc.ca/rss/city/mb-38_e.xml" ) );
+        weatherFeedsByIataCode.put( "yqr", urlFactory.build( "https://weather.gc.ca/rss/city/sk-32_e.xml" ) );
+        weatherFeedsByIataCode.put( "yxe", urlFactory.build( "https://weather.gc.ca/rss/city/sk-40_e.xml" ) );
+        weatherFeedsByIataCode.put( "ymm", urlFactory.build( "https://weather.gc.ca/rss/city/ab-20_e.xml" ) );
+        weatherFeedsByIataCode.put( "yxs", urlFactory.build( "https://weather.gc.ca/rss/city/bc-79_e.xml" ) );
+        weatherFeedsByIataCode.put( "yyj", urlFactory.build( "https://weather.gc.ca/rss/city/bc-85_e.xml" ) );
+        weatherFeedsByIataCode.put( "ylw", urlFactory.build( "https://weather.gc.ca/rss/city/bc-48_e.xml" ) );
+        weatherFeedsByIataCode.put( "yka", urlFactory.build( "https://weather.gc.ca/rss/city/bc-45_e.xml" ) );
+        weatherFeedsByIataCode.put( "yow", urlFactory.build( "https://weather.gc.ca/rss/city/on-118_e.xml" ) );
+        weatherFeedsByIataCode.put( "yxy", urlFactory.build( "https://weather.gc.ca/rss/city/yt-16_e.xml" ) );
+        weatherFeedsByIataCode.put( "yzf", urlFactory.build( "https://weather.gc.ca/rss/city/nt-24_e.xml" ) );
+        weatherFeedsByIataCode.put( "yfb", urlFactory.build( "https://weather.gc.ca/rss/city/nu-21_e.xml" ) );
+        weatherFeedsByIataCode.put( "ylt", urlFactory.build( "https://weather.gc.ca/rss/city/nu-22_e.xml" ) );
     }
 
     @OnChannelMessage( "!forecast" )
@@ -119,19 +123,19 @@ public class WeatherService
     @OnChannelMessage( "!lessweather ?@areaCode" )
     public String onLessWeather( ChannelMessageEvent event, Optional<String> areaCode )
     {
-        return currentWeather( event, areaCode.orElse(DEFAULT_LOCATION), "less" );
+        return currentWeather( event, areaCode.orElse( DEFAULT_LOCATION ), "less" );
     }
 
     @OnChannelMessage( "!moreweather ?@areaCode" )
     public String onMoreWeather( ChannelMessageEvent event, Optional<String> areaCode )
     {
-        return currentWeather( event, areaCode.orElse(DEFAULT_LOCATION), "more" );
+        return currentWeather( event, areaCode.orElse( DEFAULT_LOCATION ), "more" );
     }
 
     @OnChannelMessage( "!weather ?@areaCode" )
     public String onWeather( ChannelMessageEvent event, Optional<String> areaCode )
     {
-        return currentWeather( event, areaCode.orElse(DEFAULT_LOCATION), "" );
+        return currentWeather( event, areaCode.orElse( DEFAULT_LOCATION ), "" );
     }
 
     private String currentWeather( ChannelMessageEvent event, String areaCode, String modifier )
@@ -165,16 +169,17 @@ public class WeatherService
                 }
                 else if ( "less".equals( modifier ) )
                 {
-                    Client weatherGuyClient = clientCreator.createClient(LESS_NICK);
-                    weatherGuyClient.addChannel(event.getChannel().getMessagingName());
+                    Client weatherGuyClient = clientCreator.createClient( LESS_NICK );
+                    weatherGuyClient.addChannel( event.getChannel().getMessagingName() );
                     weatherGuyClient.connect();
                     String output = "IT'S " + currentConditions.get( "Condition" ).toUpperCase();
-                    weatherGuyClient.setOutputListener(message -> {
-                        if (message.contains(output)) {
+                    weatherGuyClient.setOutputListener( message -> {
+                        if ( message.contains( output ) )
+                        {
                             weatherGuyClient.shutdown();
                         }
-                    });
-                    weatherGuyClient.sendMessage(event.getChannel().getMessagingName(), output);
+                    } );
+                    weatherGuyClient.sendMessage( event.getChannel().getMessagingName(), output );
                 }
                 else if ( "more".equals( modifier ) )
                 {
@@ -189,7 +194,8 @@ public class WeatherService
                     }
                     out.append( sb );
                 }
-                if (out.length() > 0) {
+                if ( out.length() > 0 )
+                {
                     return out.toString();
                 }
                 return null;

@@ -1,9 +1,12 @@
 package com.oldterns.vilebot.deployment;
 
 import com.oldterns.vilebot.Nick;
+import com.oldterns.vilebot.annotations.Bot;
 import com.oldterns.vilebot.annotations.Delimiter;
 import com.oldterns.vilebot.annotations.NoHelp;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
+import com.oldterns.vilebot.annotations.OnMessage;
+import com.oldterns.vilebot.annotations.OnPrivateMessage;
 import com.oldterns.vilebot.annotations.Regex;
 import com.oldterns.vilebot.services.HelpService;
 import com.oldterns.vilebot.services.IRCService;
@@ -18,12 +21,19 @@ import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 import org.kitteh.irc.client.library.event.helper.ActorEvent;
 import org.kitteh.irc.client.library.event.helper.ChannelEvent;
+import org.kitteh.irc.client.library.event.helper.PrivateEvent;
+import org.kitteh.irc.client.library.event.user.PrivateMessageEvent;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -75,13 +85,21 @@ public class IrcServiceImplementor {
             helpCommandGroup = helpCommandGroup.substring(0, helpCommandGroup.length() - "Service".length());
         }
 
+        if (ircServiceClass.isAnnotationPresent(Bot.class)) {
+            String botName = ircServiceClass.getAnnotation(Bot.class).value();
+            MethodCreator botNickMethodCreator = classCreator.getMethodCreator(MethodDescriptor.ofMethod(classCreator.getClassName(), "botNick", String.class));
+            botNickMethodCreator.returnValue(botNickMethodCreator.load(botName));
+        }
+
         postConstructMethodCreator = classCreator.getMethodCreator(MethodDescriptor.ofMethod(classCreator.getClassName(), "__postConstruct", void.class));
         postConstructMethodCreator.addAnnotation(PostConstruct.class);
         for (Method method : ircServiceClass.getDeclaredMethods()) {
             if (hasIrcServiceAnnotation(method) && !Modifier.isPublic(method.getModifiers())) {
                 throw new IllegalStateException("IRC Service annotation detected on non-public method (" + method.toGenericString() + "). Maybe make the method public?" );
             }
-            Optional.ofNullable(method.getAnnotation(OnChannelMessage.class)).ifPresent(annotation -> implementOnChannelMessage(method, annotation));
+            Optional.ofNullable(method.getAnnotation(OnChannelMessage.class)).ifPresent(annotation -> implementOnChannelMessage(method, annotation, true));
+            Optional.ofNullable(method.getAnnotation(OnPrivateMessage.class)).ifPresent(annotation -> implementOnPrivateMessage(method, annotation, true));
+            Optional.ofNullable(method.getAnnotation(OnMessage.class)).ifPresent(annotation -> implementOnMessage(method, annotation));
         }
 
         methodCreator = classCreator.getMethodCreator(MethodDescriptor.ofMethod(IRCService.class, "getChannelsToJoin",
@@ -90,9 +108,9 @@ public class IrcServiceImplementor {
                 methodCreator.load(channelSet.size()));
         channelSet.forEach(channel -> {
             ResultHandle channelResultHandle = methodCreator.load(channel);
-            ResultHandle actualChannel = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getChannel", String.class, String.class),
+            ResultHandle actualChannel = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getChannel", Collection.class, String.class),
                     methodCreator.getThis(), channelResultHandle);
-            methodCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(Collection.class, "add", boolean.class, Object.class),
+            methodCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(Collection.class, "addAll", boolean.class, Collection.class),
                     outputArray, actualChannel);
         });
         methodCreator.returnValue(outputArray);
@@ -103,7 +121,116 @@ public class IrcServiceImplementor {
     }
 
     private boolean hasIrcServiceAnnotation(Method method) {
-        return method.isAnnotationPresent(OnChannelMessage.class);
+        return method.isAnnotationPresent(OnChannelMessage.class)
+                || method.isAnnotationPresent(OnPrivateMessage.class)
+                || method.isAnnotationPresent(OnMessage.class);
+    }
+
+    /**
+     * Generates code that looks like this:
+     *
+     * <pre>
+     *   @Handler
+     *   public void method$Handler(PrivateMessageEvent privateMessage) {
+     *       if (!privateMessage.isToClient())) {
+     *           return;
+     *       }
+     *       Pattern pattern = Pattern.compile(...);
+     *       Matcher matcher = pattern.matcher(privateMessage.getMessage());
+     *       if (!matcher.matches()) {
+     *           return;
+     *       }
+     *       Integer intArg = Integer.parseInt(matcher.group("intArg"));
+     *       String stringArg = matcher.group("stringArg");
+     *       return service.theMethod(intArg, stringArg);
+     *   }
+     * </pre>
+     * @param method
+     * @param onMessage
+     */
+    private void implementOnMessage(Method method, OnMessage onMessage) {
+        implementOnPrivateMessage(method, new OnPrivateMessage() {
+
+            @Override public Class<? extends Annotation> annotationType() {
+                return OnPrivateMessage.class;
+            }
+
+            @Override public String value() {
+                return onMessage.value();
+            }
+        }, true);
+
+        implementOnChannelMessage(method, new OnChannelMessage() {
+
+            @Override public Class<? extends Annotation> annotationType() {
+                return OnChannelMessage.class;
+            }
+
+            @Override public String value() {
+                return onMessage.value();
+            }
+
+            @Override public String channel() {
+                return "<<all>>";
+            }
+        }, false);
+    }
+
+    /**
+     * Generates code that looks like this:
+     *
+     * <pre>
+     *   @Handler
+     *   public void method$Handler(PrivateMessageEvent privateMessage) {
+     *       if (!privateMessage.isToClient())) {
+     *           return;
+     *       }
+     *       Pattern pattern = Pattern.compile(...);
+     *       Matcher matcher = pattern.matcher(privateMessage.getMessage());
+     *       if (!matcher.matches()) {
+     *           return;
+     *       }
+     *       Integer intArg = Integer.parseInt(matcher.group("intArg"));
+     *       String stringArg = matcher.group("stringArg");
+     *       return service.theMethod(intArg, stringArg);
+     *   }
+     * </pre>
+     * @param method
+     * @param onPrivateMessage
+     */
+    private void implementOnPrivateMessage(Method method, OnPrivateMessage onPrivateMessage, boolean createHelp) {
+        methodCreator = classCreator.getMethodCreator(getSafeMethodSignature(method) + "$$OnPrivateMessage", void.class, PrivateMessageEvent.class);
+        AnnotationCreator annotationCreator = methodCreator.addAnnotation(Handler.class);
+        annotationCreator.addValue("delivery", Invoke.Asynchronously);
+
+        ResultHandle privateMessageEventResultHandle = methodCreator.getMethodParam(0);
+
+        BytecodeCreator matcherBytecodeCreator = methodCreator;
+        ResultHandle ircMessageTextResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(PrivateMessageEvent.class, "getMessage", String.class),
+                privateMessageEventResultHandle);
+
+        ImplementedQuery implementedQuery = implementQuery(method, matcherBytecodeCreator, onPrivateMessage.value(), createHelp, ircMessageTextResultHandle,
+                (bytecode, parameterType) -> {
+                    if (parameterType.isAssignableFrom(PrivateMessageEvent.class)) {
+                        return Optional.of(privateMessageEventResultHandle);
+                    } else if (parameterType.isAssignableFrom(Client.class)) {
+                        return Optional.of(bytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getBot", Client.class),
+                                bytecode.getThis()));
+                    } else if (parameterType.isAssignableFrom(User.class)) {
+                        return Optional.of(bytecode.invokeInterfaceMethod(MethodDescriptor.ofMethod(ActorEvent.class, "getActor", Actor.class),
+                                privateMessageEventResultHandle));
+                    }
+                    return Optional.empty();
+                });
+        ResultHandle[] methodArgumentResultHandles = implementedQuery.methodArgumentResultHandles;
+        BytecodeCreator processorBytecode = implementedQuery.processorBytecode;
+
+        ResultHandle ircServiceResultHandle = processorBytecode.readInstanceField(ircServiceField, methodCreator.getThis());
+        sendResponse(method, processorBytecode, ircServiceResultHandle, methodArgumentResultHandles, (responseByteCodeCreator, textResultHandle) -> {
+            responseByteCodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(PrivateMessageEvent.class, "sendReply", void.class, String.class),
+                    privateMessageEventResultHandle, textResultHandle);
+        });
+        processorBytecode.returnValue(null);
     }
 
     /**
@@ -128,42 +255,75 @@ public class IrcServiceImplementor {
      * @param method
      * @param onChannelMessage
      */
-    private void implementOnChannelMessage(Method method, OnChannelMessage onChannelMessage) {
-        channelSet.add(onChannelMessage.channel());
-        methodCreator = classCreator.getMethodCreator(getSafeMethodSignature(method), void.class, ChannelMessageEvent.class);
+    private void implementOnChannelMessage(Method method, OnChannelMessage onChannelMessage, boolean createHelp) {
+        methodCreator = classCreator.getMethodCreator(getSafeMethodSignature(method)  + "$$OnChannelMessage", void.class, ChannelMessageEvent.class);
         AnnotationCreator annotationCreator = methodCreator.addAnnotation(Handler.class);
         annotationCreator.addValue("delivery", Invoke.Asynchronously);
 
-        ResultHandle channelResultHandle = methodCreator.load(onChannelMessage.channel());
-        ResultHandle actualChannelToCheckResultHandle = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getChannel", String.class, String.class),
-                methodCreator.getThis(), channelResultHandle);
+        ResultHandle isChannelTarget;
         ResultHandle channelMessageEventResultHandle = methodCreator.getMethodParam(0);
+        if (!onChannelMessage.channel().equals("<<all>>")) {
+            channelSet.add(onChannelMessage.channel());
+        ResultHandle channelResultHandle = methodCreator.load(onChannelMessage.channel());
+        ResultHandle actualChannelToCheckResultHandle = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getChannel", Collection.class, String.class),
+                methodCreator.getThis(), channelResultHandle);
 
         ResultHandle channelInstanceResultHandle = methodCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(ChannelEvent.class,
                 "getChannel", Channel.class), channelMessageEventResultHandle);
         ResultHandle channelMessagingResultHandle = methodCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(Channel.class,
                 "getMessagingName", String.class), channelInstanceResultHandle);
-        ResultHandle isChannelTarget = methodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(String.class, "equals",
+        isChannelTarget = methodCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(Collection.class, "contains",
                 boolean.class, Object.class), actualChannelToCheckResultHandle, channelMessagingResultHandle);
+        } else {
+            isChannelTarget = methodCreator.load(true);
+        }
 
         BranchResult channelMatchesBranchResult = methodCreator.ifFalse(isChannelTarget);
         channelMatchesBranchResult.trueBranch().returnValue(null);
         BytecodeCreator matcherBytecodeCreator = channelMatchesBranchResult.falseBranch();
+        ResultHandle ircMessageTextResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(ChannelMessageEvent.class, "getMessage", String.class),
+                channelMessageEventResultHandle);
+
+        ImplementedQuery implementedQuery = implementQuery(method, matcherBytecodeCreator, onChannelMessage.value(), createHelp, ircMessageTextResultHandle,
+                (bytecode, parameterType) -> {
+                    if (parameterType.isAssignableFrom(ChannelMessageEvent.class)) {
+                        return Optional.of(channelMessageEventResultHandle);
+                    } else if (parameterType.isAssignableFrom(Client.class)) {
+                        return Optional.of(bytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getBot", Client.class),
+                                bytecode.getThis()));
+                    } else if (parameterType.isAssignableFrom(User.class)) {
+                        return Optional.of(bytecode.invokeInterfaceMethod(MethodDescriptor.ofMethod(ActorEvent.class, "getActor", Actor.class),
+                                channelMessageEventResultHandle));
+                    }
+                    return Optional.empty();
+                });
+        ResultHandle[] methodArgumentResultHandles = implementedQuery.methodArgumentResultHandles;
+        BytecodeCreator processorBytecode = implementedQuery.processorBytecode;
+
+        ResultHandle ircServiceResultHandle = processorBytecode.readInstanceField(ircServiceField, methodCreator.getThis());
+        sendResponse(method, processorBytecode, ircServiceResultHandle, methodArgumentResultHandles, (responseByteCodeCreator, textResultHandle) -> {
+            responseByteCodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(ChannelMessageEvent.class, "sendReply", void.class, String.class),
+                                                        channelMessageEventResultHandle, textResultHandle);
+        });
+        processorBytecode.returnValue(null);
+    }
+
+    private ImplementedQuery implementQuery(Method method, BytecodeCreator matcherBytecodeCreator, String pattern, boolean createHelp, ResultHandle ircMessageTextResultHandle, BiFunction<BytecodeCreator, Class, Optional<ResultHandle>> additionalMatcherBiFunction) {
+
         FieldDescriptor patternField = classCreator.getFieldCreator(FieldDescriptor.of(classCreator.getClassName(), getSafeMethodSignature(method) + "$pattern", Pattern.class))
                 .getFieldDescriptor();
         postConstructMethodCreator.writeInstanceField(patternField, postConstructMethodCreator.getThis(),
                 postConstructMethodCreator.invokeStaticMethod(MethodDescriptor.ofMethod(Pattern.class, "compile", Pattern.class, String.class),
-                        postConstructMethodCreator.load(getPatternRegex(method, onChannelMessage.value()))));
+                        postConstructMethodCreator.load(getPatternRegex(method, pattern))));
 
 
-        if (!method.isAnnotationPresent(NoHelp.class)) {
+        if (createHelp && !method.isAnnotationPresent(NoHelp.class)) {
             postConstructMethodCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(HelpService.class, "addHelpCommand", void.class, String.class, String.class),
                     postConstructMethodCreator.readInstanceField(helpServiceField, postConstructMethodCreator.getThis()),
                     postConstructMethodCreator.load(helpCommandGroup),
-                    postConstructMethodCreator.load(getHelpString(method, onChannelMessage.value())));
+                    postConstructMethodCreator.load(getHelpString(method, pattern)));
         }
-        ResultHandle ircMessageTextResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(ChannelMessageEvent.class, "getMessage", String.class),
-                channelMessageEventResultHandle);
+
         ResultHandle patternMatcherResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(Pattern.class, "matcher", Matcher.class, CharSequence.class),
                 matcherBytecodeCreator.readInstanceField(patternField, matcherBytecodeCreator.getThis()), ircMessageTextResultHandle);
         ResultHandle matchesResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(Matcher.class, "matches", boolean.class),
@@ -171,23 +331,19 @@ public class IrcServiceImplementor {
         BranchResult branchResult = matcherBytecodeCreator.ifFalse(matchesResultHandle);
         branchResult.trueBranch().returnValue(null);
         BytecodeCreator processorBytecode = branchResult.falseBranch();
-        ResultHandle ircServiceResultHandle = processorBytecode.readInstanceField(ircServiceField, methodCreator.getThis());
+
 
         ResultHandle[] methodArgumentResultHandles = new ResultHandle[method.getParameterCount()];
         for (int i = 0; i < method.getParameterCount(); i++) {
             Parameter parameter = method.getParameters()[i];
-            if (parameter.getType().isAssignableFrom(ChannelMessageEvent.class)) {
-                methodArgumentResultHandles[i] = channelMessageEventResultHandle;
-            } else if (parameter.getType().isAssignableFrom(Client.class)) {
-                methodArgumentResultHandles[i] = processorBytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getBot", Client.class),
-                        processorBytecode.getThis());
-            } else if (parameter.getType().isAssignableFrom(User.class)) {
-                methodArgumentResultHandles[i] = processorBytecode.invokeInterfaceMethod(MethodDescriptor.ofMethod(ActorEvent.class, "getActor", Actor.class),
-                        channelMessageEventResultHandle);
-            }else {
-                methodArgumentResultHandles[i] = extractParameterFromMatcher(processorBytecode, parameter, patternMatcherResultHandle);
-            }
+            Optional<ResultHandle> maybeResult = additionalMatcherBiFunction.apply(processorBytecode, parameter.getType());
+            methodArgumentResultHandles[i] = maybeResult
+                    .orElseGet(() -> extractParameterFromMatcher(processorBytecode, parameter, patternMatcherResultHandle));
         }
+        return new ImplementedQuery(methodArgumentResultHandles, processorBytecode);
+    }
+
+    private void sendResponse(Method method, BytecodeCreator processorBytecode, ResultHandle ircServiceResultHandle, ResultHandle[] methodArgumentResultHandles, BiConsumer<BytecodeCreator, ResultHandle> responseSender) {
         ResultHandle methodResult = processorBytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(method),
                 ircServiceResultHandle, methodArgumentResultHandles);
         ResultHandle stringReturnValue = getReturnValue(processorBytecode, method, methodResult);
@@ -199,13 +355,21 @@ public class IrcServiceImplementor {
             AssignableResultHandle indexResultHandle = replyBytecodeCreator.createVariable(int.class);
             replyBytecodeCreator.assign(indexResultHandle, replyBytecodeCreator.load(0));
             BytecodeCreator replyLoopBytecodeCreator = replyBytecodeCreator.whileLoop(conditionCreator ->
-                conditionCreator.ifIntegerLessThan(indexResultHandle, conditionCreator.arrayLength(splitResultHandle))
+                    conditionCreator.ifIntegerLessThan(indexResultHandle, conditionCreator.arrayLength(splitResultHandle))
             ).block();
-            replyLoopBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(ChannelMessageEvent.class, "sendReply", void.class, String.class),
-                    channelMessageEventResultHandle, replyLoopBytecodeCreator.readArrayValue(splitResultHandle, indexResultHandle));
+            responseSender.accept(replyLoopBytecodeCreator, replyLoopBytecodeCreator.readArrayValue(splitResultHandle, indexResultHandle));
             replyLoopBytecodeCreator.assign(indexResultHandle, replyLoopBytecodeCreator.increment(indexResultHandle));
         }
-        processorBytecode.returnValue(null);
+    }
+
+    private static final class ImplementedQuery {
+        final ResultHandle[] methodArgumentResultHandles;
+        final BytecodeCreator processorBytecode;
+
+        public ImplementedQuery(ResultHandle[] methodArgumentResultHandles, BytecodeCreator processorBytecode) {
+            this.methodArgumentResultHandles = methodArgumentResultHandles;
+            this.processorBytecode = processorBytecode;
+        }
     }
 
     private String getSafeMethodSignature(Method method) {

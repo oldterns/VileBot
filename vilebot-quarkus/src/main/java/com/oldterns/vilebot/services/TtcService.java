@@ -1,13 +1,14 @@
 package com.oldterns.vilebot.services;
 
 import com.oldterns.vilebot.annotations.OnChannelMessage;
+import com.oldterns.vilebot.util.URLFactory;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.net.URL;
+import javax.inject.Inject;
 import java.net.URLConnection;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -17,6 +18,9 @@ public class TtcService
 {
 
     public static final String TTC_URL = "https://www.ttc.ca/Service_Advisories/all_service_alerts.jsp";
+
+    @Inject
+    URLFactory urlFactory;
 
     @OnChannelMessage( "!ttc" )
     public String printAlerts()
@@ -51,7 +55,7 @@ public class TtcService
     {
         String content;
         URLConnection connection;
-        connection = new URL( TTC_URL ).openConnection();
+        connection = urlFactory.build( TTC_URL ).openConnection();
         connection.addRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)" );
         Scanner scanner = new Scanner( connection.getInputStream() );
         scanner.useDelimiter( "\\Z" );

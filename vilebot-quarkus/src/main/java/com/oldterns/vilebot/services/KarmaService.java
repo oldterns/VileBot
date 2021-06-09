@@ -1,6 +1,7 @@
 package com.oldterns.vilebot.services;
 
 import com.oldterns.vilebot.Nick;
+import com.oldterns.vilebot.annotations.NoHelp;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.database.ChurchDB;
 import com.oldterns.vilebot.database.KarmaDB;
@@ -64,6 +65,8 @@ public class KarmaService
     }
 
     @OnChannelMessage( "@channelMessage" )
+    // TODO: Maybe replace this with a custom help command?
+    @NoHelp
     public String karmaIncOrDec( User user, String channelMessage )
     {
         Nick userNick = Nick.getNick( user );
