@@ -61,12 +61,17 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jackson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
       <artifactId>quarkus-redis-client</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-elytron-security</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
@@ -85,6 +90,12 @@
       <groupId>org.twitter4j</groupId>
       <artifactId>twitter4j-core</artifactId>
       <version>[4.0,)</version>
+    </dependency>
+    <dependency>
+      <groupId>info.debatty</groupId>
+      <artifactId>java-string-similarity</artifactId>
+      <version>0.17</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>

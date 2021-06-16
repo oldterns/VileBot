@@ -33,7 +33,7 @@ public abstract class IRCService {
             return getChannelsToJoin();
         }
         if (channel.startsWith("${")) {
-            String channelSet = ConfigProvider.getConfig().getValue(channel.substring(1, channel.length() - 1), String.class);
+            String channelSet = ConfigProvider.getConfig().getValue(channel.substring(2, channel.length() - 1), String.class);
             return List.of(channelSet.split(","));
         }
         return List.of(channel.split(","));
