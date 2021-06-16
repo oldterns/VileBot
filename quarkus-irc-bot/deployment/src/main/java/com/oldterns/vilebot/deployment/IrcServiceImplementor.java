@@ -21,7 +21,6 @@ import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 import org.kitteh.irc.client.library.event.helper.ActorEvent;
 import org.kitteh.irc.client.library.event.helper.ChannelEvent;
-import org.kitteh.irc.client.library.event.helper.PrivateEvent;
 import org.kitteh.irc.client.library.event.user.PrivateMessageEvent;
 
 import javax.annotation.PostConstruct;
@@ -32,8 +31,6 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -100,6 +97,7 @@ public class IrcServiceImplementor {
             Optional.ofNullable(method.getAnnotation(OnChannelMessage.class)).ifPresent(annotation -> implementOnChannelMessage(method, annotation, true));
             Optional.ofNullable(method.getAnnotation(OnPrivateMessage.class)).ifPresent(annotation -> implementOnPrivateMessage(method, annotation, true));
             Optional.ofNullable(method.getAnnotation(OnMessage.class)).ifPresent(annotation -> implementOnMessage(method, annotation));
+            Optional.ofNullable(method.getAnnotation(Handler.class)).ifPresent(annotation -> implementHandler(method, annotation));
         }
 
         methodCreator = classCreator.getMethodCreator(MethodDescriptor.ofMethod(IRCService.class, "getChannelsToJoin",
@@ -123,7 +121,8 @@ public class IrcServiceImplementor {
     private boolean hasIrcServiceAnnotation(Method method) {
         return method.isAnnotationPresent(OnChannelMessage.class)
                 || method.isAnnotationPresent(OnPrivateMessage.class)
-                || method.isAnnotationPresent(OnMessage.class);
+                || method.isAnnotationPresent(OnMessage.class)
+                || method.isAnnotationPresent(Handler.class);
     }
 
     /**
@@ -306,6 +305,39 @@ public class IrcServiceImplementor {
                                                         channelMessageEventResultHandle, textResultHandle);
         });
         processorBytecode.returnValue(null);
+    }
+
+    private void implementHandler(Method method, Handler handler) {
+        if (method.getParameterCount() != 1) {
+            throw new IllegalStateException("Handler methods can only take 1 argument!");
+        }
+        Class<?> eventClass = method.getParameterTypes()[0];
+        methodCreator = classCreator.getMethodCreator(getSafeMethodSignature(method) + eventClass.getSimpleName() + "Handler", void.class, eventClass);
+        AnnotationCreator annotationCreator = methodCreator.addAnnotation(Handler.class);
+        annotationCreator.addValue("delivery", handler.delivery());
+        ResultHandle eventResultHandle = methodCreator.getMethodParam(0);
+        ResultHandle ircServiceResultHandle = methodCreator.readInstanceField(ircServiceField, methodCreator.getThis());
+
+        sendResponse(method, methodCreator, ircServiceResultHandle, new ResultHandle[]{ eventResultHandle }, (responseByteCodeCreator, textResultHandle) -> {
+            if (ChannelEvent.class.isAssignableFrom(eventClass)) {
+                ResultHandle channelResultHandle = responseByteCodeCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(ChannelEvent.class, "getChannel", Channel.class),
+                        eventResultHandle);
+                responseByteCodeCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(Channel.class, "sendMessage", void.class, String.class),
+                        channelResultHandle, textResultHandle);
+            } else if (ActorEvent.class.isAssignableFrom(eventClass)) {
+                ResultHandle actorResultHandle = responseByteCodeCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(ActorEvent.class, "getActor", Actor.class),
+                        eventResultHandle);
+                ResultHandle client = responseByteCodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getBot", Client.class),
+                        responseByteCodeCreator.getThis());
+                ResultHandle target = responseByteCodeCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(Actor.class, "getName", String.class),
+                        actorResultHandle);
+                responseByteCodeCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(Client.class, "sendMessage", void.class, String.class, String.class),
+                        client, target, textResultHandle);
+            } else {
+                throw new IllegalStateException("Cannot generate a reply since it not a ChannelEvent or an ActorEvent; use a void return type to observe this event");
+            }
+        });
+        methodCreator.returnValue(null);
     }
 
     private ImplementedQuery implementQuery(Method method, BytecodeCreator matcherBytecodeCreator, String pattern, boolean createHelp, ResultHandle ircMessageTextResultHandle, BiFunction<BytecodeCreator, Class, Optional<ResultHandle>> additionalMatcherBiFunction) {

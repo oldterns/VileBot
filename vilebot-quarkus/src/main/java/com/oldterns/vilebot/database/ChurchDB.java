@@ -27,7 +27,7 @@ public class ChurchDB
 
     public boolean isTopDonor( String noun )
     {
-        return getDonorRank( noun ).map( rank -> rank.longValue() <= 4 ).orElse( false );
+        return getDonorRank( noun ).map( rank -> rank <= 4 ).orElse( false );
     }
 
     /**
@@ -84,7 +84,7 @@ public class ChurchDB
      */
     public Optional<Long> getDonorRank( String noun )
     {
-        return Optional.ofNullable( redisClient.zrevrank( keyOfChurchDonorSortedSet, noun ).toLong() ).map( rank -> rank
+        return Optional.ofNullable( redisClient.zrevrank( keyOfChurchDonorSortedSet, noun ) ).map( rank -> rank.toLong()
             + 1 );
     }
 

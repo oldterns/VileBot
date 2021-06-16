@@ -6,13 +6,13 @@ import java.util.HashSet;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.annotations.OnMessage;
 import com.oldterns.vilebot.annotations.OnPrivateMessage;
-import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.GeneratedBeanBuildItem;
 import io.quarkus.arc.deployment.GeneratedBeanGizmoAdaptor;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.CombinedIndexBuildItem;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
+import net.engio.mbassy.listener.Handler;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
@@ -34,6 +34,8 @@ class IrcServiceProcessor {
         DotName onChannelMessageDotName = DotName.createSimple(OnChannelMessage.class.getName());
         DotName onPrivateMessageDotName = DotName.createSimple(OnPrivateMessage.class.getName());
         DotName onMessageDotName = DotName.createSimple(OnMessage.class.getName());
+        DotName handlerDotName = DotName.createSimple(Handler.class.getName());
+
         IndexView indexView = combinedIndex.getIndex();
         GeneratedBeanGizmoAdaptor classOutput = new GeneratedBeanGizmoAdaptor(generatedBeanConsumer);
 
@@ -51,6 +53,11 @@ class IrcServiceProcessor {
 
         for (AnnotationInstance annotationInstance : indexView
                 .getAnnotations(onMessageDotName)) {
+            classWithAnnotations.add(annotationInstance.target().asMethod().declaringClass());
+        }
+
+        for (AnnotationInstance annotationInstance : indexView
+                .getAnnotations(handlerDotName)) {
             classWithAnnotations.add(annotationInstance.target().asMethod().declaringClass());
         }
 

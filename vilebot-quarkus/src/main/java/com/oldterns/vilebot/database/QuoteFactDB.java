@@ -13,6 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,7 +60,8 @@ public class QuoteFactDB
      */
     public String getRandomQuote( String noun )
     {
-        return redisClient.srandmember( List.of( keyOfQuoteSetsPrefix + noun ) ).toString();
+        return Optional.ofNullable( redisClient.srandmember( List.of( keyOfQuoteSetsPrefix
+            + noun ) ) ).map( Response::toString ).orElse( null );
     }
 
     /**
@@ -124,7 +126,8 @@ public class QuoteFactDB
      */
     public String getRandomFact( String noun )
     {
-        return redisClient.srandmember( List.of( keyOfFactSetsPrefix + noun ) ).toString();
+        return Optional.ofNullable( redisClient.srandmember( List.of( keyOfFactSetsPrefix
+            + noun ) ) ).map( Response::toString ).orElse( null );
     }
 
     /**

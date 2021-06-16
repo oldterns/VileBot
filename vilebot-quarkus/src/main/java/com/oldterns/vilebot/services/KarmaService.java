@@ -75,22 +75,32 @@ public class KarmaService
         for ( String noun : channelMessage.split( "\\s+" ) )
         {
             Nick nick = Nick.valueOf( noun );
-            if ( userNick.getBaseNick().equals( nick.getBaseNick() ) )
-            {
-                insult = true;
-                continue;
-            }
 
             if ( noun.endsWith( "++" ) )
             {
+                if ( userNick.getBaseNick().equals( nick.getBaseNick() ) )
+                {
+                    insult = true;
+                    continue;
+                }
                 karmaDB.modNounKarma( nick.getBaseNick(), 1 );
             }
             else if ( noun.endsWith( "--" ) )
             {
+                if ( userNick.getBaseNick().equals( nick.getBaseNick() ) )
+                {
+                    insult = true;
+                    continue;
+                }
                 karmaDB.modNounKarma( nick.getBaseNick(), -1 );
             }
             else if ( noun.endsWith( "+-" ) )
             {
+                if ( userNick.getBaseNick().equals( nick.getBaseNick() ) )
+                {
+                    insult = true;
+                    continue;
+                }
                 int karma = randomProvider.getRandomBoolean() ? 1 : -1;
                 String reply = nick + " had their karma ";
                 reply += karma == 1 ? "increased" : "decreased";
