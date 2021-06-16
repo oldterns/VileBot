@@ -58,7 +58,7 @@ public class QuotesAndFactsService
     private Map<String, Integer> dumpSize = new HashMap<>();
 
     @ConfigProperty( name = "vilebot.pastebin.api.url" )
-    private String PASTEBIN_API_URL;
+    String PASTEBIN_API_URL;
 
     @Handler
     public String onJoin( ChannelJoinEvent event )
