@@ -34,4 +34,9 @@ public class RandomProvider
     {
         return list.get( getRandomInt( list.size() ) );
     }
+
+    public <T> T getRandomElement( T[] array )
+    {
+        return array[ getRandomInt( array.length ) ];
+    }
 }
