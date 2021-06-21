@@ -19,7 +19,7 @@ public class BotStartupService {
     @Inject
     ClientCreator clientCreator;
 
-    public void onStartup(@Observes StartupEvent e) {
+    public void onStartup(@Observes StartupEvent e) throws InterruptedException {
         Map<String, Client> botNameToClient = new HashMap<>();
         ircServices.stream().forEach(ircService -> {
             Client client = botNameToClient.computeIfAbsent(ircService.botNick(),
@@ -28,6 +28,9 @@ public class BotStartupService {
             ircService.getChannelsToJoin().forEach(client::addChannel);
             ircService.setBot(client);
         });
-        botNameToClient.values().forEach(Client::connect);
+        for (Client client : botNameToClient.values()) {
+            client.connect();
+            Thread.sleep(1000);
+        }
     }
 }
