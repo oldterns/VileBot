@@ -355,9 +355,9 @@ public class IrcServiceImplementor {
                     postConstructMethodCreator.load(helpCommandGroup),
                     postConstructMethodCreator.load(getHelpString(method, pattern)));
         }
-
         ResultHandle patternMatcherResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(Pattern.class, "matcher", Matcher.class, CharSequence.class),
-                matcherBytecodeCreator.readInstanceField(patternField, matcherBytecodeCreator.getThis()), ircMessageTextResultHandle);
+                matcherBytecodeCreator.readInstanceField(patternField, matcherBytecodeCreator.getThis()),
+                matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(String.class, "stripTrailing", String.class), ircMessageTextResultHandle));
         ResultHandle matchesResultHandle = matcherBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(Matcher.class, "matches", boolean.class),
                 patternMatcherResultHandle);
         BranchResult branchResult = matcherBytecodeCreator.ifFalse(matchesResultHandle);
