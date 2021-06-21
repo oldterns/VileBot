@@ -29,6 +29,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+/**
+ * Based off of the omgword game from CasinoBot: http://casinobot.codeplex.com/
+ */
 @Bot("OmgwordBot")
 @ApplicationScoped
 public class OmgwordService {
