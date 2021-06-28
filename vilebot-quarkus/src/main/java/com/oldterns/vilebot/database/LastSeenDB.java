@@ -6,7 +6,9 @@
  */
 package com.oldterns.vilebot.database;
 
+import com.oldterns.vilebot.util.TimeService;
 import io.quarkus.redis.client.RedisClient;
+import io.vertx.redis.client.Response;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -21,14 +23,22 @@ public class LastSeenDB
     @Inject
     RedisClient redisClient;
 
+    @Inject
+    TimeService timeService;
+
     public Optional<Long> getLastSeenTime( String nick )
     {
-        return Optional.ofNullable( redisClient.hget( keyOfLastSeenHash, nick ).toLong() );
+        Response response = redisClient.hget( keyOfLastSeenHash, nick );
+        if (response != null) {
+            return Optional.of(response.toLong());
+        } else {
+            return Optional.empty();
+        }
     }
 
     public void updateLastSeenTime( String nick )
     {
-        Long milliTime = System.currentTimeMillis();
+        Long milliTime = timeService.getCurrentTimeMills();
         redisClient.hset( List.of( keyOfLastSeenHash, nick, milliTime.toString() ) );
     }
 }

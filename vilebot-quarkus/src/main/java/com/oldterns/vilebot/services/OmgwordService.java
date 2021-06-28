@@ -5,7 +5,7 @@ import com.oldterns.vilebot.annotations.Bot;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.database.KarmaDB;
 import com.oldterns.vilebot.util.RandomProvider;
-import com.oldterns.vilebot.util.TimeoutService;
+import com.oldterns.vilebot.util.TimeService;
 import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 
@@ -42,7 +42,7 @@ public class OmgwordService {
     RandomProvider randomProvider;
 
     @Inject
-    TimeoutService timeoutService;
+    TimeService timeService;
 
     @Inject
     KarmaDB karmaDB;
@@ -129,7 +129,7 @@ public class OmgwordService {
                 scrambled = scrambleWord(scrambled);
             }
 
-            timeoutHandler = timeoutService.onTimeout(Duration.ofSeconds(30), () -> {
+            timeoutHandler = timeService.onTimeout(Duration.ofSeconds(30), () -> {
                 try {
                     lock.lock();
                     event.sendReply(getTimeoutString());

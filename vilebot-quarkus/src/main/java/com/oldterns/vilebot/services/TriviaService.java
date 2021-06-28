@@ -6,7 +6,7 @@ import com.oldterns.vilebot.Nick;
 import com.oldterns.vilebot.annotations.Bot;
 import com.oldterns.vilebot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.database.KarmaDB;
-import com.oldterns.vilebot.util.TimeoutService;
+import com.oldterns.vilebot.util.TimeService;
 import com.oldterns.vilebot.util.URLFactory;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import org.kitteh.irc.client.library.element.User;
@@ -46,7 +46,7 @@ public class TriviaService {
     URLFactory urlFactory;
 
     @Inject
-    TimeoutService timeoutService;
+    TimeService timeService;
 
     @Inject
     ObjectMapper objectMapper;
@@ -72,7 +72,7 @@ public class TriviaService {
                 throw new IllegalStateException("Tried (" + tries + ") times, all responses were invalid");
             }
             game = new TriviaGame(triviaQuestions.getQuestion());
-            timeoutFuture = timeoutService.onTimeout(TIMEOUT, () -> {
+            timeoutFuture = timeService.onTimeout(TIMEOUT, () -> {
                 try {
                     gameLock.lock();
                     game.getTimeoutString().forEach(channelMessageEvent::sendReply);
