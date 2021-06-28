@@ -30,9 +30,9 @@ public class KarmaDB
      * @param noun The noun to change the karma of
      * @param mod The amount to change the karma by, may be negative.
      */
-    public void modNounKarma( String noun, Integer mod )
+    public void modNounKarma( String noun, Number mod )
     {
-        redisClient.zincrby( keyOfKarmaSortedSet, mod.toString(), noun );
+        redisClient.zincrby( keyOfKarmaSortedSet, Long.toString(mod.longValue()), noun );
     }
 
     /**
