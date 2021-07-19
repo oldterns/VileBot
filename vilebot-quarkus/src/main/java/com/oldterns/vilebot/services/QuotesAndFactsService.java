@@ -49,6 +49,9 @@ public class QuotesAndFactsService
     IgnoredUsers ignoredUsers;
 
     @Inject
+    JazizService jazizService;
+
+    @Inject
     RandomProvider randomProvider;
 
     // cache fact and quote dump links
@@ -346,8 +349,7 @@ public class QuotesAndFactsService
                         {
                             try
                             {
-                                return "Jaziz is not implemented yet";// formatFactReply( noun, Jaziz.jazizify(
-                                                                      // randomMatch ) ) );
+                                return formatFactReply( noun, jazizService.jazizify( randomMatch ) );
                             }
                             catch ( Exception e )
                             {
@@ -383,8 +385,7 @@ public class QuotesAndFactsService
                         {
                             try
                             {
-                                return "Jaziz is not implemented yet";// formatFactReply( noun, Jaziz.jazizify(
-                                                                      // randomMatch ) ) );
+                                return formatFactReply( noun, jazizService.jazizify( randomMatch ) );
                             }
                             catch ( Exception e )
                             {
@@ -478,9 +479,7 @@ public class QuotesAndFactsService
         {
             try
             {
-                // TODO: When JazizService is done
-                // text = Jaziz.jazizify( text );
-                text = "Jaziz service is not implemented yet";
+                text = jazizService.jazizify( text );
             }
             catch ( Exception e )
             {
@@ -535,9 +534,7 @@ public class QuotesAndFactsService
         {
             try
             {
-                // TODO: When JazizService is done
-                // text = Jaziz.jazizify( text );
-                text = "Jaziz service is not implemented yet";
+                text = jazizService.jazizify( text );
             }
             catch ( Exception e )
             {
