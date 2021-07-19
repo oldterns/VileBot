@@ -7,10 +7,13 @@
 package com.oldterns.vilebot.database;
 
 import io.quarkus.redis.client.RedisClient;
+import io.vertx.redis.client.Response;
+import org.jsoup.Connection;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class ExcuseDB
@@ -27,6 +30,7 @@ public class ExcuseDB
 
     public String getRandExcuse()
     {
-        return redisClient.srandmember( List.of( keyOfExcuseSet ) ).toString();
+        return Optional.ofNullable(redisClient.srandmember( List.of( keyOfExcuseSet ) ))
+                .map(Response::toString).orElse(null);
     }
 }
