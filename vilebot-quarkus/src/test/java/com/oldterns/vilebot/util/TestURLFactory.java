@@ -29,6 +29,14 @@ public class TestURLFactory
         return testURL;
     }
 
+    @Override
+    public URL build(String protocol, String host, int port, String file) throws MalformedURLException {
+        URL testURL =
+                new URL( protocol, host, port, file, urlStreamHandler );
+        urlStringToUrlMap.put( testURL.toString(), testURL );
+        return testURL;
+    }
+
     public URL getURL( String url )
     {
         return urlStringToUrlMap.get( url );

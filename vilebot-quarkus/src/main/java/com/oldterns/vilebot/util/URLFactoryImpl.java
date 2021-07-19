@@ -8,9 +8,13 @@ import java.net.URL;
 public class URLFactoryImpl
     implements URLFactory
 {
-    public URL build( String url )
-        throws MalformedURLException
+    public URL build( String url ) throws MalformedURLException
     {
         return new URL( url );
+    }
+
+    @Override
+    public URL build(String protocol, String host, int port, String file) throws MalformedURLException {
+        return new URL(protocol, host, port, file);
     }
 }

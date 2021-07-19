@@ -5,6 +5,6 @@ import java.net.URL;
 
 public interface URLFactory
 {
-    public URL build( String url )
-        throws MalformedURLException;
+    URL build( String url ) throws MalformedURLException;
+    URL build( String protocol, String host, int port, String file ) throws MalformedURLException;
 }
