@@ -32,7 +32,7 @@ public class KarmaDB
      */
     public void modNounKarma( String noun, Number mod )
     {
-        redisClient.zincrby( keyOfKarmaSortedSet, Long.toString(mod.longValue()), noun );
+        redisClient.zincrby( keyOfKarmaSortedSet, Long.toString( mod.longValue() ), noun );
     }
 
     /**

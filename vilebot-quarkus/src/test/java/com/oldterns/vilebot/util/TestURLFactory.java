@@ -30,9 +30,10 @@ public class TestURLFactory
     }
 
     @Override
-    public URL build(String protocol, String host, int port, String file) throws MalformedURLException {
-        URL testURL =
-                new URL( protocol, host, port, file, urlStreamHandler );
+    public URL build( String protocol, String host, int port, String file )
+        throws MalformedURLException
+    {
+        URL testURL = new URL( protocol, host, port, file, urlStreamHandler );
         urlStringToUrlMap.put( testURL.toString(), testURL );
         return testURL;
     }

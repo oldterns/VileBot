@@ -17,7 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
-public class KaomojiService {
+public class KaomojiService
+{
 
     @Inject
     RandomProvider randomProvider;
@@ -26,42 +27,50 @@ public class KaomojiService {
     Map<String, List<String>> queryToKaomojiListMap;
 
     @PostConstruct
-    public void constructQueryToKaomojiListMap() {
+    public void constructQueryToKaomojiListMap()
+    {
         queryToKaomojiListMap = new HashMap<>();
-        try (InputStream kaomojiListResource = KaomojiService.class.getResourceAsStream("/kaomojilist.tsv")) {
-            if (kaomojiListResource == null) {
-                throw new IOException("File not found");
+        try ( InputStream kaomojiListResource = KaomojiService.class.getResourceAsStream( "/kaomojilist.tsv" ) )
+        {
+            if ( kaomojiListResource == null )
+            {
+                throw new IOException( "File not found" );
             }
-            new BufferedReader(new InputStreamReader(kaomojiListResource, StandardCharsets.UTF_8))
-                    .lines()
-                    .forEach(line -> {
-                        String[] parts = line.split("\t");
-                        String kaomoji = parts[0];
-                        String[] matchedQueries = parts[1].split(", ");
-                        for (String matchedQuery : matchedQueries) {
-                            queryToKaomojiListMap.computeIfAbsent(matchedQuery, key -> new ArrayList<>()).add(kaomoji);
-                        }
-                    });
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to open wordlist file: ", e);
+            new BufferedReader( new InputStreamReader( kaomojiListResource,
+                                                       StandardCharsets.UTF_8 ) ).lines().forEach( line -> {
+                                                           String[] parts = line.split( "\t" );
+                                                           String kaomoji = parts[0];
+                                                           String[] matchedQueries = parts[1].split( ", " );
+                                                           for ( String matchedQuery : matchedQueries )
+                                                           {
+                                                               queryToKaomojiListMap.computeIfAbsent( matchedQuery,
+                                                                                                      key -> new ArrayList<>() ).add( kaomoji );
+                                                           }
+                                                       } );
+        }
+        catch ( IOException e )
+        {
+            throw new IllegalStateException( "Unable to open wordlist file: ", e );
         }
     }
 
-    @OnChannelMessage("!kaomoji @query")
-    public String getKaomoji(String query) {
+    @OnChannelMessage( "!kaomoji @query" )
+    public String getKaomoji( String query )
+    {
         String kaomoji = "";
         switch ( query )
         {
             case "wat":
-                return getKaomoji("confused");
+                return getKaomoji( "confused" );
             case "nsfw":
             case "wtf":
                 return "ⓃⒶⓃⒾ(☉൧ ಠ ꐦ)";
             case "vilebot":
                 return "( ͡° ͜ʖ ͡° )";
             default:
-                if (queryToKaomojiListMap.containsKey(query.toLowerCase())) {
-                    kaomoji = randomProvider.getRandomElement(queryToKaomojiListMap.get(query.toLowerCase()));
+                if ( queryToKaomojiListMap.containsKey( query.toLowerCase() ) )
+                {
+                    kaomoji = randomProvider.getRandomElement( queryToKaomojiListMap.get( query.toLowerCase() ) );
                 }
                 break;
         }

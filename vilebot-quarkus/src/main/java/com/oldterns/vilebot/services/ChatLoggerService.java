@@ -11,13 +11,15 @@ import javax.inject.Inject;
  * Created by eunderhi on 18/08/15.
  */
 @ApplicationScoped
-public class ChatLoggerService {
+public class ChatLoggerService
+{
 
     @Inject
     LogDB logDB;
 
-    @OnChannelMessage(value = "@message", channel = "${vilebot.markov.channel}")
-    public void logMessage(@Regex("[^!].*") String message) {
-        logDB.addItem(message + "\n");
+    @OnChannelMessage( value = "@message", channel = "${vilebot.markov.channel}" )
+    public void logMessage( @Regex( "[^!].*" ) String message )
+    {
+        logDB.addItem( message + "\n" );
     }
 }

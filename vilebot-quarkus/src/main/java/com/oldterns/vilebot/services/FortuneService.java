@@ -23,13 +23,13 @@ public class FortuneService
 
     List<String> fortunes = loadFortunes();
 
-    @OnChannelMessage("!fortune")
+    @OnChannelMessage( "!fortune" )
     public String onFortune()
     {
-        return randomProvider.getRandomElement(fortunes);
+        return randomProvider.getRandomElement( fortunes );
     }
 
-    @OnChannelMessage("!fortunedirty")
+    @OnChannelMessage( "!fortunedirty" )
     public String onDirtyFortune()
     {
         return "oooo you dirty";
@@ -37,15 +37,17 @@ public class FortuneService
 
     private List<String> loadFortunes()
     {
-        try (InputStream fortuneListResource = FortuneService.class.getResourceAsStream("/fortunelist.txt")) {
-            if (fortuneListResource == null) {
-                throw new IOException("Unable to find fortunelist.txt");
+        try ( InputStream fortuneListResource = FortuneService.class.getResourceAsStream( "/fortunelist.txt" ) )
+        {
+            if ( fortuneListResource == null )
+            {
+                throw new IOException( "Unable to find fortunelist.txt" );
             }
-            return new BufferedReader(new InputStreamReader(fortuneListResource))
-                    .lines()
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to open fortunelist.txt");
+            return new BufferedReader( new InputStreamReader( fortuneListResource ) ).lines().collect( Collectors.toList() );
+        }
+        catch ( IOException e )
+        {
+            throw new IllegalStateException( "Unable to open fortunelist.txt" );
         }
     }
 

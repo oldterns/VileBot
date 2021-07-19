@@ -30,7 +30,6 @@ public class ExcuseDB
 
     public String getRandExcuse()
     {
-        return Optional.ofNullable(redisClient.srandmember( List.of( keyOfExcuseSet ) ))
-                .map(Response::toString).orElse(null);
+        return Optional.ofNullable( redisClient.srandmember( List.of( keyOfExcuseSet ) ) ).map( Response::toString ).orElse( null );
     }
 }

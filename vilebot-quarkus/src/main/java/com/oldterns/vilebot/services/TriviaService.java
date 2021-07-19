@@ -23,11 +23,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 @ApplicationScoped
-@Bot("JeoBot1")
-public class TriviaService {
+@Bot( "JeoBot1" )
+public class TriviaService
+{
     final static String JEOPARDY_CHANNEL = "${vilebot.jeopardy.channel}";
 
-    private static final Duration TIMEOUT = Duration.ofSeconds(30);
+    private static final Duration TIMEOUT = Duration.ofSeconds( 30 );
 
     private static final String RED = "\u000304";
 
@@ -52,95 +53,122 @@ public class TriviaService {
     ObjectMapper objectMapper;
 
     TriviaGame game = null;
+
     TriviaQuestions triviaQuestions = null;
+
     Future<?> timeoutFuture;
+
     Lock gameLock = new ReentrantLock();
 
-    @OnChannelMessage(value = "!jeopardy", channel = JEOPARDY_CHANNEL)
-    public String startGame(ChannelMessageEvent channelMessageEvent) {
-        try {
+    @OnChannelMessage( value = "!jeopardy", channel = JEOPARDY_CHANNEL )
+    public String startGame( ChannelMessageEvent channelMessageEvent )
+    {
+        try
+        {
             gameLock.lock();
-            if (game != null) {
-                return String.join("\n", game.getAlreadyPlayingString());
+            if ( game != null )
+            {
+                return String.join( "\n", game.getAlreadyPlayingString() );
             }
             int tries = 0;
-            while (tries < RECURSION_LIMIT && (triviaQuestions == null || triviaQuestions.isEmpty())) {
-                triviaQuestions = new TriviaQuestions(urlFactory, objectMapper);
+            while ( tries < RECURSION_LIMIT && ( triviaQuestions == null || triviaQuestions.isEmpty() ) )
+            {
+                triviaQuestions = new TriviaQuestions( urlFactory, objectMapper );
                 tries++;
             }
-            if (triviaQuestions.isEmpty()) {
-                throw new IllegalStateException("Tried (" + tries + ") times, all responses were invalid");
+            if ( triviaQuestions.isEmpty() )
+            {
+                throw new IllegalStateException( "Tried (" + tries + ") times, all responses were invalid" );
             }
-            game = new TriviaGame(triviaQuestions.getQuestion());
-            timeoutFuture = timeService.onTimeout(TIMEOUT, () -> {
-                try {
+            game = new TriviaGame( triviaQuestions.getQuestion() );
+            timeoutFuture = timeService.onTimeout( TIMEOUT, () -> {
+                try
+                {
                     gameLock.lock();
-                    game.getTimeoutString().forEach(channelMessageEvent::sendReply);
+                    game.getTimeoutString().forEach( channelMessageEvent::sendReply );
                     game = null;
                     timeoutFuture = null;
-                } finally {
+                }
+                finally
+                {
                     gameLock.unlock();
                 }
-            });
-            return String.join("\n", game.getIntroString());
-        } catch (Exception e) {
+            } );
+            return String.join( "\n", game.getIntroString() );
+        }
+        catch ( Exception e )
+        {
             e.printStackTrace();
             return "I don't feel like playing.";
-        } finally {
+        }
+        finally
+        {
             gameLock.unlock();
         }
     }
 
-    @OnChannelMessage(value = "!(whatis|whois) @answer", channel = JEOPARDY_CHANNEL)
-    public String tryAnswer(User answererUser, String answer) {
-        try {
+    @OnChannelMessage( value = "!(whatis|whois) @answer", channel = JEOPARDY_CHANNEL )
+    public String tryAnswer( User answererUser, String answer )
+    {
+        try
+        {
             gameLock.lock();
-            if (game == null) {
+            if ( game == null )
+            {
                 game = null;
                 return "No active game. Start a new one with !jeopardy";
             }
-            String answerer = Nick.getNick(answererUser).getBaseNick();
+            String answerer = Nick.getNick( answererUser ).getBaseNick();
             int stakes = game.getStakes();
-            if (game.isCorrect(answer)) {
+            if ( game.isCorrect( answer ) )
+            {
                 game = null;
-                timeoutFuture.cancel(true);
+                timeoutFuture.cancel( true );
                 timeoutFuture = null;
 
-                karmaDB.modNounKarma(answerer, stakes);
-                return String.format("Congrats %s, you win %d karma!", answerer, stakes);
-            } else {
-                karmaDB.modNounKarma(answerer, -stakes);
-                return String.format("Sorry %s! That is incorrect, you lose %d karma.", answerer, stakes);
+                karmaDB.modNounKarma( answerer, stakes );
+                return String.format( "Congrats %s, you win %d karma!", answerer, stakes );
+            }
+            else
+            {
+                karmaDB.modNounKarma( answerer, -stakes );
+                return String.format( "Sorry %s! That is incorrect, you lose %d karma.", answerer, stakes );
             }
         }
-        finally {
+        finally
+        {
             gameLock.unlock();
         }
     }
 
-    private static class TriviaQuestions {
+    private static class TriviaQuestions
+    {
         private static final String API_URL = "http://jservice.io/api/random?count=100";
 
         private List<TriviaQuestion> triviaQuestionList;
 
-        public TriviaQuestions(URLFactory urlFactory, ObjectMapper objectMapper) throws IOException {
-            JsonNode response = objectMapper.readTree(urlFactory.build(API_URL));
+        public TriviaQuestions( URLFactory urlFactory, ObjectMapper objectMapper )
+            throws IOException
+        {
+            JsonNode response = objectMapper.readTree( urlFactory.build( API_URL ) );
             triviaQuestionList = new ArrayList<>();
-            response.forEach(questionJson -> {
-                String question = questionJson.get("question").asText().trim();
-                boolean invalid = !questionJson.get("invalid_count").isNull();
-                if (question.equals( "" ) || question.contains( "seen here" ) || invalid) {
+            response.forEach( questionJson -> {
+                String question = questionJson.get( "question" ).asText().trim();
+                boolean invalid = !questionJson.get( "invalid_count" ).isNull();
+                if ( question.equals( "" ) || question.contains( "seen here" ) || invalid )
+                {
                     return;
                 }
                 String category = questionJson.get( "category" ).get( "title" ).asText();
                 String answer = questionJson.get( "answer" ).asText();
                 int stakes = getStakes( questionJson );
-                triviaQuestionList.add(new TriviaQuestion(stakes, question, answer, category));
-            });
+                triviaQuestionList.add( new TriviaQuestion( stakes, question, answer, category ) );
+            } );
         }
 
-        public TriviaQuestion getQuestion() {
-            return triviaQuestionList.remove(0);
+        public TriviaQuestion getQuestion()
+        {
+            return triviaQuestionList.remove( 0 );
         }
 
         private int getStakes( JsonNode trivia )
@@ -152,18 +180,24 @@ public class TriviaService {
             return 5;
         }
 
-        public boolean isEmpty() {
+        public boolean isEmpty()
+        {
             return triviaQuestionList.isEmpty();
         }
     }
 
-    private static class TriviaQuestion {
+    private static class TriviaQuestion
+    {
         final int stakes;
+
         final String question;
+
         final String answer;
+
         final String category;
 
-        public TriviaQuestion(int stakes, String question, String answer, String category) {
+        public TriviaQuestion( int stakes, String question, String answer, String category )
+        {
             this.stakes = stakes;
             this.question = question;
             this.answer = answer;
@@ -176,7 +210,7 @@ public class TriviaService {
 
         TriviaQuestion triviaQuestion;
 
-        TriviaGame(TriviaQuestion triviaQuestion)
+        TriviaGame( TriviaQuestion triviaQuestion )
         {
             this.triviaQuestion = triviaQuestion;
         }
@@ -207,13 +241,13 @@ public class TriviaService {
         private String formatAnswer( String answer )
         {
             return answer.toLowerCase().replaceAll( "^the ",
-                    "" ).replaceAll( "^a ",
-                    "" ).replaceAll( "^an ",
-                    "" ).replaceAll( "\\(.*\\)",
-                    "" ).replaceAll( "/.*",
-                    "" ).replaceAll( "&",
-                    "and" ).replaceAll( "[^A-Za-z\\d]",
-                    "" );
+                                                    "" ).replaceAll( "^a ",
+                                                                     "" ).replaceAll( "^an ",
+                                                                                      "" ).replaceAll( "\\(.*\\)",
+                                                                                                       "" ).replaceAll( "/.*",
+                                                                                                                        "" ).replaceAll( "&",
+                                                                                                                                         "and" ).replaceAll( "[^A-Za-z\\d]",
+                                                                                                                                                             "" );
         }
 
         private List<String> getQuestionBlurb()

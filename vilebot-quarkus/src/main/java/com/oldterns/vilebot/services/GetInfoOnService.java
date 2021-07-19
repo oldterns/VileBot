@@ -14,13 +14,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 @ApplicationScoped
-public class GetInfoOnService {
+public class GetInfoOnService
+{
 
     @Inject
     URLFactory urlFactory;
 
-    @OnMessage("!infoon @query")
-    public String getInfoOn(String query) {
+    @OnMessage( "!infoon @query" )
+    public String getInfoOn( String query )
+    {
         String queryModifier = " site:wikipedia.org";
         return getWiki( query, queryModifier );
     }
@@ -40,7 +42,7 @@ public class GetInfoOnService {
     }
 
     private String getWikiURLFromGoogle( String query )
-            throws Exception
+        throws Exception
     {
         String googleURL = makeGoogleURL( query );
         String googleResponse = getContent( googleURL );
@@ -48,7 +50,7 @@ public class GetInfoOnService {
     }
 
     private String makeGoogleURL( String query )
-            throws Exception
+        throws Exception
     {
         query = encode( query );
         return "https://www.google.com/search?q=" + query;
@@ -62,11 +64,11 @@ public class GetInfoOnService {
     }
 
     private String getContent( String url )
-            throws Exception
+        throws Exception
     {
         String content;
         URLConnection connection;
-        connection = urlFactory.build(url).openConnection();
+        connection = urlFactory.build( url ).openConnection();
         connection.addRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)" );
         Scanner scanner = new Scanner( connection.getInputStream() );
         scanner.useDelimiter( "\\Z" );
@@ -75,7 +77,7 @@ public class GetInfoOnService {
     }
 
     private String parseResponse( String response )
-            throws Exception
+        throws Exception
     {
         Document doc = Jsoup.parse( response );
         Element bodyDiv = doc.getElementById( "mw-content-text" );
@@ -90,7 +92,7 @@ public class GetInfoOnService {
     }
 
     private String encode( String string )
-            throws Exception
+        throws Exception
     {
         return URLEncoder.encode( string, StandardCharsets.UTF_8 );
     }

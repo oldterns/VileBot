@@ -12,7 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ApplicationScoped
-public class LastMessageSedService {
+public class LastMessageSedService
+{
     /**
      * Map with String key of IRC nick, to String value of the last line of text.
      */
@@ -24,13 +25,15 @@ public class LastMessageSedService {
      * slash, a user can write another user's name in order to modify that user's message.
      */
     private static final Pattern replacePattern =
-            Pattern.compile( "^s(\\p{Punct})((?!\\1).+?)\\1((?!\\1).+?)(?:\\1(g|)(?:\\s+(\\S+)\\s*|)|)$" );
+        Pattern.compile( "^s(\\p{Punct})((?!\\1).+?)\\1((?!\\1).+?)(?:\\1(g|)(?:\\s+(\\S+)\\s*|)|)$" );
 
-    @OnChannelMessage("@message")
-    public String onMessage(User user, String message){
-        Matcher sedMatcher = replacePattern.matcher(message);
-        String nick = Nick.getNick(user).getBaseNick();
-        if (sedMatcher.matches()) {
+    @OnChannelMessage( "@message" )
+    public String onMessage( User user, String message )
+    {
+        Matcher sedMatcher = replacePattern.matcher( message );
+        String nick = Nick.getNick( user ).getBaseNick();
+        if ( sedMatcher.matches() )
+        {
             String correction = "Correction: ";
 
             // If the last group of the regex captures a non-null string, the user is fixing another user's message.
@@ -59,8 +62,8 @@ public class LastMessageSedService {
 
                     String replacementWHL = Colors.bold( replacement );
 
-                    BiFunction<String,String,String>
-                            replaceFunction = ("g".equals( endFlag ))? lastMessage::replaceAll : lastMessage::replaceFirst;
+                    BiFunction<String, String, String> replaceFunction =
+                        ( "g".equals( endFlag ) ) ? lastMessage::replaceAll : lastMessage::replaceFirst;
                     replacedMsg = replaceFunction.apply( regexp, replacement );
                     replacedMsgWHL = replaceFunction.apply( regexp, replacementWHL );
 
@@ -69,8 +72,10 @@ public class LastMessageSedService {
                 }
             }
             return null;
-        } else {
-            lastMessageMapByNick.put(nick, message);
+        }
+        else
+        {
+            lastMessageMapByNick.put( nick, message );
             return null;
         }
     }

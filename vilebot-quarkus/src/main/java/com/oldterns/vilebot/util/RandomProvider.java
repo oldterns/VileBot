@@ -37,6 +37,6 @@ public class RandomProvider
 
     public <T> T getRandomElement( T[] array )
     {
-        return array[ getRandomInt( array.length ) ];
+        return array[getRandomInt( array.length )];
     }
 }

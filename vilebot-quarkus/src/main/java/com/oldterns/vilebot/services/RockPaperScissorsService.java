@@ -22,7 +22,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * implementation based off of Trivia.java
  */
 @ApplicationScoped
-public class RockPaperScissorsService {
+public class RockPaperScissorsService
+{
 
     private static final String RED = "\u000304";
 
@@ -36,21 +37,27 @@ public class RockPaperScissorsService {
     RandomProvider randomProvider;
 
     Lock gameLock = new ReentrantLock();
+
     RPSGame currentGame;
 
-    @OnMessage("!rpsrules")
-    public void requestRules(ActorEvent<User> event) {
-        for (String message : getRules(event).split("\n")) {
-            event.getActor().sendMessage(message);
+    @OnMessage( "!rpsrules" )
+    public void requestRules( ActorEvent<User> event )
+    {
+        for ( String message : getRules( event ).split( "\n" ) )
+        {
+            event.getActor().sendMessage( message );
         }
     }
 
-    @OnChannelMessage("!rpscancel")
-    public String cancelGame(User user) {
-        try {
+    @OnChannelMessage( "!rpscancel" )
+    public String cancelGame( User user )
+    {
+        try
+        {
             gameLock.lock();
-            if (null != currentGame) {
-                String caller = Nick.getNick(user).getBaseNick();
+            if ( null != currentGame )
+            {
+                String caller = Nick.getNick( user ).getBaseNick();
                 if ( caller.equals( currentGame.getCaller() ) || caller.equals( currentGame.getDared() ) )
                 {
                     currentGame = null;
@@ -59,50 +66,62 @@ public class RockPaperScissorsService {
                 else
                 {
                     return "Only " + currentGame.getCaller() + " or " + currentGame.getDared()
-                            + " can cancel this game.";
+                        + " can cancel this game.";
                 }
-            } else {
+            }
+            else
+            {
                 return "No active game. Start a new one with !rps dared";
             }
-        } finally {
+        }
+        finally
+        {
             gameLock.unlock();
         }
     }
 
-    @OnChannelMessage("!rps @dared ?@daredThing")
-    public String startRpsGame(ChannelMessageEvent event, Nick dared, Optional<String> daredThing) {
-        try {
+    @OnChannelMessage( "!rps @dared ?@daredThing" )
+    public String startRpsGame( ChannelMessageEvent event, Nick dared, Optional<String> daredThing )
+    {
+        try
+        {
             gameLock.lock();
-            if (currentGame == null) {
+            if ( currentGame == null )
+            {
                 String caller = Nick.getNick( event ).getBaseNick();
                 if ( caller.equals( dared.getBaseNick() ) )
                 {
                     return "You cannot challenge yourself to a Rock Paper Scissors game!";
                 }
-                if (daredThing.isPresent())
+                if ( daredThing.isPresent() )
                 {
-                    currentGame = new RPSGame( caller, dared.getBaseNick(), daredThing.get().trim(), event,
-                            randomProvider);
+                    currentGame =
+                        new RPSGame( caller, dared.getBaseNick(), daredThing.get().trim(), event, randomProvider );
                 }
                 else
                 {
-                    currentGame = new RPSGame( caller, dared.getBaseNick(), null, event,
-                            randomProvider );
+                    currentGame = new RPSGame( caller, dared.getBaseNick(), null, event, randomProvider );
                 }
                 return currentGame.getRPSIntro() + getSubmissionRuleString( event );
-            } else {
+            }
+            else
+            {
                 return currentGame.alreadyPlaying();
             }
-        } finally {
+        }
+        finally
+        {
             gameLock.unlock();
         }
     }
 
-    @OnPrivateMessage("!@submission")
-    public String onContestantAnswer(User contestantUser, @Regex("rock|paper|scissors") String submission) {
-        try {
+    @OnPrivateMessage( "!@submission" )
+    public String onContestantAnswer( User contestantUser, @Regex( "rock|paper|scissors" ) String submission )
+    {
+        try
+        {
             gameLock.lock();
-            String contestant = Nick.getNick(contestantUser).getBaseNick();
+            String contestant = Nick.getNick( contestantUser ).getBaseNick();
             if ( currentGame != null )
             {
                 try
@@ -125,7 +144,9 @@ public class RockPaperScissorsService {
             {
                 return "No active game. Start a new one with !rps dared [bet]";
             }
-        } finally {
+        }
+        finally
+        {
             gameLock.unlock();
         }
     }
@@ -133,17 +154,18 @@ public class RockPaperScissorsService {
     private String getRules( ActorEvent<?> event )
     {
         return RED + "RPS RULES: \n" + RESET + "1) Dare someone to play rock paper scissors with you! \n" + RESET
-                + "2) Rock beats scissors, paper beats rocks, and scissors beat paper \n" + "3) Use /msg "
-                + event.getClient().getNick() + " !(rock|paper|scissors) to set your action. Cannot be undone.";
+            + "2) Rock beats scissors, paper beats rocks, and scissors beat paper \n" + "3) Use /msg "
+            + event.getClient().getNick() + " !(rock|paper|scissors) to set your action. Cannot be undone.";
     }
 
     private String getSubmissionRuleString( ActorEvent<?> event )
     {
-        return RED + "Use \" /msg " + RESET + event.getClient().getNick() + RED + " !(rock|paper|scissors) \" to submit."
-                + RESET;
+        return RED + "Use \" /msg " + RESET + event.getClient().getNick() + RED
+            + " !(rock|paper|scissors) \" to submit." + RESET;
     }
 
-    private static class RPSGame {
+    private static class RPSGame
+    {
         private static final String[] answers = { "rock", "paper", "scissors" };
 
         private String callerNick;
@@ -172,7 +194,7 @@ public class RockPaperScissorsService {
             rand = new Random();
             if ( daredNick.equals( event.getClient().getNick() ) )
             {
-                this.daredAnswer = randomProvider.getRandomElement(answers);
+                this.daredAnswer = randomProvider.getRandomElement( answers );
             }
         }
 
@@ -204,7 +226,7 @@ public class RockPaperScissorsService {
         private String getRPSOutro()
         {
             String start =
-                    RED + callerNick + " used " + callerAnswer + ", " + daredNick + " used " + daredAnswer + ", ";
+                RED + callerNick + " used " + callerAnswer + ", " + daredNick + " used " + daredAnswer + ", ";
             if ( null != getWinner() )
             {
                 return start + getWinner() + " wins" + ( ( null != daredThing ) ? " " + daredThing : "" ) + "!";
@@ -218,7 +240,7 @@ public class RockPaperScissorsService {
         }
 
         private boolean setSubmission( String contestant, String answer )
-                throws Exception
+            throws Exception
         {
             if ( contestant.equals( callerNick ) )
             {

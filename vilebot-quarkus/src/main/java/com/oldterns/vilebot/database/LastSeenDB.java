@@ -29,9 +29,12 @@ public class LastSeenDB
     public Optional<Long> getLastSeenTime( String nick )
     {
         Response response = redisClient.hget( keyOfLastSeenHash, nick );
-        if (response != null) {
-            return Optional.of(response.toLong());
-        } else {
+        if ( response != null )
+        {
+            return Optional.of( response.toLong() );
+        }
+        else
+        {
             return Optional.empty();
         }
     }

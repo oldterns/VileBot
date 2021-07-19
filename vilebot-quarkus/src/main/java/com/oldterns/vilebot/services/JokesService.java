@@ -10,42 +10,52 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
-public class JokesService {
+public class JokesService
+{
 
     @Inject
     RandomProvider randomProvider;
 
     final List<String> memes = generateMemes();
+
     final List<String> dances = generateDances();
+
     final List<String> chucks = generateChucks();
+
     final List<String> containerJokes = generateContainerJokes();
 
-    @OnChannelMessage(".*container.*")
-    public String onContainerMessage() {
-        return randomProvider.getRandomElement(containerJokes);
+    @OnChannelMessage( ".*container.*" )
+    public String onContainerMessage()
+    {
+        return randomProvider.getRandomElement( containerJokes );
     }
 
-    @OnChannelMessage(".*[rR][eE][dD][dD][iI][tT].*")
-    public String onRedditMessage() {
-        if (randomProvider.getRandomInt(10) > 6) {
+    @OnChannelMessage( ".*[rR][eE][dD][dD][iI][tT].*" )
+    public String onRedditMessage()
+    {
+        if ( randomProvider.getRandomInt( 10 ) > 6 )
+        {
             return CharactersThatBreakEclipse.LODEMOT;
         }
         return null;
     }
 
-    @OnChannelMessage("!randommeme")
-    public String onRandomMeme() {
-        return randomProvider.getRandomElement(memes);
+    @OnChannelMessage( "!randommeme" )
+    public String onRandomMeme()
+    {
+        return randomProvider.getRandomElement( memes );
     }
 
-    @OnChannelMessage("!dance")
-    public String onDance() {
-        return randomProvider.getRandomElement(dances);
+    @OnChannelMessage( "!dance" )
+    public String onDance()
+    {
+        return randomProvider.getRandomElement( dances );
     }
 
-    @OnChannelMessage("!chuck")
-    public String onChuckNorris() {
-        return randomProvider.getRandomElement(chucks);
+    @OnChannelMessage( "!chuck" )
+    public String onChuckNorris()
+    {
+        return randomProvider.getRandomElement( chucks );
     }
 
     private static List<String> generateChucks()

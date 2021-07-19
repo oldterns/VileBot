@@ -32,9 +32,10 @@ import java.util.stream.Collectors;
 /**
  * Based off of the omgword game from CasinoBot: http://casinobot.codeplex.com/
  */
-@Bot("OmgwordBot")
+@Bot( "OmgwordBot" )
 @ApplicationScoped
-public class OmgwordService {
+public class OmgwordService
+{
 
     final static String OMGWORD_CHANNEL = "${vilebot.omgword.channel}";
 
@@ -48,68 +49,89 @@ public class OmgwordService {
     KarmaDB karmaDB;
 
     List<String> wordList;
+
     Map<AnagramKey, Set<String>> anagramKeyToAnswerSetMap;
 
     OmgwordGame currentGame;
+
     Lock lock = new ReentrantLock();
 
     @PostConstruct
-    void buildAnagramKeyToAnswerSetMap() {
+    void buildAnagramKeyToAnswerSetMap()
+    {
         anagramKeyToAnswerSetMap = new HashMap<>();
-        try (InputStream wordListResource = OmgwordService.class.getResourceAsStream("/wordlist.txt")) {
-            if (wordListResource == null) {
-                throw new IOException("File not found");
+        try ( InputStream wordListResource = OmgwordService.class.getResourceAsStream( "/wordlist.txt" ) )
+        {
+            if ( wordListResource == null )
+            {
+                throw new IOException( "File not found" );
             }
-            wordList = new BufferedReader(new InputStreamReader(wordListResource, StandardCharsets.UTF_8))
-                    .lines()
-                    .collect(Collectors.toList());
+            wordList =
+                new BufferedReader( new InputStreamReader( wordListResource,
+                                                           StandardCharsets.UTF_8 ) ).lines().collect( Collectors.toList() );
 
-            for (String word : wordList) {
-                anagramKeyToAnswerSetMap.computeIfAbsent(new AnagramKey(word),
-                        (key) -> new HashSet<>()).add(word);
+            for ( String word : wordList )
+            {
+                anagramKeyToAnswerSetMap.computeIfAbsent( new AnagramKey( word ),
+                                                          ( key ) -> new HashSet<>() ).add( word );
             }
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to open wordlist file: ", e);
+        }
+        catch ( IOException e )
+        {
+            throw new IllegalStateException( "Unable to open wordlist file: ", e );
         }
     }
 
-    @OnChannelMessage(value = "!omgword", channel = OMGWORD_CHANNEL)
-    public String startGame(ChannelMessageEvent event) {
-        try {
+    @OnChannelMessage( value = "!omgword", channel = OMGWORD_CHANNEL )
+    public String startGame( ChannelMessageEvent event )
+    {
+        try
+        {
             lock.lock();
-            if (currentGame != null) {
+            if ( currentGame != null )
+            {
                 return currentGame.getAlreadyPlayingString();
             }
-            currentGame = new OmgwordGame(event);
+            currentGame = new OmgwordGame( event );
             return currentGame.getIntroString();
-        } finally {
+        }
+        finally
+        {
             lock.unlock();
         }
     }
 
-    @OnChannelMessage(value = "!answer @answer", channel = OMGWORD_CHANNEL)
-    public String onAnswer(User answerer, String answer) {
-        try {
+    @OnChannelMessage( value = "!answer @answer", channel = OMGWORD_CHANNEL )
+    public String onAnswer( User answerer, String answer )
+    {
+        try
+        {
             lock.lock();
 
-            if (currentGame == null) {
+            if ( currentGame == null )
+            {
                 return "No active game. Start a new one with !omgword";
             }
 
-            Nick answererNick = Nick.getNick(answerer);
-            if (currentGame.isCorrect(answer)) {
+            Nick answererNick = Nick.getNick( answerer );
+            if ( currentGame.isCorrect( answer ) )
+            {
                 String out = String.format( "Congrats %s, you win %d karma!", answererNick.getFullNick(),
-                        currentGame.getStakes() );
-                karmaDB.modNounKarma(answererNick.getBaseNick(), currentGame.getStakes());
+                                            currentGame.getStakes() );
+                karmaDB.modNounKarma( answererNick.getBaseNick(), currentGame.getStakes() );
                 currentGame.cancelTimeout();
                 currentGame = null;
                 return out;
-            } else {
-                karmaDB.modNounKarma(answererNick.getBaseNick(), -currentGame.getStakes());
-                return String.format( "Sorry %s! That is incorrect, you lose %d karma.", answererNick.getFullNick(),
-                        currentGame.getStakes() );
             }
-        } finally {
+            else
+            {
+                karmaDB.modNounKarma( answererNick.getBaseNick(), -currentGame.getStakes() );
+                return String.format( "Sorry %s! That is incorrect, you lose %d karma.", answererNick.getFullNick(),
+                                      currentGame.getStakes() );
+            }
+        }
+        finally
+        {
             lock.unlock();
         }
     }
@@ -117,31 +139,39 @@ public class OmgwordService {
     private class OmgwordGame
     {
         AnagramKey anagramKey;
+
         String scrambled;
+
         Future<?> timeoutHandler;
 
-        public OmgwordGame(ChannelMessageEvent event) {
-            String word = randomProvider.getRandomElement(wordList);
-            anagramKey = new AnagramKey(word);
+        public OmgwordGame( ChannelMessageEvent event )
+        {
+            String word = randomProvider.getRandomElement( wordList );
+            anagramKey = new AnagramKey( word );
             scrambled = word;
 
-            while ( anagramKeyToAnswerSetMap.get(anagramKey).contains(scrambled) ) {
-                scrambled = scrambleWord(scrambled);
+            while ( anagramKeyToAnswerSetMap.get( anagramKey ).contains( scrambled ) )
+            {
+                scrambled = scrambleWord( scrambled );
             }
 
-            timeoutHandler = timeService.onTimeout(Duration.ofSeconds(30), () -> {
-                try {
+            timeoutHandler = timeService.onTimeout( Duration.ofSeconds( 30 ), () -> {
+                try
+                {
                     lock.lock();
-                    event.sendReply(getTimeoutString());
+                    event.sendReply( getTimeoutString() );
                     currentGame = null;
-                } finally {
+                }
+                finally
+                {
                     lock.unlock();
                 }
-            });
+            } );
         }
 
-        public void cancelTimeout() {
-            timeoutHandler.cancel(true);
+        public void cancelTimeout()
+        {
+            timeoutHandler.cancel( true );
         }
 
         String getAlreadyPlayingString()
@@ -151,20 +181,20 @@ public class OmgwordService {
 
         String getIntroString()
         {
-            return "Welcome to omgword!\nFor " + getStakes() + " karma:\n" + scrambled +
-                    "\n30 seconds on the clock.";
+            return "Welcome to omgword!\nFor " + getStakes() + " karma:\n" + scrambled + "\n30 seconds on the clock.";
         }
 
         boolean isCorrect( String answer )
         {
-            return anagramKeyToAnswerSetMap.get(anagramKey).contains(answer);
+            return anagramKeyToAnswerSetMap.get( anagramKey ).contains( answer );
         }
 
         String getTimeoutString()
         {
-            Set<String> possibleAnswers = anagramKeyToAnswerSetMap.get(anagramKey);
-            String answerPlural = possibleAnswers.size() == 1? "answer was: " : "answers were: ";
-            return "Game over! The correct " + answerPlural + String.join(", ", anagramKeyToAnswerSetMap.get(anagramKey));
+            Set<String> possibleAnswers = anagramKeyToAnswerSetMap.get( anagramKey );
+            String answerPlural = possibleAnswers.size() == 1 ? "answer was: " : "answers were: ";
+            return "Game over! The correct " + answerPlural
+                + String.join( ", ", anagramKeyToAnswerSetMap.get( anagramKey ) );
         }
 
         int getStakes()
@@ -172,47 +202,50 @@ public class OmgwordService {
             return (int) Math.ceil( scrambled.length() >> 1 );
         }
 
-        public String scrambleWord(String word) {
+        public String scrambleWord( String word )
+        {
             StringBuilder newWord = new StringBuilder();
-            StringBuilder remaining = new StringBuilder(word);
-            for (int i = 0; i < word.length(); i++) {
-                int pickedCharIndex = randomProvider.getRandomInt(remaining.length());
-                newWord.append(remaining.charAt(pickedCharIndex));
-                remaining.deleteCharAt(pickedCharIndex);
+            StringBuilder remaining = new StringBuilder( word );
+            for ( int i = 0; i < word.length(); i++ )
+            {
+                int pickedCharIndex = randomProvider.getRandomInt( remaining.length() );
+                newWord.append( remaining.charAt( pickedCharIndex ) );
+                remaining.deleteCharAt( pickedCharIndex );
             }
             return newWord.toString();
         }
     }
 
-    public static final class AnagramKey {
+    public static final class AnagramKey
+    {
         final String lettersSorted;
 
-        public AnagramKey(String word) {
-            lettersSorted = word.chars()
-                .sorted()
-                .collect(StringBuilder::new,
-                         StringBuilder::appendCodePoint,
-                         StringBuilder::append)
-                .toString();
+        public AnagramKey( String word )
+        {
+            lettersSorted = word.chars().sorted().collect( StringBuilder::new, StringBuilder::appendCodePoint,
+                                                           StringBuilder::append ).toString();
         }
 
-        public String getLettersSorted() {
+        public String getLettersSorted()
+        {
             return lettersSorted;
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o)
+        public boolean equals( Object o )
+        {
+            if ( this == o )
                 return true;
-            if (o == null || getClass() != o.getClass())
+            if ( o == null || getClass() != o.getClass() )
                 return false;
             AnagramKey that = (AnagramKey) o;
-            return Objects.equals(lettersSorted, that.lettersSorted);
+            return Objects.equals( lettersSorted, that.lettersSorted );
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(lettersSorted);
+        public int hashCode()
+        {
+            return Objects.hash( lettersSorted );
         }
     }
 }

@@ -20,9 +20,11 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 @ApplicationScoped
-public class LastSeenService {
+public class LastSeenService
+{
 
     private static TimeZone timeZone = TimeZone.getTimeZone( "America/Toronto" );
+
     private static DateTimeFormatter dateFormatter = makeDateFormat();
 
     @Inject
@@ -32,23 +34,27 @@ public class LastSeenService {
     TimeService timeService;
 
     @Handler
-    @SuppressWarnings("unchecked")
-    public void updateLastSeenTime(ActorEvent<?> event) {
+    @SuppressWarnings( "unchecked" )
+    public void updateLastSeenTime( ActorEvent<?> event )
+    {
         // generic infomation is hidden; need to check if the
         // event is for a User
-        if (event.getActor() instanceof User) {
-            String joiner = Nick.getNick((ActorEvent<User>) event).getBaseNick();
-            lastSeenDB.updateLastSeenTime(joiner);
+        if ( event.getActor() instanceof User )
+        {
+            String joiner = Nick.getNick( (ActorEvent<User>) event ).getBaseNick();
+            lastSeenDB.updateLastSeenTime( joiner );
         }
     }
 
     @Handler
-    public String onJoin(ChannelJoinEvent event) {
-        String joiner = Nick.getNick(event).getBaseNick();
+    public String onJoin( ChannelJoinEvent event )
+    {
+        String joiner = Nick.getNick( event ).getBaseNick();
         Optional<Long> maybeLastSeen = lastSeenDB.getLastSeenTime( joiner );
 
-        lastSeenDB.updateLastSeenTime(joiner);
-        if (maybeLastSeen.isEmpty()) {
+        lastSeenDB.updateLastSeenTime( joiner );
+        if ( maybeLastSeen.isEmpty() )
+        {
             return null;
         }
 
@@ -61,9 +67,9 @@ public class LastSeenService {
         if ( daysAgo > 30 )
         {
             return "Hi " + joiner + "! I last saw you " + daysAgo + " days ago at "
-                    + OffsetDateTime.ofInstant(Instant.ofEpochMilli(lastSeen),
-                        timeZone.toZoneId().getRules().getOffset(Instant.ofEpochMilli(lastSeen)))
-                    .format(dateFormatter)+ ". Long time, no see.";
+                + OffsetDateTime.ofInstant( Instant.ofEpochMilli( lastSeen ),
+                                            timeZone.toZoneId().getRules().getOffset( Instant.ofEpochMilli( lastSeen ) ) ).format( dateFormatter )
+                + ". Long time, no see.";
         }
         return null;
     }
@@ -72,6 +78,6 @@ public class LastSeenService {
     {
         SimpleDateFormat df = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mmX" );
         df.setTimeZone( timeZone );
-        return DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmX" ).withZone(timeZone.toZoneId());
+        return DateTimeFormatter.ofPattern( "yyyy-MM-dd'T'HH:mmX" ).withZone( timeZone.toZoneId() );
     }
 }

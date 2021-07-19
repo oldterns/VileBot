@@ -29,7 +29,7 @@ public class DownOrJustMeService
     private static final String HTTP_UA =
         "Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36";
 
-    @OnMessage("!downorjustme @hostnameOrUrl")
+    @OnMessage( "!downorjustme @hostnameOrUrl" )
     public String check( String hostnameOrUrl )
     {
         InetAddress destination;
@@ -39,7 +39,7 @@ public class DownOrJustMeService
         }
         catch ( UnknownHostException e )
         {
-            return  "Nope, it's not just you. The hostname is not resolvable from here, too!";
+            return "Nope, it's not just you. The hostname is not resolvable from here, too!";
         }
 
         try
@@ -75,12 +75,12 @@ public class DownOrJustMeService
         }
         else if ( status != -1 )
         {
-            return  "LGTM! It's just you.";
+            return "LGTM! It's just you.";
         }
 
         if ( icmpPing( destination ) )
         {
-            return  "Not sure about web services, but the host is definitely up.";
+            return "Not sure about web services, but the host is definitely up.";
         }
         else
         {

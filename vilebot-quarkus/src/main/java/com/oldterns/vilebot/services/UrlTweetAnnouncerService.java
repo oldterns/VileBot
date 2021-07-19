@@ -17,21 +17,23 @@ import java.net.URL;
 import java.util.Optional;
 
 @ApplicationScoped
-public class UrlTweetAnnouncerService {
+public class UrlTweetAnnouncerService
+{
     @ConfigProperty( name = "vilebot.twitter.consumer-key" )
-    Optional<String>  consumerKey; // may be known as 'API key'
+    Optional<String> consumerKey; // may be known as 'API key'
 
     @ConfigProperty( name = "vilebot.twitter.consumer-secret" )
-    Optional<String>  consumerSecret; // may be known as 'API secret'
+    Optional<String> consumerSecret; // may be known as 'API secret'
 
     @ConfigProperty( name = "vilebot.twitter.access-token" )
-    Optional<String>  accessToken; // may be known as 'Access token'
+    Optional<String> accessToken; // may be known as 'Access token'
 
     @ConfigProperty( name = "vilebot.twitter.access-token-secret" )
     Optional<String> accessTokenSecret; // may be known as 'Access token secret'
 
-    @OnChannelMessage("@message")
-    public String onTwitterUrlMessage( Client client, @Regex("((?:http|https)://(?:www.|)(?:(?:twitter)\\.com)[^ ]*)") String message )
+    @OnChannelMessage( "@message" )
+    public String onTwitterUrlMessage( Client client,
+                                       @Regex( "((?:http|https)://(?:www.|)(?:(?:twitter)\\.com)[^ ]*)" ) String message )
     {
         if ( consumerKey.isEmpty() || consumerSecret.isEmpty() || accessToken.isEmpty() || accessTokenSecret.isEmpty() )
         {
@@ -93,7 +95,7 @@ public class UrlTweetAnnouncerService {
                     User user = twitter.showUser( parts[userPosition].toString() );
                     if ( !user.getDescription().isEmpty() ) // the user has a description
                         return ( "Name: " + user.getName() + " | " + user.getDescription() + "\'\nLast Tweet: \'"
-                                + user.getStatus().getText() );
+                            + user.getStatus().getText() );
                     else // the user doesn't have a description, don't print it
                         return ( "Name: " + user.getName() + "\'\nLast Tweet: \'" + user.getStatus().getText() );
 
@@ -102,7 +104,7 @@ public class UrlTweetAnnouncerService {
             catch ( TwitterException x )
             {
                 return client.getNick()
-                        + ": Until my maintainer fixes the API Key, this is the only tweet you're gonna see. U mad, bro?";
+                    + ": Until my maintainer fixes the API Key, this is the only tweet you're gonna see. U mad, bro?";
             }
         }
     }

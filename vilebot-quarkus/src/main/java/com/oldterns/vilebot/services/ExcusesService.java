@@ -8,24 +8,30 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 @ApplicationScoped
-public class ExcusesService {
+public class ExcusesService
+{
 
     @Inject
     ExcuseDB excuseDB;
 
-    @OnMessage("!excuse")
-    public String getExcuse() {
+    @OnMessage( "!excuse" )
+    public String getExcuse()
+    {
         String excuse = excuseDB.getRandExcuse();
-        if (excuse != null) {
+        if ( excuse != null )
+        {
             return excuse;
-        } else {
+        }
+        else
+        {
             return "No excuses available";
         }
     }
 
-    @OnChannelMessage("!excuseadd @excuse")
-    public String addExcuse(String excuse) {
-        excuseDB.addExcuse(excuse);
+    @OnChannelMessage( "!excuseadd @excuse" )
+    public String addExcuse( String excuse )
+    {
+        excuseDB.addExcuse( excuse );
         return "Excuse was added to database";
     }
 }

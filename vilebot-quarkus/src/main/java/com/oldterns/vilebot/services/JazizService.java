@@ -17,17 +17,19 @@ import java.util.List;
 import java.util.Scanner;
 
 @ApplicationScoped
-public class JazizService {
+public class JazizService
+{
     @Inject
     RandomProvider randomProvider;
 
     @Inject
     URLFactory urlFactory;
 
-    @ConfigProperty(name = "vilebot.jaziz.thesaurus-key")
+    @ConfigProperty( name = "vilebot.jaziz.thesaurus-key" )
     String API_KEY;
 
     private static final String API_URL = "http://words.bighugelabs.com/api/2/";
+
     private static final String API_FORMAT = "/json";
 
     private static String[] splitWords( String message )
@@ -35,17 +37,21 @@ public class JazizService {
         return message.split( "\\b" );
     }
 
-    @OnChannelMessage("!jaziz @message")
-    public String jazizify(String message) {
+    @OnChannelMessage( "!jaziz @message" )
+    public String jazizify( String message )
+    {
         String[] words = splitWords( message );
         for ( int i = 0; i < words.length; i++ )
         {
             if ( !words[i].contains( " " ) )
             {
                 String replacement;
-                try {
+                try
+                {
                     replacement = words[i].length() > 3 ? randomChoice( getSynonyms( words[i] ) ) : words[i];
-                } catch (Exception e) {
+                }
+                catch ( Exception e )
+                {
                     replacement = "";
                 }
                 if ( !replacement.isEmpty() )
@@ -58,7 +64,7 @@ public class JazizService {
     }
 
     private List<String> getSynonyms( String word )
-            throws Exception
+        throws Exception
     {
         JSONObject json = new JSONObject( getContent( word ) );
 
@@ -76,7 +82,7 @@ public class JazizService {
     }
 
     private JSONArray getSyns( JSONObject json )
-            throws JSONException
+        throws JSONException
     {
         return json.has( "syn" ) ? json.getJSONArray( "syn" ) : new JSONArray();
     }
@@ -101,7 +107,7 @@ public class JazizService {
     }
 
     private List<String> jsonToList( JSONArray array )
-            throws JSONException
+        throws JSONException
     {
         List<String> words = new ArrayList<>();
         for ( int i = 0; i < array.length(); i++ )
@@ -112,11 +118,11 @@ public class JazizService {
     }
 
     private String getContent( String word )
-            throws Exception
+        throws Exception
     {
         String content;
         URLConnection connection;
-        connection = urlFactory.build( API_URL + API_KEY + "/"  + word + API_FORMAT ).openConnection();
+        connection = urlFactory.build( API_URL + API_KEY + "/" + word + API_FORMAT ).openConnection();
         connection.addRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)" );
         try
         {

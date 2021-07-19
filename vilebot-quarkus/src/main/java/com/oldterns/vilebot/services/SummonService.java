@@ -11,25 +11,29 @@ import javax.inject.Inject;
 import javax.naming.LimitExceededException;
 
 @ApplicationScoped
-public class SummonService {
+public class SummonService
+{
 
     @Inject
     LimitService limitService;
 
-    @OnChannelMessage("!summon @nick")
-    public String summonNick(ChannelMessageEvent event, String nick) {
+    @OnChannelMessage( "!summon @nick" )
+    public String summonNick( ChannelMessageEvent event, String nick )
+    {
         Channel channel = event.getChannel();
-        if (channel.getUsers().stream().anyMatch(user ->
-                Nick.valueOf(nick).getBaseNick().equals(Nick.getNick(user).getBaseNick()))) {
+        if ( channel.getUsers().stream().anyMatch( user -> Nick.valueOf( nick ).getBaseNick().equals( Nick.getNick( user ).getBaseNick() ) ) )
+        {
             return nick + " is already in the channel.";
         }
-        try {
-            limitService.addUse(event.getActor());
-            event.getClient().sendMessage(nick, "You are summoned by " +
-                    Nick.getNick(event.getActor()).getBaseNick() + " to join " +
-                    event.getChannel().getMessagingName());
+        try
+        {
+            limitService.addUse( event.getActor() );
+            event.getClient().sendMessage( nick, "You are summoned by " + Nick.getNick( event.getActor() ).getBaseNick()
+                + " to join " + event.getChannel().getMessagingName() );
             return nick + " was invited";
-        } catch (LimitExceededException e) {
+        }
+        catch ( LimitExceededException e )
+        {
             return e.getMessage();
         }
     }

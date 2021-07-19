@@ -13,7 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ApplicationScoped
-public class RemindMeService {
+public class RemindMeService
+{
 
     @Inject
     TimeService timeService;
@@ -22,43 +23,51 @@ public class RemindMeService {
 
     Map<String, Integer> userToReminderCount = new HashMap<>();
 
-    @OnMessage("!remindme @message @length ?@timeUnit")
-    public String remindMe(User user, String message, Integer length, @Regex("\\S") String timeUnit) {
+    @OnMessage( "!remindme @message @length ?@timeUnit" )
+    public String remindMe( User user, String message, Integer length, @Regex( "\\S" ) String timeUnit )
+    {
         Duration duration;
-        switch (timeUnit) {
-            case "d": case "D":
-                duration = Duration.ofDays(length);
+        switch ( timeUnit )
+        {
+            case "d":
+            case "D":
+                duration = Duration.ofDays( length );
                 break;
-            case "h": case "H":
-                duration = Duration.ofHours(length);
+            case "h":
+            case "H":
+                duration = Duration.ofHours( length );
                 break;
-            case "m": case "M":
-                duration = Duration.ofMinutes(length);
+            case "m":
+            case "M":
+                duration = Duration.ofMinutes( length );
                 break;
-            case "s": case "S":
-                duration = Duration.ofSeconds(length);
+            case "s":
+            case "S":
+                duration = Duration.ofSeconds( length );
                 break;
             default:
-                return  BAD_TIME_UNIT;
+                return BAD_TIME_UNIT;
         }
 
-        final String userKey = Nick.getNick(user).getBaseNick();
-        if (userToReminderCount.getOrDefault(userKey, 0) > 10) {
+        final String userKey = Nick.getNick( user ).getBaseNick();
+        if ( userToReminderCount.getOrDefault( userKey, 0 ) > 10 )
+        {
             return "There is a limit of 10 reminders, please wait until one reminder ends to set a new one.";
         }
 
         // TODO: Persist this in the database in case VileBot is restarted?
-        userToReminderCount.merge(userKey, 1, Integer::sum);
-        timeService.onTimeout(duration, () -> {
-            user.sendMessage("This is your reminder that you should: " + message);
-            userToReminderCount.computeIfPresent(userKey, (key, currentCount) -> {
-                if (currentCount == 1) {
+        userToReminderCount.merge( userKey, 1, Integer::sum );
+        timeService.onTimeout( duration, () -> {
+            user.sendMessage( "This is your reminder that you should: " + message );
+            userToReminderCount.computeIfPresent( userKey, ( key, currentCount ) -> {
+                if ( currentCount == 1 )
+                {
                     return null;
                 }
                 return currentCount - 1;
-            });
-        });
+            } );
+        } );
 
-        return "Created reminder for " +  timeService.getCurrentDateTime().plus(duration).toString();
+        return "Created reminder for " + timeService.getCurrentDateTime().plus( duration ).toString();
     }
 }

@@ -9,45 +9,55 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Dependent
-public class LimitServiceImpl implements LimitService {
+public class LimitServiceImpl
+    implements LimitService
+{
 
     private final Map<String, Integer> userToUsageCountMap = new ConcurrentHashMap<>();
 
     private int maxUsesPerPeriod = 2;
 
-    private Duration period = Duration.ofSeconds(300);
+    private Duration period = Duration.ofSeconds( 300 );
 
     @Override
-    public void setLimit(int maxUsesPerPeriod, Duration period) {
+    public void setLimit( int maxUsesPerPeriod, Duration period )
+    {
         this.maxUsesPerPeriod = maxUsesPerPeriod;
         this.period = period;
     }
 
     @Override
-    public void addUse(String noun) throws LimitExceededException {
-        if (isAtLimit(noun)) {
-            throw new LimitExceededException(noun + " has the maximum uses");
+    public void addUse( String noun )
+        throws LimitExceededException
+    {
+        if ( isAtLimit( noun ) )
+        {
+            throw new LimitExceededException( noun + " has the maximum uses" );
         }
 
-        userToUsageCountMap.merge(noun, 1, Integer::sum);
-        TimerTask removeUsage = new TimerTask() {
+        userToUsageCountMap.merge( noun, 1, Integer::sum );
+        TimerTask removeUsage = new TimerTask()
+        {
             @Override
-            public void run() {
-                userToUsageCountMap.computeIfPresent(noun, (key, count) -> {
-                    if (count > 1) {
+            public void run()
+            {
+                userToUsageCountMap.computeIfPresent( noun, ( key, count ) -> {
+                    if ( count > 1 )
+                    {
                         return count - 1;
                     }
                     return null;
-                });
+                } );
             }
         };
         Timer timer = new Timer();
-        timer.schedule(removeUsage, period.toMillis());
+        timer.schedule( removeUsage, period.toMillis() );
     }
 
     @Override
-    public boolean isAtLimit(String noun) {
-        int useCount = userToUsageCountMap.getOrDefault(noun, 0);
+    public boolean isAtLimit( String noun )
+    {
+        int useCount = userToUsageCountMap.getOrDefault( noun, 0 );
         return useCount >= maxUsesPerPeriod;
     }
 }

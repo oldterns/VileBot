@@ -22,17 +22,18 @@ public class DecideService
     @Inject
     RandomProvider randomProvider;
 
-    @OnMessage("!decide ?@maybeNoun ?@maybePrefix @choices")
-    public String onDecision( @Regex("\\[.*\\]") Optional<String> maybeNoun,
-            @Regex("\\{.*\\}") Optional<String> maybePrefix,
-            @Delimiter("\\|") List<String> choices) {
-        String noun = maybeNoun.orElse("you");
+    @OnMessage( "!decide ?@maybeNoun ?@maybePrefix @choices" )
+    public String onDecision( @Regex( "\\[.*\\]" ) Optional<String> maybeNoun,
+                              @Regex( "\\{.*\\}" ) Optional<String> maybePrefix,
+                              @Delimiter( "\\|" ) List<String> choices )
+    {
+        String noun = maybeNoun.orElse( "you" );
         if ( !noun.equals( "you" ) )
         {
             noun = noun.substring( 1, noun.length() - 1 );
         }
 
-        String prefix = maybePrefix.orElse("");
+        String prefix = maybePrefix.orElse( "" );
 
         if ( prefix.length() >= 2 )
         {
@@ -51,7 +52,7 @@ public class DecideService
         }
 
         sb.append( prefix );
-        sb.append( randomProvider.getRandomElement(choices).trim() );
+        sb.append( randomProvider.getRandomElement( choices ).trim() );
         sb.append( ". Go do that now." );
 
         return sb.toString();

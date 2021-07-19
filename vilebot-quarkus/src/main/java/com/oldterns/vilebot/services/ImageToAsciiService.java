@@ -20,8 +20,9 @@ public class ImageToAsciiService
     @Inject
     URLFactory urlFactory;
 
-    @OnChannelMessage("!convert @url")
-    public String convert(String url) {
+    @OnChannelMessage( "!convert @url" )
+    public String convert( String url )
+    {
         try
         {
             return convertImage( url );

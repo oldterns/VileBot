@@ -22,8 +22,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 public final class ASCII
 {
-    public static String convert( final BufferedImage image ) {
-        return convert(image, false);
+    public static String convert( final BufferedImage image )
+    {
+        return convert( image, false );
     }
 
     public static String convert( final BufferedImage image, boolean negative )
