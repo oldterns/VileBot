@@ -73,7 +73,7 @@ public class ChurchDB
      */
     public Optional<Long> getDonorKarma( String noun )
     {
-        return Optional.ofNullable( redisClient.zscore( keyOfChurchDonorSortedSet, noun ).toLong() );
+        return Optional.ofNullable( redisClient.zscore( keyOfChurchDonorSortedSet, noun )).map(Response::toLong);
     }
 
     /**
