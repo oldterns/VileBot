@@ -1,0 +1,24 @@
+name: Tests
+on: [push, pull_request]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Cache .m2 repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: maven-repository-${{ hashFiles('**/pom.xml') }}
+      - name: Set up Adoptium JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Setup fonts
+        run: cd vilebot && bash download-fonts.sh && cd ..
+      - name: Setup configuration
+        run: cp vilebot/cfg/vilebot.conf.example vilebot/cfg/vilebot.conf
+      - name: Run tests
+        run: mvn verify
