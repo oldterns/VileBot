@@ -1,5 +1,5 @@
 # Vilebot
-[![Build Status](https://travis-ci.org/oldterns/VileBot.svg?branch=master)](https://travis-ci.org/oldterns/VileBot)
+[![Build Status](https://github.com/oldterns/VileBot/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/oldterns/VileBot/actions?query=branch%3Amaster)
 
 ## Setup
 
