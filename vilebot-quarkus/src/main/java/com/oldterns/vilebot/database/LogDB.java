@@ -1,11 +1,13 @@
 package com.oldterns.vilebot.database;
 
 import io.quarkus.redis.client.RedisClient;
+import io.vertx.redis.client.Response;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by eunderhi on 18/08/15.
@@ -33,7 +35,7 @@ public class LogDB
 
     public String getLog()
     {
-        return redisClient.get( logKey ).toString();
+        return Optional.ofNullable(redisClient.get(logKey)).map(Response::toString).orElse("");
     }
 
     public void deleteLog()

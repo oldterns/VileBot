@@ -7,6 +7,7 @@ import com.oldterns.vilebot.annotations.OnPrivateMessage;
 import com.oldterns.vilebot.annotations.Regex;
 import com.oldterns.vilebot.util.LimitService;
 import com.oldterns.vilebot.util.URLFactory;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.kitteh.irc.client.library.element.User;
 
 import javax.annotation.PostConstruct;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +44,9 @@ public class AsciiService
     @Inject
     LimitService limitCommand;
 
+    @ConfigProperty(name = "vilebot.ascii.font-directory", defaultValue = ".fonts")
+    Path fontDirectory;
+
     @PostConstruct
     public void constructFontMap() {
         fontNameToDataMap = new HashMap<>();
@@ -54,11 +59,24 @@ public class AsciiService
                     .forEach(fontLocation -> {
                         try {
                             URL url = urlFactory.build(fontLocation);
-                            InputStreamReader inputStreamReader = new InputStreamReader(url.openStream());
+                            String fontFileName = Path.of(url.getFile()).getFileName().toString();
+                            Path fontFile = fontDirectory.resolve(fontFileName);
+                            InputStream fontFileInputStream;
+                            if (Files.exists(fontFile)) {
+                                fontFileInputStream = Files.newInputStream(fontFile);
+                            } else {
+                                fontFileInputStream = url.openStream();
+                            }
+                            InputStreamReader inputStreamReader = new InputStreamReader(fontFileInputStream);
                             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                            String fontFile = Path.of(url.getFile()).getFileName().toString();
-                            String fontName = fontFile.substring(0, fontFile.length() - 4);
-                            fontNameToDataMap.put(fontName, bufferedReader.lines().collect(Collectors.joining("\n")));
+
+                            String fontName = fontFileName.substring(0, fontFileName.length() - 4);
+                            String lines = bufferedReader.lines().collect(Collectors.joining("\n"));
+                            fontNameToDataMap.put(fontName, lines);
+                            if (!Files.exists(fontFile)) {
+                                Files.createDirectories(fontFile.getParent());
+                                Files.writeString(fontFile, lines);
+                            }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
