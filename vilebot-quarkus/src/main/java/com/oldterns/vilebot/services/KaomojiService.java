@@ -1,6 +1,7 @@
 package com.oldterns.vilebot.services;
 
 import com.oldterns.irc.bot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.annotations.OnMessage;
 import com.oldterns.vilebot.util.RandomProvider;
 
 import javax.annotation.PostConstruct;
@@ -54,7 +55,7 @@ public class KaomojiService
         }
     }
 
-    @OnChannelMessage( "!kaomoji @query" )
+    @OnMessage( "!kaomoji @query" )
     public String getKaomoji( String query )
     {
         String kaomoji = "";

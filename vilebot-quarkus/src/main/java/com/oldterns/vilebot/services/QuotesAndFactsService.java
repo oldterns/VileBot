@@ -67,6 +67,7 @@ public class QuotesAndFactsService
     public String onJoin( ChannelJoinEvent event )
     {
         Nick nick = Nick.getNick( event.getUser() );
+        System.out.println( nick + " has joined" );
         if ( !ignoredUsers.getOnJoin().contains( nick.getBaseNick() ) )
         {
             String out;

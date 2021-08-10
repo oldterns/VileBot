@@ -26,12 +26,12 @@ public class BotStartupService {
         ircServices.stream().forEach(ircService -> {
             Client client = botNameToClient.computeIfAbsent(ircService.botNick(),
                     clientCreator::createClient);
-            client.getEventManager().registerEventListener(ircService);
             ircService.getChannelsToJoin().forEach(client::addChannel);
             ircService.setBot(client);
         });
         for (Client client : botNameToClient.values()) {
             client.connect();
+            ircServices.stream().forEach(client.getEventManager()::registerEventListener);
             Thread.sleep(1000);
         }
     }

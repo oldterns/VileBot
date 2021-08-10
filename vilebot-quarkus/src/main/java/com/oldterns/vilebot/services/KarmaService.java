@@ -3,14 +3,20 @@ package com.oldterns.vilebot.services;
 import com.oldterns.irc.bot.Nick;
 import com.oldterns.irc.bot.annotations.NoHelp;
 import com.oldterns.irc.bot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.annotations.OnMessage;
 import com.oldterns.vilebot.database.ChurchDB;
 import com.oldterns.vilebot.database.KarmaDB;
+import com.oldterns.vilebot.util.IgnoredUsers;
 import com.oldterns.vilebot.util.RandomProvider;
+import net.engio.mbassy.listener.Handler;
 import org.kitteh.irc.client.library.element.User;
+import org.kitteh.irc.client.library.event.channel.ChannelJoinEvent;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,13 +34,25 @@ public class KarmaService
     @Inject
     RandomProvider randomProvider;
 
-    @OnChannelMessage( "!total" )
+    @Inject
+    IgnoredUsers ignoredUsers;
+
+    @Handler
+    public String onUserJoin( ChannelJoinEvent channelJoinEvent )
+    {
+        Nick noun = Nick.getNick( channelJoinEvent.getUser() );
+        if ( !ignoredUsers.getOnJoin().contains( noun ) )
+            return getReplyWithRankAndKarma( noun.getBaseNick(), false, false, true );
+        return null;
+    }
+
+    @OnMessage( "!total" )
     public String total()
     {
         return "" + karmaDB.getTotalKarma();
     }
 
-    @OnChannelMessage( "!topthree" )
+    @OnMessage( "!topthree" )
     public String getTopThree()
     {
         Set<String> nouns = karmaDB.getRankNouns( 0L, 2L );
@@ -49,7 +67,7 @@ public class KarmaService
         }
     }
 
-    @OnChannelMessage( "!bottomthree" )
+    @OnMessage( "!bottomthree" )
     public String getBottomThree()
     {
         Set<String> nouns = karmaDB.getRevRankNouns( 0L, 2L );
@@ -65,7 +83,6 @@ public class KarmaService
     }
 
     @OnChannelMessage( "@channelMessage" )
-    // TODO: Maybe replace this with a custom help command?
     @NoHelp
     public String karmaIncOrDec( User user, String channelMessage )
     {
@@ -124,25 +141,25 @@ public class KarmaService
         return out.toString();
     }
 
-    @OnChannelMessage( "!rank @nick" )
+    @OnMessage( "!rank @nick" )
     public String rank( Nick nick )
     {
         return getReplyWithRankAndKarma( nick.getBaseNick() );
     }
 
-    @OnChannelMessage( "!revrank @nick" )
+    @OnMessage( "!revrank @nick" )
     public String revrank( Nick nick )
     {
         return getReplyWithRankAndKarma( nick.getBaseNick(), true );
     }
 
-    @OnChannelMessage( "!rank" )
+    @OnMessage( "!rank" )
     public String selfRank( User user )
     {
         return rank( Nick.getNick( user ) );
     }
 
-    @OnChannelMessage( "!revrank" )
+    @OnMessage( "!revrank" )
     public String selfRevrank( User user )
     {
         return revrank( Nick.getNick( user ) );
