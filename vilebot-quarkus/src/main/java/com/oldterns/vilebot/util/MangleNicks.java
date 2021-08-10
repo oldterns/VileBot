@@ -1,11 +1,9 @@
 package com.oldterns.vilebot.util;
 
-import com.oldterns.vilebot.Nick;
+import com.oldterns.irc.bot.Nick;
 import org.kitteh.irc.client.library.element.User;
-import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 import org.kitteh.irc.client.library.event.helper.ActorEvent;
 import org.kitteh.irc.client.library.event.helper.ChannelEvent;
-import org.kitteh.irc.client.library.event.user.PrivateMessageEvent;
 
 import java.util.Collection;
 import java.util.Collections;

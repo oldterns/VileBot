@@ -1,6 +1,7 @@
-package com.oldterns.vilebot;
+package com.oldterns.irc.bot.test;
 
-import com.oldterns.vilebot.services.ClientCreatorImpl;
+import com.oldterns.irc.bot.Nick;
+import com.oldterns.irc.bot.services.ClientCreatorImpl;
 import io.quarkus.test.QuarkusUnitTest;
 import io.smallrye.mutiny.tuples.Functions;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -29,14 +30,13 @@ public class ServiceImplementationTest {
             .overrideConfigKey("vilebot.default.channel", "#channel")
             .overrideConfigKey("vilebot.default.nick", "Bot")
             .overrideConfigKey("vilebot.irc.server", "localhost")
-            .overrideConfigKey("quarkus.arc.selected-alternatives", "com.oldterns.vilebot.MockClientCreator")
+            .overrideConfigKey("quarkus.arc.selected-alternatives", "com.oldterns.irc.bot.test.MockClientCreator")
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
                                                 .addClasses(ExampleService.class,
-                                                        MockClientCreator.class)
+                                                            MockClientCreator.class)
                                                 .deleteClass(ClientCreatorImpl.class)
             );
 
-    ExampleService exampleService;
     Functions.Function3<String, String, String, ChannelMessageEvent> fireMessage;
     BiFunction<String, String, PrivateMessageEvent> firePrivateMessage;
 

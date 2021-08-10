@@ -1,9 +1,9 @@
 package com.oldterns.vilebot.services;
 
+import com.oldterns.irc.bot.services.ClientCreator;
 import com.oldterns.vilebot.util.TestUrlStreamHandler;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kitteh.irc.client.library.Client;

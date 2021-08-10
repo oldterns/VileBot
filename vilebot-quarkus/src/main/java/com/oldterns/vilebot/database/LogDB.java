@@ -35,7 +35,7 @@ public class LogDB
 
     public String getLog()
     {
-        return Optional.ofNullable(redisClient.get(logKey)).map(Response::toString).orElse("");
+        return Optional.ofNullable( redisClient.get( logKey ) ).map( Response::toString ).orElse( "" );
     }
 
     public void deleteLog()

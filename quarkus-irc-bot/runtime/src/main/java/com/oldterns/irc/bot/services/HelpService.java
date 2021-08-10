@@ -1,6 +1,6 @@
-package com.oldterns.vilebot.services;
+package com.oldterns.irc.bot.services;
 
-import com.oldterns.vilebot.annotations.OnMessage;
+import com.oldterns.irc.bot.annotations.OnMessage;
 import org.kitteh.irc.client.library.element.User;
 
 import javax.enterprise.context.ApplicationScoped;

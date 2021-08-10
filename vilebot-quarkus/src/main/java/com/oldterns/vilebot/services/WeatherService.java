@@ -1,6 +1,7 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.services.ClientCreator;
 import com.oldterns.vilebot.util.URLFactory;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;

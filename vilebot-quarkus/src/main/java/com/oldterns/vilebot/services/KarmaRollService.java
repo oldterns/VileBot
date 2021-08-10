@@ -1,11 +1,10 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.Nick;
-import com.oldterns.vilebot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.Nick;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.database.KarmaDB;
 import com.oldterns.vilebot.util.RandomProvider;
 import org.kitteh.irc.client.library.element.User;
-import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

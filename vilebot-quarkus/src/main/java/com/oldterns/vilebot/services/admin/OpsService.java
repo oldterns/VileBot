@@ -5,15 +5,16 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import com.oldterns.vilebot.Nick;
-import com.oldterns.vilebot.annotations.Delimiter;
-import com.oldterns.vilebot.annotations.OnMessage;
+import com.oldterns.irc.bot.Nick;
+import com.oldterns.irc.bot.annotations.Delimiter;
+import com.oldterns.irc.bot.annotations.OnMessage;
 import com.oldterns.vilebot.database.GroupDB;
 import com.oldterns.vilebot.util.SessionService;
 import org.kitteh.irc.client.library.element.User;
 
 @ApplicationScoped
-public class OpsService {
+public class OpsService
+{
 
     @Inject
     SessionService sessionService;
@@ -21,9 +22,10 @@ public class OpsService {
     @Inject
     GroupDB groupDB;
 
-    @OnMessage("!admin op @nickList")
-    public String autoOpNicks(User sender, @Delimiter("\\s+") List<Nick> nickList) {
-        String username = sessionService.getSession( Nick.getNick(sender) );
+    @OnMessage( "!admin op @nickList" )
+    public String autoOpNicks( User sender, @Delimiter( "\\s+" ) List<Nick> nickList )
+    {
+        String username = sessionService.getSession( Nick.getNick( sender ) );
         if ( groupDB.isAdmin( username ) )
         {
             StringBuilder successNicks = new StringBuilder();
@@ -51,9 +53,10 @@ public class OpsService {
         return null;
     }
 
-    @OnMessage("!admin unop @nickList")
-    public String removeAutoOpNicks(User sender, @Delimiter("\\s+") List<Nick> nickList) {
-        String username = sessionService.getSession( Nick.getNick(sender) );
+    @OnMessage( "!admin unop @nickList" )
+    public String removeAutoOpNicks( User sender, @Delimiter( "\\s+" ) List<Nick> nickList )
+    {
+        String username = sessionService.getSession( Nick.getNick( sender ) );
         if ( groupDB.isAdmin( username ) )
         {
             StringBuilder successNicks = new StringBuilder();
@@ -73,7 +76,7 @@ public class OpsService {
 
             StringBuilder out = new StringBuilder();
             if ( successNicks.length() > 0 )
-                out.append( "Removed " + successNicks.toString() + "from operator group\n"  );
+                out.append( "Removed " + successNicks.toString() + "from operator group\n" );
             if ( failureNicks.length() > 0 )
                 out.append( failureNicks.toString() + "was/were not in the operator group" );
             return out.toString();

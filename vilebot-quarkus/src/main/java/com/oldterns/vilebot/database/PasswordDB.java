@@ -44,8 +44,9 @@ public class PasswordDB
 
     private static String hash( String salt, String input )
     {
-        return HMAC.generateHMAC(input, salt );
+        return HMAC.generateHMAC( input, salt );
     }
+
     /**
      * Checks the validity of a password for a user
      * 
@@ -55,8 +56,9 @@ public class PasswordDB
      */
     public boolean isValidPassword( String username, String password )
     {
-        Response storedHash = redisClient.hget(keyOfPassHash, username );
-        if (storedHash == null) {
+        Response storedHash = redisClient.hget( keyOfPassHash, username );
+        if ( storedHash == null )
+        {
             return false;
         }
         String hash = hash( password, getSalt( username ) );
@@ -101,10 +103,10 @@ public class PasswordDB
                 newUser = true;
 
                 String salt = generateSalt();
-                redisClient.hset( List.of(keyOfPassSaltsHash, username, salt) );
+                redisClient.hset( List.of( keyOfPassSaltsHash, username, salt ) );
 
                 String hash = hash( password, salt );
-                redisClient.hset( List.of(keyOfPassHash, username, hash) );
+                redisClient.hset( List.of( keyOfPassHash, username, hash ) );
             }
             else
             {

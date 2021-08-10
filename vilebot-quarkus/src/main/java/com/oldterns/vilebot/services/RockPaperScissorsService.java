@@ -1,10 +1,10 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.Nick;
-import com.oldterns.vilebot.annotations.OnChannelMessage;
-import com.oldterns.vilebot.annotations.OnMessage;
-import com.oldterns.vilebot.annotations.OnPrivateMessage;
-import com.oldterns.vilebot.annotations.Regex;
+import com.oldterns.irc.bot.Nick;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.annotations.OnMessage;
+import com.oldterns.irc.bot.annotations.OnPrivateMessage;
+import com.oldterns.irc.bot.annotations.Regex;
 import com.oldterns.vilebot.util.RandomProvider;
 import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;

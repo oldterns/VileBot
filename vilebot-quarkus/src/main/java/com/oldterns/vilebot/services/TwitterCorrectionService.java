@@ -1,7 +1,7 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.annotations.OnChannelMessage;
-import com.oldterns.vilebot.annotations.Regex;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.annotations.Regex;
 
 import javax.enterprise.context.ApplicationScoped;
 

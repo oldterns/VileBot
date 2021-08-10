@@ -6,9 +6,9 @@
  */
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.annotations.Delimiter;
-import com.oldterns.vilebot.annotations.OnMessage;
-import com.oldterns.vilebot.annotations.Regex;
+import com.oldterns.irc.bot.annotations.Delimiter;
+import com.oldterns.irc.bot.annotations.OnMessage;
+import com.oldterns.irc.bot.annotations.Regex;
 import com.oldterns.vilebot.util.RandomProvider;
 
 import javax.enterprise.context.ApplicationScoped;

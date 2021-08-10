@@ -1,4 +1,4 @@
-package com.oldterns.vilebot;
+package com.oldterns.irc.bot;
 
 import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.helper.ActorEvent;

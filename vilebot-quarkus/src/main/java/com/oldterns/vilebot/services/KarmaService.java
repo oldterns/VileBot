@@ -1,8 +1,8 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.Nick;
-import com.oldterns.vilebot.annotations.NoHelp;
-import com.oldterns.vilebot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.Nick;
+import com.oldterns.irc.bot.annotations.NoHelp;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.database.ChurchDB;
 import com.oldterns.vilebot.database.KarmaDB;
 import com.oldterns.vilebot.util.RandomProvider;

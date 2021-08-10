@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.annotations.OnMessage;
+import com.oldterns.irc.bot.annotations.OnMessage;
 import com.oldterns.vilebot.util.URLFactory;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.w3c.dom.Document;
@@ -18,7 +18,8 @@ import java.net.URLEncoder;
 import java.util.Scanner;
 
 @ApplicationScoped
-public class AnswerQuestionService {
+public class AnswerQuestionService
+{
     private static final int MAX_RESPONSE = 500;
 
     @Inject
@@ -27,8 +28,9 @@ public class AnswerQuestionService {
     @ConfigProperty( name = "vilebot.wolfram.key" )
     String API_KEY;
 
-    @OnMessage("!tellme @question")
-    public String getAnswerForQuery(String question) {
+    @OnMessage( "!tellme @question" )
+    public String getAnswerForQuery( String question )
+    {
         String answer = getAnswer( question );
         return truncate( answer );
     }
@@ -48,11 +50,11 @@ public class AnswerQuestionService {
     }
 
     private String makeURL( String searchTerm )
-            throws UnsupportedEncodingException
+        throws UnsupportedEncodingException
     {
         searchTerm = URLEncoder.encode( searchTerm, "UTF-8" );
         return "http://api.wolframalpha.com/v2/query?input=" + searchTerm + "&appid=" + API_KEY
-                + "&format=plaintext&output=XML";
+            + "&format=plaintext&output=XML";
     }
 
     private String getContent( String url )
@@ -61,7 +63,7 @@ public class AnswerQuestionService {
         URLConnection connection;
         try
         {
-            connection = urlFactory.build(url).openConnection();
+            connection = urlFactory.build( url ).openConnection();
             Scanner scanner = new Scanner( connection.getInputStream() );
             scanner.useDelimiter( "\\Z" );
             content = scanner.next();
@@ -74,7 +76,7 @@ public class AnswerQuestionService {
     }
 
     private String parseResponse( String response )
-            throws Exception
+        throws Exception
     {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();

@@ -1,4 +1,4 @@
-package com.oldterns.vilebot.services;
+package com.oldterns.irc.bot.services;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.kitteh.irc.client.library.Client;

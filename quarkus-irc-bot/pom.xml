@@ -24,7 +24,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.release>11</maven.compiler.release>
         <maven.compiler.parameters>true</maven.compiler.parameters>
-        <quarkus.version>1.11.1.Final</quarkus.version>
+        <quarkus.version>2.1.1.Final</quarkus.version>
         <kitteh.version>8.0.0</kitteh.version>
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
     </properties>

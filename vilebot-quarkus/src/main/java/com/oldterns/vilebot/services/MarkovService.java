@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.annotations.OnMessage;
+import com.oldterns.irc.bot.annotations.OnMessage;
 import com.oldterns.vilebot.database.LogDB;
 import com.oldterns.vilebot.util.RandomProvider;
 import com.oldterns.vilebot.util.Zalgo;

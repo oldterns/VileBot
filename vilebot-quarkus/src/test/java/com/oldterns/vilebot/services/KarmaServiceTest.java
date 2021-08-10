@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.Nick;
+import com.oldterns.irc.bot.Nick;
 import com.oldterns.vilebot.database.KarmaDB;
 import com.oldterns.vilebot.util.RandomProvider;
 import io.quarkus.test.junit.QuarkusTest;

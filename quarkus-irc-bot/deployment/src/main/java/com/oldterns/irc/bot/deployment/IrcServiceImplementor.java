@@ -1,15 +1,15 @@
-package com.oldterns.vilebot.deployment;
+package com.oldterns.irc.bot.deployment;
 
-import com.oldterns.vilebot.Nick;
-import com.oldterns.vilebot.annotations.Bot;
-import com.oldterns.vilebot.annotations.Delimiter;
-import com.oldterns.vilebot.annotations.NoHelp;
-import com.oldterns.vilebot.annotations.OnChannelMessage;
-import com.oldterns.vilebot.annotations.OnMessage;
-import com.oldterns.vilebot.annotations.OnPrivateMessage;
-import com.oldterns.vilebot.annotations.Regex;
-import com.oldterns.vilebot.services.HelpService;
-import com.oldterns.vilebot.services.IRCService;
+import com.oldterns.irc.bot.Nick;
+import com.oldterns.irc.bot.annotations.Bot;
+import com.oldterns.irc.bot.annotations.Delimiter;
+import com.oldterns.irc.bot.annotations.NoHelp;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.annotations.OnMessage;
+import com.oldterns.irc.bot.annotations.OnPrivateMessage;
+import com.oldterns.irc.bot.annotations.Regex;
+import com.oldterns.irc.bot.services.HelpService;
+import com.oldterns.irc.bot.services.IRCService;
 import io.quarkus.arc.deployment.GeneratedBeanGizmoAdaptor;
 import io.quarkus.gizmo.*;
 import net.engio.mbassy.listener.Handler;

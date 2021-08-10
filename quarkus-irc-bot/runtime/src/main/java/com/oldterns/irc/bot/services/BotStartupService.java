@@ -1,4 +1,4 @@
-package com.oldterns.vilebot.services;
+package com.oldterns.irc.bot.services;
 
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;

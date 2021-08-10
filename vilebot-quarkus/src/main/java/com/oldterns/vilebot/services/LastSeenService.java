@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.Nick;
+import com.oldterns.irc.bot.Nick;
 import com.oldterns.vilebot.database.LastSeenDB;
 import com.oldterns.vilebot.util.TimeService;
 import net.engio.mbassy.listener.Handler;
@@ -12,7 +12,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;

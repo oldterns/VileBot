@@ -1,8 +1,7 @@
-package com.oldterns.vilebot;
+package com.oldterns.irc.bot.test;
 
-import com.oldterns.vilebot.services.ClientCreator;
+import com.oldterns.irc.bot.services.ClientCreator;
 import org.kitteh.irc.client.library.Client;
-import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 import org.kitteh.irc.client.library.event.helper.MessageEvent;
 import org.kitteh.irc.client.library.feature.CaseMapping;
 import org.kitteh.irc.client.library.feature.EventManager;
@@ -30,6 +29,7 @@ public class MockClientCreator implements ClientCreator {
     public Client createClient(String nick) {
         if (client == null) {
             client = Mockito.mock(Client.class);
+            System.out.println("Okay...");
             EventManager eventManager = Mockito.mock(EventManager.class);
             Mockito.when(client.getName()).thenReturn(nick);
             Mockito.when(client.getNick()).thenReturn(nick);

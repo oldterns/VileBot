@@ -1,10 +1,10 @@
 package com.oldterns.vilebot.services;
 
 import com.github.lalyos.jfiglet.FigletFont;
-import com.oldterns.vilebot.annotations.OnChannelMessage;
-import com.oldterns.vilebot.annotations.OnMessage;
-import com.oldterns.vilebot.annotations.OnPrivateMessage;
-import com.oldterns.vilebot.annotations.Regex;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.annotations.OnMessage;
+import com.oldterns.irc.bot.annotations.OnPrivateMessage;
+import com.oldterns.irc.bot.annotations.Regex;
 import com.oldterns.vilebot.util.LimitService;
 import com.oldterns.vilebot.util.URLFactory;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -44,72 +44,85 @@ public class AsciiService
     @Inject
     LimitService limitCommand;
 
-    @ConfigProperty(name = "vilebot.ascii.font-directory", defaultValue = ".fonts")
+    @ConfigProperty( name = "vilebot.ascii.font-directory", defaultValue = ".fonts" )
     Path fontDirectory;
 
     @PostConstruct
-    public void constructFontMap() {
+    public void constructFontMap()
+    {
         fontNameToDataMap = new HashMap<>();
-        try (InputStream fontListResource = AsciiService.class.getResourceAsStream("/fontlist.txt")) {
-            if (fontListResource == null) {
-                throw new IOException("/fontlist.txt does not exist");
+        try ( InputStream fontListResource = AsciiService.class.getResourceAsStream( "/fontlist.txt" ) )
+        {
+            if ( fontListResource == null )
+            {
+                throw new IOException( "/fontlist.txt does not exist" );
             }
-            new BufferedReader(new InputStreamReader(fontListResource))
-                    .lines()
-                    .forEach(fontLocation -> {
-                        try {
-                            URL url = urlFactory.build(fontLocation);
-                            String fontFileName = Path.of(url.getFile()).getFileName().toString();
-                            Path fontFile = fontDirectory.resolve(fontFileName);
-                            InputStream fontFileInputStream;
-                            if (Files.exists(fontFile)) {
-                                fontFileInputStream = Files.newInputStream(fontFile);
-                            } else {
-                                fontFileInputStream = url.openStream();
-                            }
-                            InputStreamReader inputStreamReader = new InputStreamReader(fontFileInputStream);
-                            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            new BufferedReader( new InputStreamReader( fontListResource ) ).lines().forEach( fontLocation -> {
+                try
+                {
+                    URL url = urlFactory.build( fontLocation );
+                    String fontFileName = Path.of( url.getFile() ).getFileName().toString();
+                    Path fontFile = fontDirectory.resolve( fontFileName );
+                    InputStream fontFileInputStream;
+                    if ( Files.exists( fontFile ) )
+                    {
+                        fontFileInputStream = Files.newInputStream( fontFile );
+                    }
+                    else
+                    {
+                        fontFileInputStream = url.openStream();
+                    }
+                    InputStreamReader inputStreamReader = new InputStreamReader( fontFileInputStream );
+                    BufferedReader bufferedReader = new BufferedReader( inputStreamReader );
 
-                            String fontName = fontFileName.substring(0, fontFileName.length() - 4);
-                            String lines = bufferedReader.lines().collect(Collectors.joining("\n"));
-                            fontNameToDataMap.put(fontName, lines);
-                            if (!Files.exists(fontFile)) {
-                                Files.createDirectories(fontFile.getParent());
-                                Files.writeString(fontFile, lines);
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to open /fontlist.txt", e);
+                    String fontName = fontFileName.substring( 0, fontFileName.length() - 4 );
+                    String lines = bufferedReader.lines().collect( Collectors.joining( "\n" ) );
+                    fontNameToDataMap.put( fontName, lines );
+                    if ( !Files.exists( fontFile ) )
+                    {
+                        Files.createDirectories( fontFile.getParent() );
+                        Files.writeString( fontFile, lines );
+                    }
+                }
+                catch ( IOException e )
+                {
+                    e.printStackTrace();
+                }
+            } );
+        }
+        catch ( IOException e )
+        {
+            throw new IllegalStateException( "Unable to open /fontlist.txt", e );
         }
     }
 
-    @OnChannelMessage("!ascii @font @message")
-    public String ascii(User user, @Regex("\\S+") String font, String message) {
-        try {
+    @OnChannelMessage( "!ascii @font @message" )
+    public String ascii( User user, @Regex( "\\S+" ) String font, String message )
+    {
+        try
+        {
             limitCommand.addUse( user );
             return runAscii( font, message );
-        } catch (LimitExceededException e) {
+        }
+        catch ( LimitExceededException e )
+        {
             return e.getMessage();
         }
     }
 
-    @OnPrivateMessage("!ascii @font @message")
-    public String asciiPrivateMessage(@Regex("\\S+") String font, String message) {
+    @OnPrivateMessage( "!ascii @font @message" )
+    public String asciiPrivateMessage( @Regex( "\\S+" ) String font, String message )
+    {
         return runAscii( font, message );
     }
 
-    @OnMessage("!asciifonts")
-    public void asciifonts(User user)
+    @OnMessage( "!asciifonts" )
+    public void asciifonts( User user )
     {
         StringBuilder sb = new StringBuilder();
         sb.append( "Available fonts for !ascii:\n" );
         int i = 0;
-        for ( String font : fontNameToDataMap.keySet()
-                .stream()
-                .sorted().collect(Collectors.toList()) )
+        for ( String font : fontNameToDataMap.keySet().stream().sorted().collect( Collectors.toList() ) )
         {
             sb.append( String.format( "%20s ", font ) );
             if ( ( ( i + 1 ) % 5 ) == 0 )
@@ -118,12 +131,13 @@ public class AsciiService
             }
             i++;
         }
-        for (String line : sb.toString().split("\n")) {
-            user.sendMessage(line);
+        for ( String line : sb.toString().split( "\n" ) )
+        {
+            user.sendMessage( line );
         }
     }
 
-    private String runAscii( String font, String message  )
+    private String runAscii( String font, String message )
     {
         String asciiArt;
         if ( fontNameToDataMap.containsKey( font ) )
@@ -164,7 +178,8 @@ public class AsciiService
             String[] lines = splitMessage( text );
             for ( String line : lines )
             {
-                sb.append( FigletFont.convertOneLine( new ByteArrayInputStream(fontNameToDataMap.get(font).getBytes()), line ) );
+                sb.append( FigletFont.convertOneLine( new ByteArrayInputStream( fontNameToDataMap.get( font ).getBytes() ),
+                                                      line ) );
             }
             return sb.toString();
         }

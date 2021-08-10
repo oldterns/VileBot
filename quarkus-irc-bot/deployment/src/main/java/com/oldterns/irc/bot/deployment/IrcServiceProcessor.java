@@ -1,11 +1,11 @@
-package com.oldterns.vilebot.deployment;
+package com.oldterns.irc.bot.deployment;
 
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.oldterns.vilebot.annotations.OnChannelMessage;
-import com.oldterns.vilebot.annotations.OnMessage;
-import com.oldterns.vilebot.annotations.OnPrivateMessage;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.annotations.OnMessage;
+import com.oldterns.irc.bot.annotations.OnPrivateMessage;
 import io.quarkus.arc.deployment.GeneratedBeanBuildItem;
 import io.quarkus.arc.deployment.GeneratedBeanGizmoAdaptor;
 import io.quarkus.deployment.annotations.BuildProducer;

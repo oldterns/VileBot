@@ -1,9 +1,9 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.Nick;
-import com.oldterns.vilebot.annotations.OnChannelMessage;
-import com.oldterns.vilebot.annotations.OnMessage;
-import com.oldterns.vilebot.annotations.Regex;
+import com.oldterns.irc.bot.Nick;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.annotations.OnMessage;
+import com.oldterns.irc.bot.annotations.Regex;
 import com.oldterns.vilebot.database.ChurchDB;
 import com.oldterns.vilebot.database.QuoteFactDB;
 import com.oldterns.vilebot.util.IgnoredUsers;

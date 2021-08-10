@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
 import com.oldterns.vilebot.util.ASCII;
 import com.oldterns.vilebot.util.URLFactory;
 

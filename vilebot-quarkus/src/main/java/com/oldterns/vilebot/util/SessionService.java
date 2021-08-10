@@ -7,13 +7,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import com.oldterns.vilebot.Nick;
+import com.oldterns.irc.bot.Nick;
 
 /**
  * Provides record-keeping for time limited sessions.
  */
 @ApplicationScoped
-public class SessionService {
+public class SessionService
+{
 
     @Inject
     TimeService timeService;

@@ -1,8 +1,8 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.vilebot.Nick;
-import com.oldterns.vilebot.annotations.OnChannelMessage;
-import com.oldterns.vilebot.annotations.OnMessage;
+import com.oldterns.irc.bot.Nick;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.annotations.OnMessage;
 import com.oldterns.vilebot.database.ChurchDB;
 import com.oldterns.vilebot.database.KarmaDB;
 import com.oldterns.vilebot.util.TimeService;
@@ -17,8 +17,9 @@ import java.util.Objects;
 import java.util.Set;
 
 @ApplicationScoped
-public class ChurchService {
-    private static final Duration TIMEOUT = Duration.ofSeconds(30);
+public class ChurchService
+{
+    private static final Duration TIMEOUT = Duration.ofSeconds( 30 );
 
     @Inject
     TimeService timeService;
@@ -31,15 +32,16 @@ public class ChurchService {
 
     VoteEvent currentVote = null;
 
-    @OnChannelMessage("!donate @donationAmount")
-    public String donate(User user, Integer donationAmount) {
+    @OnChannelMessage( "!donate @donationAmount" )
+    public String donate( User user, Integer donationAmount )
+    {
         if ( currentVote != null )
         {
-            return  "There is an ongoing vote, you cannot donate at this time.";
+            return "There is an ongoing vote, you cannot donate at this time.";
         }
 
         String donor = Nick.getNick( user ).getBaseNick();
-        long donorKarma = karmaDB.getNounKarma( donor ).orElse(0L);
+        long donorKarma = karmaDB.getNounKarma( donor ).orElse( 0L );
         if ( donationAmount <= 0 )
         {
             return "You cannot donate a non-positive number.";
@@ -52,7 +54,7 @@ public class ChurchService {
         {
             churchDB.modDonorKarma( donor, donationAmount );
             karmaDB.modNounKarma( donor, -1 * donationAmount );
-            Long churchDonorKarma = churchDB.getDonorKarma( donor ).orElse(null);
+            Long churchDonorKarma = churchDB.getDonorKarma( donor ).orElse( null );
             if ( churchDonorKarma != null && churchDonorKarma - donationAmount <= 0 )
             {
                 churchDB.modDonorTitle( donor, " " );
@@ -61,16 +63,18 @@ public class ChurchService {
         }
     }
 
-    @OnMessage("!churchtotal")
-    public String churchTotal() {
+    @OnMessage( "!churchtotal" )
+    public String churchTotal()
+    {
         long totalDonations = churchDB.getTotalDonations();
         long churchTotal = totalDonations + churchDB.getTotalNonDonations();
         return "The church coffers contains " + churchTotal + ", of which " + totalDonations
-                + " was contributed by its loyal believers.";
+            + " was contributed by its loyal believers.";
     }
 
-    @OnMessage("!topdonors")
-    public String topDonors() {
+    @OnMessage( "!topdonors" )
+    public String topDonors()
+    {
         Set<String> nouns;
         nouns = churchDB.getDonorsByRanks( 0L, 3L );
         if ( nouns != null && nouns.size() > 0 )
@@ -79,10 +83,10 @@ public class ChurchService {
             out.append( "NICK           AMOUNT    TITLE\n" );
             for ( String noun : nouns )
             {
-                out.append(getReplyWithRankAndDonationAmount( noun ));
-                out.append('\n');
+                out.append( getReplyWithRankAndDonationAmount( noun ) );
+                out.append( '\n' );
             }
-            out.deleteCharAt(out.length() - 1);
+            out.deleteCharAt( out.length() - 1 );
             return out.toString();
         }
         else
@@ -91,10 +95,11 @@ public class ChurchService {
         }
     }
 
-    @OnMessage("!settitle @newTitle")
-    public String setTitle(User user, String newTitle) {
+    @OnMessage( "!settitle @newTitle" )
+    public String setTitle( User user, String newTitle )
+    {
         String donor = Nick.getNick( user ).getBaseNick();
-        Long donorRank = churchDB.getDonorRank( donor ).orElse(null);
+        Long donorRank = churchDB.getDonorRank( donor ).orElse( null );
         if ( donorRank != null && donorRank > 4 )
         {
             return "You must be a top donor to set your title.";
@@ -110,17 +115,17 @@ public class ChurchService {
         return donor + " is now to be referred to as " + newTitle + " instead of " + oldTitle + ".";
     }
 
-    @OnChannelMessage("!inquisit @toInquisit")
+    @OnChannelMessage( "!inquisit @toInquisit" )
     public String inquisit( ChannelMessageEvent event, User user, Nick toInquisit )
     {
         if ( currentVote != null )
         {
             return "There is an ongoing inquisition against " + currentVote.getDecisionTarget()
-                    + ". Please use !aye or !nay to decide their fate";
+                + ". Please use !aye or !nay to decide their fate";
         }
 
         String donor = Nick.getNick( user ).getBaseNick();
-        Long donorRank = churchDB.getDonorRank( donor ).orElse(null);
+        Long donorRank = churchDB.getDonorRank( donor ).orElse( null );
         if ( donorRank == null || donorRank > 4 )
         {
             return "You must be a top donor to start an inquisition.";
@@ -141,15 +146,15 @@ public class ChurchService {
         }
 
         String inquisitedNick = toInquisit.getBaseNick();
-        Long nounKarma = churchDB.getDonorKarma( inquisitedNick ).orElse(null);
+        Long nounKarma = churchDB.getDonorKarma( inquisitedNick ).orElse( null );
         if ( nounKarma == null || nounKarma == 0 )
         {
             return "You cannot start an inquisition against someone who has no donation value.";
         }
 
         startInquisitionVote( event.getChannel(), inquisitedNick, donorRank );
-        return "An inquisition has started against " + inquisitedNick
-                + ". Please cast your votes with !aye or !nay\n" + membersToPing;
+        return "An inquisition has started against " + inquisitedNick + ". Please cast your votes with !aye or !nay\n"
+            + membersToPing;
 
     }
 
@@ -161,24 +166,27 @@ public class ChurchService {
         startTimer( channel );
     }
 
-    @OnChannelMessage("!aye")
-    public String voteAye(User user) {
-        return vote(user, true);
+    @OnChannelMessage( "!aye" )
+    public String voteAye( User user )
+    {
+        return vote( user, true );
     }
 
-    @OnChannelMessage("!nay")
-    public String voteNay(User user) {
-        return vote(user, false);
+    @OnChannelMessage( "!nay" )
+    public String voteNay( User user )
+    {
+        return vote( user, false );
     }
 
-    public String vote(User user, boolean isAye) {
+    public String vote( User user, boolean isAye )
+    {
         if ( currentVote == null )
         {
             return "There is no ongoing vote.";
         }
 
         String donor = Nick.getNick( user ).getBaseNick();
-        Long donorRank = churchDB.getDonorRank( donor ).orElse(null);
+        Long donorRank = churchDB.getDonorRank( donor ).orElse( null );
         if ( donorRank == null || donorRank > 4 )
         {
             return "You must be a top donor to vote.";
@@ -205,7 +213,7 @@ public class ChurchService {
 
     private void startTimer( final Channel channel )
     {
-        timeService.onTimeout(TIMEOUT, () -> timeoutTimer(channel));
+        timeService.onTimeout( TIMEOUT, () -> timeoutTimer( channel ) );
     }
 
     private void timeoutTimer( Channel channel )
@@ -214,8 +222,8 @@ public class ChurchService {
         if ( currentVote.isDecisionYes() )
         {
             message += "The vote to inquisit " + currentVote.getDecisionTarget() + " has passed. "
-                    + currentVote.getDecisionTarget() + " will be stripped of their karma.";
-            Long donorKarma = churchDB.getDonorKarma( currentVote.getDecisionTarget() ).orElse(null);
+                + currentVote.getDecisionTarget() + " will be stripped of their karma.";
+            Long donorKarma = churchDB.getDonorKarma( currentVote.getDecisionTarget() ).orElse( null );
             if ( donorKarma != null )
             {
                 churchDB.modNonDonorKarma( donorKarma.intValue() );
@@ -235,7 +243,7 @@ public class ChurchService {
 
     private String getReplyWithRankAndDonationAmount( String noun )
     {
-        Long nounKarma = churchDB.getDonorKarma( noun ).orElse(null);
+        Long nounKarma = churchDB.getDonorKarma( noun ).orElse( null );
         String nounTitle = churchDB.getDonorTitle( noun );
         StringBuilder sb = new StringBuilder();
         sb.append( noun );
@@ -263,7 +271,9 @@ public class ChurchService {
 
             String spaces_second = String.format( "%" + spaceLength + "s", "" );
             return nounString + spaces_first + nounKarma + spaces_second + nounTitle;
-        } else {
+        }
+        else
+        {
             return nounString + " has no donations";
         }
     }

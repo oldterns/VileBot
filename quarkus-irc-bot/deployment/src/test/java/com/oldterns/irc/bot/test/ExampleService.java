@@ -1,8 +1,9 @@
-package com.oldterns.vilebot;
+package com.oldterns.irc.bot.test;
 
-import com.oldterns.vilebot.annotations.Delimiter;
-import com.oldterns.vilebot.annotations.NoHelp;
-import com.oldterns.vilebot.annotations.OnChannelMessage;
+import com.oldterns.irc.bot.Nick;
+import com.oldterns.irc.bot.annotations.Delimiter;
+import com.oldterns.irc.bot.annotations.NoHelp;
+import com.oldterns.irc.bot.annotations.OnChannelMessage;
 import org.kitteh.irc.client.library.Client;
 import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;

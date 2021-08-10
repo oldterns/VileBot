@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.util;
 
-import com.oldterns.vilebot.Nick;
+import com.oldterns.irc.bot.Nick;
 import org.kitteh.irc.client.library.element.User;
 
 import javax.naming.LimitExceededException;
