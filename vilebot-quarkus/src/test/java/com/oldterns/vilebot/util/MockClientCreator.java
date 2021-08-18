@@ -25,43 +25,39 @@ import static org.mockito.Mockito.doAnswer;
 public class MockClientCreator
     implements ClientCreator
 {
-    static Client client;
 
     static List<Consumer<MessageEvent>> eventListeners = new ArrayList<>();
 
     @Override
     public Client createClient( String nick )
     {
-        if ( client == null )
-        {
-            client = Mockito.mock( Client.class );
-            EventManager eventManager = Mockito.mock( EventManager.class );
-            Mockito.when( client.getName() ).thenReturn( nick );
-            Mockito.when( client.getNick() ).thenReturn( nick );
-            Mockito.when( client.getEventManager() ).thenReturn( eventManager );
-            ServerInfo serverInfo = Mockito.mock( ServerInfo.class );
-            Mockito.when( client.getServerInfo() ).thenReturn( serverInfo );
-            Mockito.when( serverInfo.getCaseMapping() ).thenReturn( CaseMapping.ASCII );
-            doAnswer( invocationOnMock -> {
-                Object object = invocationOnMock.getArgument( 0 );
-                Arrays.stream( object.getClass().getMethods() ).filter( method -> method.getParameterCount() == 1
-                    && MessageEvent.class.isAssignableFrom( method.getParameterTypes()[0] ) ).forEach( method -> eventListeners.add( event -> {
-                        try
+        Client client = Mockito.mock( Client.class );
+        EventManager eventManager = Mockito.mock( EventManager.class );
+        Mockito.when( client.getName() ).thenReturn( nick );
+        Mockito.when( client.getNick() ).thenReturn( nick );
+        Mockito.when( client.getEventManager() ).thenReturn( eventManager );
+        ServerInfo serverInfo = Mockito.mock( ServerInfo.class );
+        Mockito.when( client.getServerInfo() ).thenReturn( serverInfo );
+        Mockito.when( serverInfo.getCaseMapping() ).thenReturn( CaseMapping.ASCII );
+        doAnswer( invocationOnMock -> {
+            Object object = invocationOnMock.getArgument( 0 );
+            Arrays.stream( object.getClass().getMethods() ).filter( method -> method.getParameterCount() == 1
+                && MessageEvent.class.isAssignableFrom( method.getParameterTypes()[0] ) ).forEach( method -> eventListeners.add( event -> {
+                    try
+                    {
+                        if ( method.getParameterTypes()[0].isAssignableFrom( event.getClass() ) )
                         {
-                            if ( method.getParameterTypes()[0].isAssignableFrom( event.getClass() ) )
-                            {
-                                method.invoke( object, event );
-                            }
+                            method.invoke( object, event );
                         }
-                        catch ( InvocationTargetException | IllegalAccessException e )
-                        {
-                            throw new IllegalStateException( e );
-                        }
-                    } ) );
+                    }
+                    catch ( InvocationTargetException | IllegalAccessException e )
+                    {
+                        throw new IllegalStateException( e );
+                    }
+                } ) );
 
-                return null;
-            } ).when( eventManager ).registerEventListener( any() );
-        }
+            return null;
+        } ).when( eventManager ).registerEventListener( any() );
         return client;
     }
 }

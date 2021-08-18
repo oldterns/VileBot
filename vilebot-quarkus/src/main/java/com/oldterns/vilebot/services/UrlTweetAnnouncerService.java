@@ -2,6 +2,7 @@ package com.oldterns.vilebot.services;
 
 import com.oldterns.irc.bot.annotations.OnChannelMessage;
 import com.oldterns.irc.bot.annotations.Regex;
+import com.oldterns.vilebot.util.TwitterService;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.kitteh.irc.client.library.Client;
 import twitter4j.Status;
@@ -12,6 +13,8 @@ import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
@@ -30,6 +33,9 @@ public class UrlTweetAnnouncerService
 
     @ConfigProperty( name = "vilebot.twitter.access-token-secret" )
     Optional<String> accessTokenSecret; // may be known as 'Access token secret'
+
+    @Inject
+    TwitterService twitterService;
 
     @OnChannelMessage( "@message" )
     public String onTwitterUrlMessage( Client client,
@@ -81,18 +87,14 @@ public class UrlTweetAnnouncerService
         {
             try
             {
-                ConfigurationBuilder cb = new ConfigurationBuilder();
-                cb.setDebugEnabled( true ).setOAuthConsumerKey( consumerKey.get() ).setOAuthConsumerSecret( consumerSecret.get() ).setOAuthAccessToken( accessToken.get() ).setOAuthAccessTokenSecret( accessTokenSecret.get() );
-                TwitterFactory tf = new TwitterFactory( cb.build() );
-                Twitter twitter = tf.getInstance();
                 if ( tweetID != 0 ) // tweet of the twitter.com/USERID/status/TWEETID variety
                 {
-                    Status status = twitter.showStatus( tweetID );
+                    Status status = twitterService.getStatus( tweetID );
                     return ( status.getUser().getName() + ": " + status.getText() );
                 }
                 else // just the user is given, ie, twitter.com/USERID
                 {
-                    User user = twitter.showUser( parts[userPosition].toString() );
+                    User user = twitterService.getUser( parts[userPosition].toString() );
                     if ( !user.getDescription().isEmpty() ) // the user has a description
                         return ( "Name: " + user.getName() + " | " + user.getDescription() + "\'\nLast Tweet: \'"
                             + user.getStatus().getText() );

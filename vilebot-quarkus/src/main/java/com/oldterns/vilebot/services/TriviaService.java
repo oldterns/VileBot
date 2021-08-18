@@ -30,13 +30,13 @@ public class TriviaService
 
     private static final Duration TIMEOUT = Duration.ofSeconds( 30 );
 
-    private static final String RED = "\u000304";
+    static final String RED = "\u000304";
 
-    private static final String RESET = "\u000f";
+    static final String RESET = "\u000f";
 
-    private static final String BLUE = "\u000302";
+    static final String BLUE = "\u000302";
 
-    private static final String GREEN = "\u000303";
+    static final String GREEN = "\u000303";
 
     private static final Integer RECURSION_LIMIT = 10;
 

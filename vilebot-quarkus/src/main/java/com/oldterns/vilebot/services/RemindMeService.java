@@ -50,7 +50,7 @@ public class RemindMeService
         }
 
         final String userKey = Nick.getNick( user ).getBaseNick();
-        if ( userToReminderCount.getOrDefault( userKey, 0 ) > 10 )
+        if ( userToReminderCount.getOrDefault( userKey, 0 ) >= 10 )
         {
             return "There is a limit of 10 reminders, please wait until one reminder ends to set a new one.";
         }

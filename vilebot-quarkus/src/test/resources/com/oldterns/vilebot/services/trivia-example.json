@@ -1,0 +1,33 @@
+[
+  {
+    "question": "This number is the base used in binary",
+    "invalid_count": null,
+    "category": { "title": "Math" },
+    "answer": "2"
+  },
+  {
+    "question": "This location, seen here, is a beautiful spot for a vacation",
+    "invalid_count": null,
+    "category": { "title": "Vacation Getaways" },
+    "answer": "A Beautiful Spot for a Vacation"
+  },
+  {
+    "question": "Adding 1 and 1 together gives this number",
+    "invalid_count": 4,
+    "category": { "title": "Math" },
+    "answer": "3"
+  },
+  {
+    "question": "",
+    "invalid_count": null,
+    "category": { "title": "Wat?" },
+    "answer": "Wat?"
+  },
+  {
+    "question": "This command starts a trivia game",
+    "invalid_count": null,
+    "category": { "title": "VileBot1" },
+    "value": 200,
+    "answer": "!jeopardy"
+  }
+]

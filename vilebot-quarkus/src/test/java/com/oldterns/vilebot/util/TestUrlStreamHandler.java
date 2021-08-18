@@ -30,6 +30,12 @@ public class TestUrlStreamHandler
     @Inject
     TestURLFactory testURLFactory;
 
+    @SuppressWarnings( "unchecked" )
+    public <T extends URLConnection> T getConnection( String url )
+    {
+        return (T) urlToConnectionMap.get( url );
+    }
+
     @Override
     protected URLConnection openConnection( URL url )
     {

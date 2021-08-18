@@ -9,6 +9,7 @@ import com.oldterns.vilebot.database.QuoteFactDB;
 import com.oldterns.vilebot.util.IgnoredUsers;
 import com.oldterns.vilebot.util.MangleNicks;
 import com.oldterns.vilebot.util.RandomProvider;
+import com.oldterns.vilebot.util.URLFactory;
 import net.engio.mbassy.listener.Handler;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.kitteh.irc.client.library.element.User;
@@ -54,6 +55,9 @@ public class QuotesAndFactsService
     @Inject
     RandomProvider randomProvider;
 
+    @Inject
+    URLFactory urlFactory;
+
     // cache fact and quote dump links
     private Map<String, String> dumpCache = new HashMap<>();
 
@@ -67,10 +71,8 @@ public class QuotesAndFactsService
     public String onJoin( ChannelJoinEvent event )
     {
         Nick nick = Nick.getNick( event.getUser() );
-        System.out.println( nick + " has joined" );
         if ( !ignoredUsers.getOnJoin().contains( nick.getBaseNick() ) )
         {
-            String out;
             if ( randomProvider.getRandomBoolean() )
             {
                 return replyWithFact( nick.getBaseNick(), event, false );
@@ -178,7 +180,7 @@ public class QuotesAndFactsService
             sb.append( URLEncoder.encode( quote + "\n", StandardCharsets.UTF_8 ) );
         }
 
-        URL url = new URL( PASTEBIN_API_URL );
+        URL url = urlFactory.build( PASTEBIN_API_URL );
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setDoOutput( true );
         conn.setRequestMethod( "POST" );
@@ -194,33 +196,35 @@ public class QuotesAndFactsService
     }
 
     @OnMessage( "!factrandom5 @queried" )
-    public String factRandomDump( Nick queried )
+    public void factRandomDump( User user, Nick queried )
     {
-        return factQuoteRandomDump( "fact", queried.getBaseNick() );
+        factQuoteRandomDump( user, "fact", queried.getBaseNick() );
     }
 
     @OnMessage( "!quoterandom5 @queried" )
-    public String quoteRandomDump( Nick queried )
+    public void quoteRandomDump( User user, Nick queried )
     {
-        return factQuoteRandomDump( "quote", queried.getBaseNick() );
+        factQuoteRandomDump( user, "quote", queried.getBaseNick() );
     }
 
-    private String factQuoteRandomDump( String mode, String queried )
+    private void factQuoteRandomDump( User user, String mode, String queried )
     {
         if ( "fact".equals( mode ) )
         {
             Long factsLength = quoteFactDB.getFactsLength( queried );
             if ( factsLength == 0 )
             {
-                return queried + " has no facts.";
+                user.sendMessage( queried + " has no facts." );
             }
             else if ( factsLength <= 5 )
             {
-                return String.join( "\n", quoteFactDB.getFacts( queried ) );
+                quoteFactDB.getFacts( queried ).forEach( replyText -> user.sendMessage( formatFactReply( getTitle( queried ),
+                                                                                                         replyText ) ) );
             }
             else
             {
-                return String.join( "\n", quoteFactDB.getRandomFacts( queried ) );
+                quoteFactDB.getRandomFacts( queried ).forEach( replyText -> user.sendMessage( formatFactReply( getTitle( queried ),
+                                                                                                               replyText ) ) );
             }
         }
         else
@@ -228,15 +232,17 @@ public class QuotesAndFactsService
             Long quotesLength = quoteFactDB.getQuotesLength( queried );
             if ( quotesLength == 0 )
             {
-                return queried + " has no quotes.";
+                user.sendMessage( queried + " has no quotes." );
             }
             else if ( quotesLength <= 5 )
             {
-                return String.join( "\n", quoteFactDB.getQuotes( queried ) );
+                quoteFactDB.getQuotes( queried ).forEach( replyText -> user.sendMessage( formatQuoteReply( getTitle( queried ),
+                                                                                                           replyText ) ) );
             }
             else
             {
-                return String.join( "\n", quoteFactDB.getRandomQuotes( queried ) );
+                quoteFactDB.getRandomQuotes( queried ).forEach( replyText -> user.sendMessage( formatQuoteReply( getTitle( queried ),
+                                                                                                                 replyText ) ) );
             }
         }
     }

@@ -13,7 +13,6 @@ import org.kitteh.irc.client.library.event.helper.ActorEvent;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -25,13 +24,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class RockPaperScissorsService
 {
 
-    private static final String RED = "\u000304";
+    static final String RED = "\u000304";
 
-    private static final String RESET = "\u000f";
-
-    private static final String BLUE = "\u000302";
-
-    private static final String GREEN = "\u000303";
+    static final String RESET = "\u000f";
 
     @Inject
     RandomProvider randomProvider;
@@ -132,11 +127,10 @@ public class RockPaperScissorsService
                         currentGame.getEvent().sendReply( currentGame.getRPSOutro() );
                         currentGame = null;
                     }
-                    return String.format( "Your submission of %s has been recieved!", submission );
+                    return String.format( "Your submission of %s has been received!", submission );
                 }
                 catch ( Exception e )
                 {
-                    e.printStackTrace();
                     return e.getMessage();
                 }
             }
@@ -168,19 +162,17 @@ public class RockPaperScissorsService
     {
         private static final String[] answers = { "rock", "paper", "scissors" };
 
-        private String callerNick;
+        private final String callerNick;
 
-        private String daredNick;
+        private final String daredNick;
+
+        private final String daredThing;
+
+        private final ChannelMessageEvent event;
 
         private String callerAnswer;
 
         private String daredAnswer;
-
-        private String daredThing;
-
-        private ChannelMessageEvent event;
-
-        Random rand = new Random();
 
         RPSGame( String callerNick, String daredNick, String daredThing, ChannelMessageEvent event,
                  RandomProvider randomProvider )
@@ -191,7 +183,6 @@ public class RockPaperScissorsService
             this.daredAnswer = null;
             this.daredThing = daredThing;
             this.event = event;
-            rand = new Random();
             if ( daredNick.equals( event.getClient().getNick() ) )
             {
                 this.daredAnswer = randomProvider.getRandomElement( answers );
