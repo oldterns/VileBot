@@ -1,0 +1,66 @@
+<rss version="2.0">
+  <channel>
+    <title>Sample News Source</title>
+    <link>https://example.com</link>
+    <description>An Example RSS Feed</description>
+    <language>en-ca</language>
+    <lastBuildDate>Wed, 18 Aug 2021 20:23:10 EDT</lastBuildDate>
+    <copyright>
+      Apache 2.0
+    </copyright>
+    <docs>https://example.com/rss</docs>
+    <image>
+      <title>Example</title>
+      <url>https://example.com/image.gif</url>
+      <link>https://example.com/rss?cmp=rss</link>
+    </image>
+    <item>
+      <title>News Title 1 - A story to behold</title>
+      <link>https://example.com/1</link>
+      <guid isPermaLink="false">2.3451</guid>
+      <pubDate>Mon, 17 Jan 2020 17:11:33 EST</pubDate>
+      <author/>
+      <category>News</category>
+      <description>
+        <img src='https://example.com/image.gif' alt='Image' width='460' title='Image' height='259'/>
+        <p></p>
+      </description>
+    </item>
+    <item>
+      <title>News Title 2 - A stunning sight</title>
+      <link>https://example.com/2</link>
+      <guid isPermaLink="false">9.3451</guid>
+      <pubDate>Mon, 22 Jan 2020 17:00:30 EST</pubDate>
+      <author/>
+      <category>News</category>
+      <description>
+        <img src='https://example.com/image.gif' alt='Image' width='460' title='Image' height='259'/>
+        <p></p>
+      </description>
+    </item>
+    <item>
+      <title>News Title 3 - A new dawn</title>
+      <link>https://example.com/3</link>
+      <guid isPermaLink="false">2.3451</guid>
+      <pubDate>Mon, 5 Jan 2020 17:21:23 EST</pubDate>
+      <author/>
+      <category>News</category>
+      <description>
+        <img src='https://example.com/image.gif' alt='Image' width='460' title='Image' height='259'/>
+        <p></p>
+      </description>
+    </item>
+    <item>
+      <title>News Title 4 - A stunning conclusion</title>
+      <link>https://example.com/4</link>
+      <guid isPermaLink="false">2.3451</guid>
+      <pubDate>Mon, 29 Jan 2020 17:11:13 EST</pubDate>
+      <author/>
+      <category>News</category>
+      <description>
+        <img src='https://example.com/image.gif' alt='Image' width='460' title='Image' height='259'/>
+        <p></p>
+      </description>
+    </item>
+  </channel>
+</rss>
