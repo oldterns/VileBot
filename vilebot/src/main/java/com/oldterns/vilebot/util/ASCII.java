@@ -1,6 +1,6 @@
 package com.oldterns.vilebot.util;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /*Copyright (c) 2011 Aravind Rao
@@ -22,19 +22,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 public final class ASCII
 {
-    private boolean negative;
-
-    public ASCII()
+    public static String convert( final BufferedImage image )
     {
-        this( false );
+        return convert( image, false );
     }
 
-    public ASCII( final boolean negative )
-    {
-        this.negative = negative;
-    }
-
-    public String convert( final BufferedImage image )
+    public static String convert( final BufferedImage image, boolean negative )
     {
         StringBuilder sb = new StringBuilder( ( image.getWidth() + 1 ) * image.getHeight() );
         for ( int y = 0; y < image.getHeight(); y++ )
@@ -61,7 +54,7 @@ public final class ASCII
      * @param g grayscale
      * @return char
      */
-    private char returnStrPos( double g )// takes the grayscale value as parameter
+    private static char returnStrPos( double g )// takes the grayscale value as parameter
     {
         final char str;
 
@@ -111,7 +104,7 @@ public final class ASCII
      * @param g grayscale
      * @return char
      */
-    private char returnStrNeg( double g )
+    private static char returnStrNeg( double g )
     {
         final char str;
 
