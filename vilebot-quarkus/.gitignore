@@ -36,5 +36,7 @@ nb-configuration.xml
 *.rej
 
 # Local environment
+/db
+/log
 .env
 .fonts
