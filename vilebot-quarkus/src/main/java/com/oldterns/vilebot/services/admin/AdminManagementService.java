@@ -25,6 +25,7 @@ public class AdminManagementService
     @OnMessage( "!setadmin @editedAdminNick @password" )
     public String setAdmin( User user, Nick editedAdminNick, String password )
     {
+        // TODO: The way this is written, one admin can change another admin password
         String username = sessionService.getSession( Nick.getNick( user ) );
         if ( groupDB.noAdmins() || groupDB.isAdmin( username ) )
         {
@@ -40,6 +41,8 @@ public class AdminManagementService
     @OnMessage( "!remadmin @editedAdminNick" )
     public String removeAdmin( User user, Nick editedAdminNick )
     {
+        // One admin can remove other admins, which is needed if they ever leaves
+        // However, there is nothing that can be done if the only admin leaves
         String username = sessionService.getSession( Nick.getNick( user ) );
         if ( groupDB.isAdmin( username ) )
         {
