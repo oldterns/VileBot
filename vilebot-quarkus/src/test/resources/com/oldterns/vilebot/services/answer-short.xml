@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<queryresult success='true'
+             error='false'
+             xml:space='preserve'
+             numpods='6'
+             datatypes='Math'
+             timedout=''
+             timedoutpods=''
+             timing='1.047'
+             parsetiming='0.17300000000000001'
+             parsetimedout='false'
+             recalculate=''
+             host='https://www3.wolframalpha.com'
+             server='6'
+             version='2.6'
+             inputstring='1 + 1'>
+ <pod title='Input'
+      scanner='Identity'
+      id='Input'
+      position='100'
+      error='false'
+      numsubpods='1'>
+  <subpod title=''>
+   <plaintext>1 + 1</plaintext>
+  </subpod>
+   <expressiontypes count='1'>
+   <expressiontype name='Default' />
+  </expressiontypes>
+ </pod>
+  <pod title='Result'
+       scanner='Simplification'
+       id='Result'
+       position='200'
+       error='false'
+       numsubpods='1'
+       primary='true'>
+  <subpod title=''>
+   <plaintext>2</plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='Default' />
+  </expressiontypes>
+    <states count='1'>
+   <state name='Step-by-step solution'
+          input='Result__Step-by-step solution'
+          stepbystep='true' />
+  </states>
+ </pod>
+  <pod title='Number line'
+       scanner='NumberLine'
+       id='NumberLine'
+       position='300'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <plaintext></plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='1DMathPlot' />
+  </expressiontypes>
+ </pod>
+  <pod title='Number name'
+       scanner='Integer'
+       id='NumberName'
+       position='400'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <plaintext>two</plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='Default' />
+  </expressiontypes>
+ </pod>
+  <pod title='Manipulatives illustration'
+       scanner='Arithmetic'
+       id='Illustration'
+       position='500'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <plaintext> | + | | = |
+1 | | 1 | | 2</plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='Default' />
+  </expressiontypes>
+ </pod>
+  <pod title='Typical human computation times'
+       scanner='Arithmetic'
+       id='TypicalHumanComputationTimes'
+       position='600'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <microsources>
+    <microsource>HumanComputationQuery</microsource>
+   </microsources>
+    <plaintext>age 6: 3.2 seconds | age 8: 1.8 seconds | age 10: 1.2 seconds |
+age 18: 0.83 seconds
+(ignoring concentration, repetition, variations in education, etc.)</plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='Grid' />
+  </expressiontypes>
+    <states count='1'>
+   <state name='More details'
+          input='TypicalHumanComputationTimes__More details' />
+  </states>
+ </pod>
+  <sources count='1'>
+  <source url='https://www3.wolframalpha.com/sources/HumanComputationQuerySourceInformationNotes.html'
+          text='Human computation query' />
+ </sources>
+</queryresult>

@@ -15,6 +15,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 @ApplicationScoped
@@ -50,9 +51,8 @@ public class AnswerQuestionService
     }
 
     private String makeURL( String searchTerm )
-        throws UnsupportedEncodingException
     {
-        searchTerm = URLEncoder.encode( searchTerm, "UTF-8" );
+        searchTerm = URLEncoder.encode( searchTerm, StandardCharsets.UTF_8 );
         return "http://api.wolframalpha.com/v2/query?input=" + searchTerm + "&appid=" + API_KEY
             + "&format=plaintext&output=XML";
     }

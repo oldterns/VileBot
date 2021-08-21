@@ -8,6 +8,7 @@ import com.oldterns.irc.bot.annotations.OnChannelMessage;
 import com.oldterns.irc.bot.annotations.OnMessage;
 import com.oldterns.irc.bot.annotations.OnPrivateMessage;
 import com.oldterns.vilebot.database.KarmaDB;
+import com.oldterns.vilebot.util.RandomProvider;
 import com.oldterns.vilebot.util.TimeService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.kitteh.irc.client.library.element.Channel;
@@ -56,6 +57,9 @@ public class CountdownService
     @Inject
     KarmaDB karmaDB;
 
+    @Inject
+    RandomProvider randomProvider;
+
     CountdownGame currGame = null;
 
     private static ExecutorService timer = Executors.newScheduledThreadPool( 1 );
@@ -67,8 +71,12 @@ public class CountdownService
     }
 
     @OnPrivateMessage( "!solution @answer" )
-    public String onSolution( User user, String answer )
+    public synchronized String onSolution( User user, String answer )
     {
+        if ( currGame == null )
+        {
+            return "No active game. Start a new one with !countdown.";
+        }
         return checkAnswer( user, answer );
     }
 
@@ -128,7 +136,6 @@ public class CountdownService
         }
         catch ( Exception e )
         {
-            e.printStackTrace();
             karmaDB.modNounKarma( contestant, -1 * INVALID_STAKE );
             return String.format( "Sorry %s! You have put an invalid answer, you lose %d karma.", contestant,
                                   INVALID_STAKE );
@@ -209,13 +216,13 @@ public class CountdownService
         return RED + "Use \" /msg " + RESET + "CountdownB0t1" + RED + " !solution < answer > \" to submit." + RESET;
     }
 
-    private static class CountdownGame
+    private class CountdownGame
     {
         private final int VALID_NUMBER_COUNT = 6;
 
-        private final List<Integer> LARGE_NUMBERS = new ArrayList<>( Arrays.asList( 25, 50, 75, 100 ) );
+        private List<Integer> largeNumbers = new ArrayList<>( Arrays.asList( 25, 50, 75, 100 ) );
 
-        private final List<Integer> SMALL_NUMBERS =
+        private List<Integer> smallNumbers =
             new ArrayList<>( Arrays.asList( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ) );
 
         private List<Integer> questionNumbers = new ArrayList<>();
@@ -234,22 +241,20 @@ public class CountdownService
 
         Interpreter interpreter;
 
-        Random rand = new Random();
-
         CountdownGame()
         {
             shuffleNumbers();
-            largeNumberCount = rand.nextInt( LARGE_NUMBERS.size() + 1 );
+            largeNumberCount = randomProvider.getRandomInt( largeNumbers.size() + 1 );
             smallNumberCount = VALID_NUMBER_COUNT - largeNumberCount;
-            questionNumbers.addAll( LARGE_NUMBERS.subList( 0, largeNumberCount ) );
-            questionNumbers.addAll( SMALL_NUMBERS.subList( 0, smallNumberCount ) );
+            questionNumbers.addAll( largeNumbers.subList( 0, largeNumberCount ) );
+            questionNumbers.addAll( smallNumbers.subList( 0, smallNumberCount ) );
             targetNumber = generateTargetNumber();
         }
 
         // target number should be between 100-999.
         private int generateTargetNumber()
         {
-            return rand.nextInt( 900 ) + 100;
+            return randomProvider.getRandomInt( 900 ) + 100;
         }
 
         private String getSubmissionAndAnswer( String contestant )
@@ -328,8 +333,8 @@ public class CountdownService
 
         private void shuffleNumbers()
         {
-            Collections.shuffle( LARGE_NUMBERS );
-            Collections.shuffle( SMALL_NUMBERS );
+            largeNumbers = randomProvider.shuffleList( largeNumbers );
+            smallNumbers = randomProvider.shuffleList( smallNumbers );
         }
 
         private int interpretedAnswer( String answer )

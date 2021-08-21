@@ -2,6 +2,8 @@ package com.oldterns.vilebot.util;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -38,5 +40,12 @@ public class RandomProvider
     public <T> T getRandomElement( T[] array )
     {
         return array[getRandomInt( array.length )];
+    }
+
+    public <T> List<T> shuffleList( List<T> list )
+    {
+        List<T> out = new ArrayList<>( list );
+        Collections.shuffle( out );
+        return out;
     }
 }

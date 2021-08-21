@@ -28,9 +28,9 @@ public class JazizService
     @ConfigProperty( name = "vilebot.jaziz.thesaurus-key" )
     String API_KEY;
 
-    private static final String API_URL = "http://words.bighugelabs.com/api/2/";
+    static final String API_URL = "http://words.bighugelabs.com/api/2/";
 
-    private static final String API_FORMAT = "/json";
+    static final String API_FORMAT = "/json";
 
     private static String[] splitWords( String message )
     {

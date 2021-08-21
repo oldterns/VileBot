@@ -1,6 +1,7 @@
 package com.oldterns.vilebot.services;
 
 import com.oldterns.irc.bot.annotations.OnMessage;
+import com.oldterns.vilebot.util.InetAddressProvider;
 import com.oldterns.vilebot.util.URLFactory;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -19,6 +20,9 @@ public class DownOrJustMeService
     @Inject
     URLFactory urlFactory;
 
+    @Inject
+    InetAddressProvider inetAddressProvider;
+
     private static final int PING_TIMEOUT = 3000;
 
     private static final int HTTP_TIMEOUT = 5000;
@@ -35,7 +39,7 @@ public class DownOrJustMeService
         InetAddress destination;
         try
         {
-            destination = getHostNetAddress( hostnameOrUrl );
+            destination = inetAddressProvider.getHostNetAddress( hostnameOrUrl );
         }
         catch ( UnknownHostException e )
         {
@@ -88,22 +92,7 @@ public class DownOrJustMeService
         }
     }
 
-    private static InetAddress getHostNetAddress( String hostnameOrUrl )
-        throws UnknownHostException
-    {
-        try
-        {
-            return InetAddress.getByName( new URL( hostnameOrUrl ).getHost() );
-        }
-        catch ( MalformedURLException e )
-        {
-            // noop
-        }
-
-        return InetAddress.getByName( hostnameOrUrl );
-    }
-
-    private static void validateDestination( InetAddress destination )
+    private void validateDestination( InetAddress destination )
     {
         if ( destination.isMulticastAddress() )
         {
@@ -120,7 +109,7 @@ public class DownOrJustMeService
             InetAddress id;
             try
             {
-                id = InetAddress.getByName( subnet.split( "/" )[0] );
+                id = inetAddressProvider.getByName( subnet.split( "/" )[0] );
             }
             catch ( UnknownHostException e )
             {

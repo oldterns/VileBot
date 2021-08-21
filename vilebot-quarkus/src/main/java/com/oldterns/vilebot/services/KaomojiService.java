@@ -1,6 +1,5 @@
 package com.oldterns.vilebot.services;
 
-import com.oldterns.irc.bot.annotations.OnChannelMessage;
 import com.oldterns.irc.bot.annotations.OnMessage;
 import com.oldterns.vilebot.util.RandomProvider;
 
@@ -51,7 +50,7 @@ public class KaomojiService
         }
         catch ( IOException e )
         {
-            throw new IllegalStateException( "Unable to open wordlist file: ", e );
+            throw new IllegalStateException( "Unable to open kaomojilist file: ", e );
         }
     }
 

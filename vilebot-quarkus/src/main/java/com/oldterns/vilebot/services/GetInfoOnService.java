@@ -5,6 +5,7 @@ import com.oldterns.vilebot.util.URLFactory;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -19,6 +20,8 @@ public class GetInfoOnService
 
     @Inject
     URLFactory urlFactory;
+
+    private static final int MAX_RESPONSE = 400;
 
     @OnMessage( "!infoon @query" )
     public String getInfoOn( String query )
@@ -81,14 +84,33 @@ public class GetInfoOnService
     {
         Document doc = Jsoup.parse( response );
         Element bodyDiv = doc.getElementById( "mw-content-text" );
-        Element firstParagraph = bodyDiv.getElementsByTag( "p" ).first();
-        String answer = firstParagraph.text();
+        Elements paragraphs = bodyDiv.getElementsByTag( "p" );
+        String answer = "";
+        for ( int i = 0; i < paragraphs.size(); i++ )
+        {
+            Element paragraph = paragraphs.get( i );
+            if ( paragraph.hasClass( "mw-empty-elt" ) )
+            {
+                continue;
+            }
+            answer = paragraph.text();
+            break;
+        }
         if ( answer.isEmpty() )
         {
             throw new Exception();
         }
         answer = answer.replaceAll( "\\[[0-9]+\\]", "" );
-        return answer;
+        return truncate( answer );
+    }
+
+    private String truncate( String response )
+    {
+        if ( response.length() > MAX_RESPONSE )
+        {
+            response = response.substring( 0, MAX_RESPONSE ) + "...";
+        }
+        return response;
     }
 
     private String encode( String string )

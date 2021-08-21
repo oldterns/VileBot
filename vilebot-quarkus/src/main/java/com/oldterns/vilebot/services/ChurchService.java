@@ -55,6 +55,8 @@ public class ChurchService
             churchDB.modDonorKarma( donor, donationAmount );
             karmaDB.modNounKarma( donor, -1 * donationAmount );
             Long churchDonorKarma = churchDB.getDonorKarma( donor ).orElse( null );
+
+            // True if this is someone first donation after being inquisited
             if ( churchDonorKarma != null && churchDonorKarma - donationAmount <= 0 )
             {
                 churchDB.modDonorTitle( donor, " " );
@@ -100,7 +102,7 @@ public class ChurchService
     {
         String donor = Nick.getNick( user ).getBaseNick();
         Long donorRank = churchDB.getDonorRank( donor ).orElse( null );
-        if ( donorRank != null && donorRank > 4 )
+        if ( donorRank == null || donorRank > 4 )
         {
             return "You must be a top donor to set your title.";
         }
