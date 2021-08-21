@@ -1,6 +1,7 @@
 package com.oldterns.vilebot.util;
 
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 import javax.naming.LimitExceededException;
 import java.time.Duration;
 import java.util.Map;
@@ -19,6 +20,9 @@ public class LimitServiceImpl
 
     private Duration period = Duration.ofSeconds( 300 );
 
+    @Inject
+    TimeService timeService;
+
     @Override
     public void setLimit( int maxUsesPerPeriod, Duration period )
     {
@@ -36,22 +40,15 @@ public class LimitServiceImpl
         }
 
         userToUsageCountMap.merge( noun, 1, Integer::sum );
-        TimerTask removeUsage = new TimerTask()
-        {
-            @Override
-            public void run()
-            {
-                userToUsageCountMap.computeIfPresent( noun, ( key, count ) -> {
-                    if ( count > 1 )
-                    {
-                        return count - 1;
-                    }
-                    return null;
-                } );
-            }
-        };
-        Timer timer = new Timer();
-        timer.schedule( removeUsage, period.toMillis() );
+        timeService.onTimeout( period, () -> {
+            userToUsageCountMap.computeIfPresent( noun, ( key, count ) -> {
+                if ( count > 1 )
+                {
+                    return count - 1;
+                }
+                return null;
+            } );
+        } );
     }
 
     @Override
