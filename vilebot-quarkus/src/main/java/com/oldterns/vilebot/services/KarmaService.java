@@ -141,6 +141,34 @@ public class KarmaService
         return out.toString();
     }
 
+    @OnMessage( "!rankn @rank" )
+    public String rankn( Integer rank )
+    {
+        String noun = karmaDB.getRankNoun( rank );
+        if ( noun != null )
+        {
+            return getReplyWithRankAndKarma( noun );
+        }
+        else
+        {
+            return "No noun at that rank.";
+        }
+    }
+
+    @OnMessage( "!revrankn @rank" )
+    public String revrankn( Integer rank )
+    {
+        String noun = karmaDB.getRevRankNoun( rank );
+        if ( noun != null )
+        {
+            return getReplyWithRankAndKarma( noun, true );
+        }
+        else
+        {
+            return "No noun at that rank.";
+        }
+    }
+
     @OnMessage( "!rank @nick" )
     public String rank( Nick nick )
     {

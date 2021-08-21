@@ -98,6 +98,40 @@ public class KarmaServiceTest
     }
 
     @Test
+    public void testRankN()
+    {
+        when( karmaDB.getRankNoun( 2L ) ).thenReturn( "user1" );
+        when( karmaDB.getNounRank( "user1" ) ).thenReturn( Optional.of( 2L ) );
+        when( karmaDB.getNounKarma( "user1" ) ).thenReturn( Optional.of( 5L ) );
+
+        assertThat( karmaService.rankn( 2 ) ).isEqualTo( "user1 is ranked at #2 with 5 points of karma." );
+    }
+
+    @Test
+    public void testRankDoesNotExist()
+    {
+        when( karmaDB.getRankNoun( 2L ) ).thenReturn( null );
+        assertThat( karmaService.rankn( 2 ) ).isEqualTo( "No noun at that rank." );
+    }
+
+    @Test
+    public void testRevRankN()
+    {
+        when( karmaDB.getRevRankNoun( 2L ) ).thenReturn( "user1" );
+        when( karmaDB.getNounRevRank( "user1" ) ).thenReturn( Optional.of( 2L ) );
+        when( karmaDB.getNounKarma( "user1" ) ).thenReturn( Optional.of( 5L ) );
+
+        assertThat( karmaService.revrankn( 2 ) ).isEqualTo( "user1 is ranked at (reverse) #2 with 5 points of karma." );
+    }
+
+    @Test
+    public void testRevRankDoesNotExist()
+    {
+        when( karmaDB.getRevRankNoun( 2L ) ).thenReturn( null );
+        assertThat( karmaService.revrankn( 2 ) ).isEqualTo( "No noun at that rank." );
+    }
+
+    @Test
     public void testRevRank()
     {
         when( karmaDB.getNounRevRank( "user1" ) ).thenReturn( Optional.of( 2L ) );

@@ -54,7 +54,8 @@ public class KarmaDB
      */
     public Optional<Long> getNounRank( String noun )
     {
-        return Optional.ofNullable( redisClient.zrevrank( keyOfKarmaSortedSet, noun ) ).map( Response::toLong );
+        return Optional.ofNullable( redisClient.zrevrank( keyOfKarmaSortedSet,
+                                                          noun ) ).map( response -> response.toLong() + 1L );
     }
 
     /**
