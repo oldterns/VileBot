@@ -7,6 +7,7 @@
 package com.oldterns.vilebot.database;
 
 import com.oldterns.vilebot.util.HMAC;
+import com.oldterns.vilebot.util.RandomProvider;
 import io.quarkus.redis.client.RedisClient;
 import io.vertx.redis.client.Response;
 
@@ -25,6 +26,9 @@ public class PasswordDB
     @Inject
     RedisClient redisClient;
 
+    @Inject
+    RandomProvider randomProvider;
+
     // Note, there is some overlap in terms between the crypto term "Secure Hash" and the Redis structure "Hash". Redis
     // hashes are maps, though called hashes because of a common method of implementing them via a hash function. Except
     // for keyOfPassHash and keyOfPassSaltsHash, every use of "hash" in this file refers to the cryptography term.
@@ -34,7 +38,9 @@ public class PasswordDB
      */
     private String generateSalt()
     {
-        return UUID.randomUUID().toString();
+        byte[] randomBytes = new byte[16];
+        randomProvider.getRandom().nextBytes( randomBytes );
+        return UUID.nameUUIDFromBytes( randomBytes ).toString();
     }
 
     private String getSalt( String username )
@@ -110,6 +116,7 @@ public class PasswordDB
             }
             else
             {
+                // So, password cannot be changed once created?
                 newUser = false;
             }
         }
