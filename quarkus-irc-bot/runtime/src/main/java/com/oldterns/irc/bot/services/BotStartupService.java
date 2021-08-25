@@ -27,7 +27,6 @@ public class BotStartupService {
             Client client = botNameToClient.computeIfAbsent(ircService.botNick(),
                     clientCreator::createClient);
             ircService.getChannelsToJoin().forEach(client::addChannel);
-            ircService.setBot(client);
         });
         for (Client client : botNameToClient.values()) {
             client.connect();

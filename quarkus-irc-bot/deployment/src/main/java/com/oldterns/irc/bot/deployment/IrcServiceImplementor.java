@@ -17,6 +17,7 @@ import net.engio.mbassy.listener.Invoke;
 import org.kitteh.irc.client.library.Client;
 import org.kitteh.irc.client.library.element.Actor;
 import org.kitteh.irc.client.library.element.Channel;
+import org.kitteh.irc.client.library.element.ClientLinked;
 import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 import org.kitteh.irc.client.library.event.helper.ActorEvent;
@@ -213,8 +214,8 @@ public class IrcServiceImplementor {
                     if (parameterType.isAssignableFrom(PrivateMessageEvent.class)) {
                         return Optional.of(privateMessageEventResultHandle);
                     } else if (parameterType.isAssignableFrom(Client.class)) {
-                        return Optional.of(bytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getBot", Client.class),
-                                bytecode.getThis()));
+                        return Optional.of(bytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(ClientLinked.class, "getClient", Client.class),
+                                                                        privateMessageEventResultHandle));
                     } else if (parameterType.isAssignableFrom(User.class)) {
                         return Optional.of(bytecode.invokeInterfaceMethod(MethodDescriptor.ofMethod(ActorEvent.class, "getActor", Actor.class),
                                 privateMessageEventResultHandle));
@@ -288,8 +289,8 @@ public class IrcServiceImplementor {
                     if (parameterType.isAssignableFrom(ChannelMessageEvent.class)) {
                         return Optional.of(channelMessageEventResultHandle);
                     } else if (parameterType.isAssignableFrom(Client.class)) {
-                        return Optional.of(bytecode.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getBot", Client.class),
-                                bytecode.getThis()));
+                        return Optional.of(bytecode.invokeInterfaceMethod(MethodDescriptor.ofMethod(ClientLinked.class, "getClient", Client.class),
+                                                                          channelMessageEventResultHandle));
                     } else if (parameterType.isAssignableFrom(User.class)) {
                         return Optional.of(bytecode.invokeInterfaceMethod(MethodDescriptor.ofMethod(ActorEvent.class, "getActor", Actor.class),
                                 channelMessageEventResultHandle));
@@ -327,8 +328,8 @@ public class IrcServiceImplementor {
             } else if (ActorEvent.class.isAssignableFrom(eventClass)) {
                 ResultHandle actorResultHandle = responseByteCodeCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(ActorEvent.class, "getActor", Actor.class),
                         eventResultHandle);
-                ResultHandle client = responseByteCodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(IRCService.class, "getBot", Client.class),
-                        responseByteCodeCreator.getThis());
+                ResultHandle client = responseByteCodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(ClientLinked.class, "getClient", Client.class),
+                                                                                  eventResultHandle);
                 ResultHandle target = responseByteCodeCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(Actor.class, "getName", String.class),
                         actorResultHandle);
                 responseByteCodeCreator.invokeInterfaceMethod(MethodDescriptor.ofMethod(Client.class, "sendMessage", void.class, String.class, String.class),
@@ -382,8 +383,8 @@ public class IrcServiceImplementor {
 
         if (!method.getReturnType().isAssignableFrom(void.class)) {
             BytecodeCreator replyBytecodeCreator = processorBytecode.ifNotNull(stringReturnValue).trueBranch();
-            ResultHandle splitResultHandle = replyBytecodeCreator.invokeVirtualMethod(MethodDescriptor.ofMethod(String.class, "split", String[].class,
-                    String.class), stringReturnValue, replyBytecodeCreator.load("\n"));
+            ResultHandle splitResultHandle = replyBytecodeCreator.invokeStaticMethod(MethodDescriptor.ofMethod(IRCService.class, "splitIrcMessage", String[].class,
+                    String.class), stringReturnValue);
             AssignableResultHandle indexResultHandle = replyBytecodeCreator.createVariable(int.class);
             replyBytecodeCreator.assign(indexResultHandle, replyBytecodeCreator.load(0));
             BytecodeCreator replyLoopBytecodeCreator = replyBytecodeCreator.whileLoop(conditionCreator ->

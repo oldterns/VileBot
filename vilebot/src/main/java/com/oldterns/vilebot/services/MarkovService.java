@@ -2,8 +2,11 @@ package com.oldterns.vilebot.services;
 
 import com.oldterns.irc.bot.annotations.OnMessage;
 import com.oldterns.vilebot.database.LogDB;
+import com.oldterns.vilebot.util.MangleNicks;
 import com.oldterns.vilebot.util.RandomProvider;
 import com.oldterns.vilebot.util.Zalgo;
+import org.kitteh.irc.client.library.element.User;
+import org.kitteh.irc.client.library.event.helper.ActorEvent;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -26,15 +29,15 @@ public class MarkovService
     RandomProvider randomProvider;
 
     @OnMessage( "!speak" )
-    public String speak()
+    public String speak( ActorEvent<User> event )
     {
-        return generatePhase();
+        return MangleNicks.mangleNicks( event, generatePhase() );
     }
 
     @OnMessage( "!gospel" )
-    public String gospel()
+    public String gospel( ActorEvent<User> event )
     {
-        return Zalgo.generate( generatePhase() );
+        return MangleNicks.mangleNicks( event, Zalgo.generate( generatePhase() ) );
     }
 
     private String generatePhase()

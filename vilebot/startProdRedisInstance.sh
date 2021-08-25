@@ -36,4 +36,4 @@ mkdir -p "$VB_REDIS_DB_LOCATION"
 mkdir -p log
 
 echo "Starting production redis docker container..."
-$DOCKER run -it --rm=true --memory-swappiness=0 --name redis_quarkus_prod -p 6379:6379 -v "$VB_REDIS_CONF_PATH":/usr/local/etc/redis/redis.conf:ro -v "$VB_REDIS_DB_LOCATION":/data:z redis:5.0.6
+$DOCKER run -it --rm=true --name redis_quarkus_prod -p 6379:6379 -v "$VB_REDIS_CONF_PATH":/usr/local/etc/redis/redis.conf:ro -v "$VB_REDIS_DB_LOCATION":/data:z redis:5.0.6
