@@ -89,6 +89,7 @@ public class ServiceImplementationTest {
         assertThat(message).contains("{ !list <arg0:number>[,<arg02>...] }");
         assertThat(message).contains("{ !client }");
         assertThat(message).contains("{ !user }");
+        assertThat(message).contains("{ !channel }");
         assertThat(message).contains("{ !event }");
         assertThat(message).contains("{ !nick <arg0:nick> }");
         assertThat(message).contains("{ !multiarg <arg0:nick> <arg1:number> }");
@@ -180,6 +181,10 @@ public class ServiceImplementationTest {
 
         event = fireMessage.apply("user", "#channel", "!event");
         Mockito.verify(exampleService, only()).eventArg(event);
+        Mockito.reset(exampleService);
+
+        event = fireMessage.apply("user", "#channel", "!channel");
+        Mockito.verify(exampleService, only()).channelArg(event.getChannel());
         Mockito.reset(exampleService);
 
         fireMessage.apply("user", "#channel", "!nick myNick");

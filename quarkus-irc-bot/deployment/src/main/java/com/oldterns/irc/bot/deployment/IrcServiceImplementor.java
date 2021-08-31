@@ -294,6 +294,10 @@ public class IrcServiceImplementor {
                     } else if (parameterType.isAssignableFrom(User.class)) {
                         return Optional.of(bytecode.invokeInterfaceMethod(MethodDescriptor.ofMethod(ActorEvent.class, "getActor", Actor.class),
                                 channelMessageEventResultHandle));
+                    } else if (parameterType.isAssignableFrom(Channel.class)) {
+                        return Optional.of(bytecode.invokeInterfaceMethod(MethodDescriptor.ofMethod(ChannelEvent.class,
+                                                                                                         "getChannel", Channel.class),
+                                                                               channelMessageEventResultHandle));
                     }
                     return Optional.empty();
                 });

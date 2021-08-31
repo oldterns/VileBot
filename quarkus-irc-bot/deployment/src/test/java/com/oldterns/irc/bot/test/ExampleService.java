@@ -5,6 +5,7 @@ import com.oldterns.irc.bot.annotations.Delimiter;
 import com.oldterns.irc.bot.annotations.NoHelp;
 import com.oldterns.irc.bot.annotations.OnChannelMessage;
 import org.kitteh.irc.client.library.Client;
+import org.kitteh.irc.client.library.element.Channel;
 import org.kitteh.irc.client.library.element.User;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 
@@ -60,6 +61,11 @@ public class ExampleService {
     @OnChannelMessage("!user")
     public void userArg(User user) {
         mock.userArg(user);
+    }
+
+    @OnChannelMessage("!channel")
+    public void channelArg(Channel channel) {
+        mock.channelArg(channel);
     }
 
     @OnChannelMessage("!event")
