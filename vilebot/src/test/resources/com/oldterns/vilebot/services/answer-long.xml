@@ -1,0 +1,306 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<queryresult success='true'
+             error='false'
+             xml:space='preserve'
+             numpods='11'
+             datatypes='HistoricalSite,Leader,Person,USCounty'
+             timedout=''
+             timedoutpods=''
+             timing='3.841'
+             parsetiming='0.467'
+             parsetimedout='false'
+             recalculate=''
+             host='https://www5b.wolframalpha.com'
+             server='45'
+             version='2.6'
+             inputstring='George Washington'>
+ <pod title='Input interpretation'
+      scanner='Identity'
+      id='Input'
+      position='100'
+      error='false'
+      numsubpods='1'>
+  <subpod title=''>
+   <plaintext>George Washington (politician)</plaintext>
+  </subpod>
+   <expressiontypes count='1'>
+   <expressiontype name='Default' />
+  </expressiontypes>
+ </pod>
+  <pod title='Basic information'
+       scanner='Data'
+       id='BasicInformation:PeopleData'
+       position='200'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <microsources>
+    <microsource>PeopleData</microsource>
+     <microsource>USCountyData</microsource>
+   </microsources>
+    <plaintext>full name | George Washington
+date of birth | Friday, February 11, 1732 (Julian calendar) (289 years ago)
+place of birth | Westmoreland County, Virginia
+date of death | Saturday, December 14, 1799 (Gregorian calendar) (age: 67 years)
+ (221 years ago)
+place of death | Mount Vernon, Virginia, United States</plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='Grid' />
+  </expressiontypes>
+    <states count='1'>
+   <statelist count='3'
+              value='Local historical calendar'
+              delimiters=''>
+    <state name='Local historical calendar'
+           input='BasicInformation:PeopleData__Local historical calendar' />
+     <state name='Gregorian calendar'
+            input='BasicInformation:PeopleData__Gregorian calendar' />
+     <state name='Julian calendar'
+            input='BasicInformation:PeopleData__Julian calendar' />
+   </statelist>
+  </states>
+ </pod>
+  <pod title='Image'
+       scanner='Data'
+       id='Image:PeopleData'
+       position='300'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <imagesource>http://en.wikipedia.org/wiki/File:Gilbert_Stuart_Williamstown_Portrait_of_George_Washington.jpg</imagesource>
+    <microsources>
+    <microsource>PeopleData</microsource>
+   </microsources>
+    <plaintext></plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='Default' />
+  </expressiontypes>
+ </pod>
+  <pod title='Leadership positions'
+       scanner='Data'
+       id='Position:LeaderData'
+       position='400'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <microsources>
+    <microsource>LeaderData</microsource>
+   </microsources>
+    <plaintext>official position | country | start date | end date
+senior officer (Department of Defense) | United States | 13-07-1798 | 14-12-1799
+president (1st) | United States | 30-04-1789 | 04-03-1797
+continental Army general and commander in chief (Department of Defense) | United States | 15-06-1775 | 23-12-1783</plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='Grid' />
+  </expressiontypes>
+ </pod>
+  <pod title='Timeline'
+       scanner='Data'
+       id='Timeline:PeopleData'
+       position='500'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <microsources>
+    <microsource>PeopleData</microsource>
+   </microsources>
+    <plaintext></plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='TimelinePlot' />
+  </expressiontypes>
+    <states count='1'>
+   <state name='Include today'
+          input='Timeline:PeopleData__Include today' />
+  </states>
+ </pod>
+  <pod title='Notable facts'
+       scanner='Data'
+       id='NotableFacts:PeopleData'
+       position='600'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <microsources>
+    <microsource>PeopleData</microsource>
+   </microsources>
+    <datasources>
+    <datasource>TheWikimediaFoundationIncWikipedia</datasource>
+   </datasources>
+    <plaintext>First US president and preeminent military and political leader during formative years of the country
+Champion of Federalist policies, including strong national government, who oversaw drafting of the US Constitution
+Famously led troops across icy Delaware River for significant victory over British at Trenton
+Commander in chief of the Continental Army during the Revolutionary War</plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='Grid' />
+  </expressiontypes>
+ </pod>
+  <pod title='Physical characteristics'
+       scanner='Data'
+       id='PhysicalCharacteristics:PeopleData'
+       position='700'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <microsources>
+    <microsource>PeopleData</microsource>
+   </microsources>
+    <plaintext>height | 1.88 meters</plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='Grid' />
+  </expressiontypes>
+    <states count='1'>
+   <state name='Show non-metric'
+          input='PhysicalCharacteristics:PeopleData__Show non-metric' />
+  </states>
+ </pod>
+  <pod title='Familial relationships'
+       scanner='Data'
+       id='FamilialRelationships:PeopleData'
+       position='800'
+       error='false'
+       numsubpods='3'>
+  <subpod title='Parents'>
+   <microsources>
+    <microsource>PeopleData</microsource>
+   </microsources>
+    <plaintext>Augustine Washington | Mary Ball Washington</plaintext>
+  </subpod>
+    <subpod title='Siblings'>
+   <microsources>
+    <microsource>PeopleData</microsource>
+   </microsources>
+      <plaintext>John Augustine Washington | Betty Washington Lewis | Samuel Washington | Charles Washington | Mildred Washington | ...</plaintext>
+  </subpod>
+    <subpod title='Spouse'>
+   <microsources>
+    <microsource>PeopleData</microsource>
+   </microsources>
+      <plaintext>Martha Washington (1759-1799)</plaintext>
+  </subpod>
+    <expressiontypes count='3'>
+   <expressiontype name='Grid' />
+      <expressiontype name='Grid' />
+      <expressiontype name='Grid' />
+  </expressiontypes>
+    <states count='2'>
+   <state name='Show full dates'
+          input='FamilialRelationships:PeopleData__Show full dates' />
+      <state name='More'
+             input='FamilialRelationships:PeopleData__More' />
+  </states>
+ </pod>
+  <pod title='Associated historical sites'
+       scanner='Data'
+       id='AssociatedHistoricalSites:PeopleData'
+       position='900'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <microsources>
+    <microsource>HistoricalSiteData</microsource>
+     <microsource>PeopleData</microsource>
+     <microsource>USCountyData</microsource>
+   </microsources>
+    <datasources>
+    <datasource>Freebase</datasource>
+   </datasources>
+    <plaintext>Mount Rushmore (Pennington County, South Dakota) | George Washington Masonic National Memorial (Alexandria, Virginia, United States) | George Washington Birthplace National Monument (Westmoreland County, Virginia) | Tomb of the Unknown Revolutionary War Soldier (Philadelphia, Pennsylvania, United States) | Washington Memorial Chapel (Montgomery County, Pennsylvania) | ... (total: 8)</plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='Grid' />
+  </expressiontypes>
+    <states count='1'>
+   <state name='More'
+          input='AssociatedHistoricalSites:PeopleData__More' />
+  </states>
+ </pod>
+  <pod title='Wikipedia summary'
+       scanner='Data'
+       id='WikipediaSummary:PeopleData'
+       position='1000'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <plaintext>George Washington (February 22, 1732 - December 14, 1799) was an American political leader, military general, statesman, and Founding Father of the United States, who served as the first president of the United States from 1789 to 1797. Washington led the Patriot forces to victory in the American Revolutionary War, and presided at the Constitutional Convention of 1787, which established ...</plaintext>
+    <infos count='1'>
+    <info>
+     <link url='http://en.wikipedia.org/wiki?curid=11968'
+           text='Full entry' />
+    </info>
+   </infos>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='Default' />
+  </expressiontypes>
+    <states count='1'>
+   <state name='More'
+          input='WikipediaSummary:PeopleData__More' />
+  </states>
+ </pod>
+  <pod title='Wikipedia page hits history'
+       scanner='Data'
+       id='PopularityPod:WikipediaStatsData'
+       position='1100'
+       error='false'
+       numsubpods='1'>
+  <subpod title=''>
+   <plaintext></plaintext>
+  </subpod>
+    <expressiontypes count='1'>
+   <expressiontype name='TimeSeriesPlot' />
+  </expressiontypes>
+    <states count='1'>
+   <state name='Log scale'
+          input='PopularityPod:WikipediaStatsData__Log scale' />
+  </states>
+ </pod>
+  <assumptions count='2'>
+  <assumption type='Clash'
+              word='George Washington'
+              template='Assuming &quot;${word}&quot; is ${desc1}. Use as ${desc2} instead'
+              count='5'>
+   <value name='Person'
+          desc='a person'
+          input='*C.George+Washington-_*Person-' />
+    <value name='City'
+           desc='a city'
+           input='*C.George+Washington-_*City-' />
+    <value name='USPublicSchool'
+           desc='a public school'
+           input='*C.George+Washington-_*USPublicSchool-' />
+    <value name='Movie'
+           desc='a movie'
+           input='*C.George+Washington-_*Movie-' />
+    <value name='Book'
+           desc='a book'
+           input='*C.George+Washington-_*Book-' />
+  </assumption>
+    <assumption type='SubCategory'
+                word='George Washington'
+                template='Assuming ${desc1}. Use ${desc2} instead'
+                count='2'>
+   <value name='GeorgeWashington::7v7hm'
+          desc='George Washington (politician)'
+          input='*DPClash.PersonE.George+Washington-_*GeorgeWashington%3A%3A7v7hm-' />
+      <value name='GeorgeWashington::z6zk7'
+             desc='George Washington (baseball player)'
+             input='*DPClash.PersonE.George+Washington-_*GeorgeWashington%3A%3Az6zk7-' />
+  </assumption>
+ </assumptions>
+  <sources count='4'>
+  <source url='https://www5b.wolframalpha.com/sources/HistoricalSiteDataSourceInformationNotes.html'
+          text='Historical site data' />
+    <source url='https://www5b.wolframalpha.com/sources/LeaderDataSourceInformationNotes.html'
+            text='Leader data' />
+    <source url='https://www5b.wolframalpha.com/sources/PeopleDataSourceInformationNotes.html'
+            text='People data' />
+    <source url='https://www5b.wolframalpha.com/sources/USCountyDataSourceInformationNotes.html'
+            text='US county data' />
+ </sources>
+</queryresult>

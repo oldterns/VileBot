@@ -11,6 +11,7 @@
     </properties>
 
     <modules>
+        <module>quarkus-irc-bot</module>
         <module>vilebot</module>
     </modules>
 

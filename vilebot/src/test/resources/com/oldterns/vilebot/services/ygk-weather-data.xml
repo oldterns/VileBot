@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-ca">
+ 
+<!--
+This is a data file that is meant to be read by RSS readers or aggregators.
+See https://www.canada.ca/en/environment-climate-change/services/weather-general-tools-resources/ways-to-access-forecasts.html to learn more about our RSS service.
+-->
+
+ <title>Kingston - Weather - Environment Canada</title>
+ <link rel="related" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html" type="text/html"/>
+ <link rel="self" href="https://www.weather.gc.ca/rss/city/on-69_e.xml" type="application/atom+xml"/>
+ <link rel="alternate" hreflang="fr-ca" href="https://www.meteo.gc.ca/rss/city/on-69_f.xml" type="application/atom+xml"/>
+ <author>
+ <name>Environment Canada</name>
+ <uri>https://www.weather.gc.ca</uri>
+ </author>
+ <updated>2021-05-31T00:02:09Z</updated>
+ <id>tag:weather.gc.ca,2013-04-16:20210531000209</id>
+ <logo>https://www.weather.gc.ca/template/gcweb/v5.0.1/assets/wmms-alt.png</logo>
+ <icon>https://www.weather.gc.ca/template/gcweb/v5.0.1/assets/favicon.ico</icon>
+ <rights>Copyright 2021, Environment Canada</rights>
+ <entry>
+ <title>No watches or warnings in effect, Kingston</title>
+ <link type="text/html" href="https://www.weather.gc.ca/warnings/index_e.html"/>
+ <updated>2021-05-11T13:45:00Z</updated>
+ <published>2021-05-11T13:45:00Z</published>
+ <category term="Warnings and Watches"/>
+ <summary type="html">No watches or warnings in effect.</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_w1:20210511134500</id>
+ </entry>
+ <entry>
+ <title>Current Conditions: Partly Cloudy, 16.7&#xB0;C</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T23:00:00Z</updated>
+ <published>2021-05-30T23:00:00Z</published>
+ <category term="Current Conditions"/>
+ <summary type="html"><![CDATA[<b>Observed at:</b> Kingston Airport 7:00 PM EDT Sunday 30 May 2021 <br/>
+<b>Condition:</b> Partly Cloudy <br/>
+<b>Temperature:</b> 16.7&deg;C <br/>
+<b>Pressure / Tendency:</b> 102.3 kPa falling<br/>
+<b>Visibility:</b> 24.1 km<br/>
+<b>Humidity:</b> 46 %<br/>
+<b>Dewpoint:</b> 5.1&deg;C <br/>
+<b>Wind:</b> SSE 13 km/h<br/>
+<b>Air Quality Health Index:</b> 2 <br/>
+]]></summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_cc:20210530230000</id>
+ </entry>
+ <entry>
+ <title>Sunday night: Partly cloudy. Low plus 5.</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">Partly cloudy. Low plus 5. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc1:20210530193000</id>
+ </entry>
+ <entry>
+ <title>Monday: Mainly sunny. High 23.</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">Mainly sunny. High 23. UV index 8 or very high. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc2:20210530193000</id>
+ </entry>
+ <entry>
+ <title>Monday night: Increasing cloudiness. Low 12.</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">A few clouds. Increasing cloudiness near midnight. Low 12. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc3:20210530193000</id>
+ </entry>
+ <entry>
+ <title>Tuesday: A mix of sun and cloud. High 20.</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">A mix of sun and cloud. High 20. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc4:20210530193000</id>
+ </entry>
+ <entry>
+ <title>Tuesday night: Clear. Low 11.</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">Clear. Low 11. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc5:20210530193000</id>
+ </entry>
+ <entry>
+ <title>Wednesday: A mix of sun and cloud. High 21.</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">A mix of sun and cloud. High 21. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc6:20210530193000</id>
+ </entry>
+ <entry>
+ <title>Wednesday night: Chance of showers. Low 13. POP 60%</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">Cloudy with 60 percent chance of showers. Low 13. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc7:20210530193000</id>
+ </entry>
+ <entry>
+ <title>Thursday: Chance of showers. High 19. POP 60%</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">Cloudy with 60 percent chance of showers. High 19. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc8:20210530193000</id>
+ </entry>
+ <entry>
+ <title>Thursday night: Chance of showers. Low 15. POP 60%</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">Cloudy with 60 percent chance of showers. Low 15. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc9:20210530193000</id>
+ </entry>
+ <entry>
+ <title>Friday: A mix of sun and cloud. High 22.</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">A mix of sun and cloud. High 22. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc10:20210530193000</id>
+ </entry>
+ <entry>
+ <title>Friday night: Cloudy periods. Low 15.</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">Cloudy periods. Low 15. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc11:20210530193000</id>
+ </entry>
+ <entry>
+ <title>Saturday: A mix of sun and cloud. High 23.</title>
+ <link type="text/html" href="https://www.weather.gc.ca/city/pages/on-69_metric_e.html"/>
+ <updated>2021-05-30T19:30:00Z</updated>
+ <published>2021-05-30T19:30:00Z</published>
+ <category term="Weather Forecasts"/>
+ <summary type="html">A mix of sun and cloud. High 23. Forecast issued 3:30 PM EDT Sunday 30 May 2021</summary>
+ <id>tag:weather.gc.ca,2013-04-16:on-69_fc12:20210530193000</id>
+ </entry>
+ </feed>
+

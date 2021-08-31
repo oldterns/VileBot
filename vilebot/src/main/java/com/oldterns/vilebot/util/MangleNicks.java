@@ -1,55 +1,35 @@
 package com.oldterns.vilebot.util;
 
-import com.google.common.collect.ImmutableSortedSet;
-import org.pircbotx.hooks.events.JoinEvent;
-import org.pircbotx.hooks.events.MessageEvent;
-import org.pircbotx.hooks.events.PrivateMessageEvent;
-import org.pircbotx.hooks.types.GenericMessageEvent;
+import com.oldterns.irc.bot.Nick;
+import org.kitteh.irc.client.library.element.User;
+import org.kitteh.irc.client.library.event.helper.ActorEvent;
+import org.kitteh.irc.client.library.event.helper.ChannelEvent;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-/**
- * Reverse all nicks in messages
- */
 public class MangleNicks
 {
 
-    public static String mangleNicks( MessageEvent event, String message )
+    public static String mangleNicks( ChannelEvent event, String message )
     {
-        return mangleNicks( event.getChannel().getUsersNicks(), message );
+        return mangleNicks( event.getChannel().getUsers().stream().map( Nick::getNick ).map( Nick::getFullNick ).collect( Collectors.toList() ),
+                            message );
     }
 
-    public static String mangleNicks( JoinEvent event, String message )
+    public static String mangleNicks( ActorEvent<User> event, String message )
     {
-        return mangleNicks( event.getChannel().getUsersNicks(), message );
+        // Delegate to Channel if possible
+        if ( event instanceof ChannelEvent )
+        {
+            return mangleNicks( (ChannelEvent) event, message );
+        }
+        return mangleNicks( Collections.singleton( Objects.requireNonNull( event.getActor() ).getNick() ), message );
     }
 
-    public static String mangleNicks( PrivateMessageEvent event, String message )
-    {
-        return mangleNicks( ImmutableSortedSet.of( Objects.requireNonNull( event.getUser() ).getNick() ), message );
-    }
-
-    public static String mangleNicks( GenericMessageEvent event, String message )
-    {
-        if ( event instanceof MessageEvent )
-        {
-            return mangleNicks( (MessageEvent) event, message );
-        }
-        else if ( event instanceof JoinEvent )
-        {
-            return mangleNicks( (JoinEvent) event, message );
-        }
-        else if ( event instanceof PrivateMessageEvent )
-        {
-            return mangleNicks( (PrivateMessageEvent) event, message );
-        }
-        else
-        {
-            return mangleNicks( ImmutableSortedSet.of(), message );
-        }
-    }
-
-    private static String mangleNicks( ImmutableSortedSet<String> nicks, String message )
+    private static String mangleNicks( Collection<String> nicks, String message )
     {
 
         if ( nicks.isEmpty() )
@@ -71,7 +51,7 @@ public class MangleNicks
         return new StringBuilder( word ).reverse().toString();
     }
 
-    private static boolean inside( ImmutableSortedSet<String> nicks, String word )
+    private static boolean inside( Collection<String> nicks, String word )
     {
         for ( String nick : nicks )
         {

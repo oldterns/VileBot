@@ -14,7 +14,7 @@ set -f
 
 : "${VB_REDIS_CONF_PATH:=cfg/redis.conf}"
 : "${VB_REDIS_PID_PATH:=/tmp/vb-redis-server-pid-$USER}"
-: "${VB_JAR_PATH:=target/vilebot-shaded.jar}"
+: "${VB_JAR_PATH:=target/quarkus-app/quarkus-run.jar}"
 : "${VB_PID_PATH:=/tmp/vb-server-pid-$USER}"
 : "${VB_LOG_PATH:=log}"
 : "${VB_REMOTE_DEBUG:=0}"
@@ -64,7 +64,7 @@ mode_start() {
     msg ">> Testing prerequisites"
     local required_files=("$VB_JAR_PATH"
                           "$VB_REDIS_CONF_PATH"
-                          "cfg/vilebot.conf")
+                          ".env")
 
     for filepath in "${required_files[@]}"
     do
@@ -76,7 +76,6 @@ mode_start() {
         fi
     done
 
-    mkdir -p db
     mkdir -p log
 
     status_info=$(mode_status | grep -e ' up$' || true)
@@ -86,7 +85,7 @@ mode_start() {
         msg ">> Redis server already up"
     else
         msg ">> Starting local redis server"
-        nohup redis-server "$VB_REDIS_CONF_PATH" 1>>"$VB_LOG_PATH/redis-stdout.log" 2>&1 &
+        nohup ./startProdRedisInstance.sh >> log/redis.log 2>&1 &
         echo -n "$!" >| "$VB_REDIS_PID_PATH"
     fi
 
@@ -119,6 +118,24 @@ mode_start() {
     fi
 }
 
+get_docker() {
+          local DOCKER=''
+          if command -v docker &> /dev/null
+          then
+            DOCKER='docker'
+          fi
+          if command -v podman &> /dev/null
+          then
+            DOCKER='podman'
+          fi
+          if [ -z "$DOCKER" ]
+          then
+            echo "Could not find docker or podman. Aborting"
+            exit 1
+          fi
+          echo $DOCKER
+}
+
 mode_stop() {
     msg "Stopping services"
 
@@ -138,12 +155,17 @@ mode_stop() {
     fi
 
     msg ">> Stopping local redis server"
-    redis-cli -p "$(get_redis_port)" SHUTDOWN || msg ">> Couldn't send shutdown command to redis server"
+    kill -15 "$redis_pid" || msg ">> Couldn't send term signal to redis"
+    while kill -0 "$redis_pid" >/dev/null 2>&1
+    do
+        sleep 1
+    done
+    $(get_docker) kill --signal TERM redis_quarkus_prod >/dev/null 2>&1
 }
 
 mode_status() {
     _is_redis_up() {
-        redis-cli -p "$(get_redis_port)" PING >/dev/null 2>&1
+        $(get_docker) container exists redis_quarkus_prod
     }
 
     _is_vilebot_up() {
@@ -171,6 +193,7 @@ mode_status() {
     fi
 
     true
+
 }
 
 mode_restart() {
